@@ -19,6 +19,7 @@ import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/ap
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedEtudiantIndexRouteImport } from './routes/_authenticated/etudiant.index'
 import { Route as AuthenticatedConseillerIndexRouteImport } from './routes/_authenticated/conseiller.index'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedEtudiantRendezVousRouteImport } from './routes/_authenticated/etudiant.rendez-vous'
 import { Route as AuthenticatedEtudiantMessagesRouteImport } from './routes/_authenticated/etudiant.messages'
 import { Route as AuthenticatedEtudiantDossierRouteImport } from './routes/_authenticated/etudiant.dossier'
@@ -79,6 +80,11 @@ const AuthenticatedConseillerIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedConseillerRoute,
   } as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedEtudiantRendezVousRoute =
   AuthenticatedEtudiantRendezVousRouteImport.update({
     id: '/rendez-vous',
@@ -132,7 +138,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/unauthorized': typeof UnauthorizedRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/app': typeof AuthenticatedAppRoute
   '/conseiller': typeof AuthenticatedConseillerRouteWithChildren
   '/etudiant': typeof AuthenticatedEtudiantRouteWithChildren
@@ -144,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
   '/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
   '/etudiant/rendez-vous': typeof AuthenticatedEtudiantRendezVousRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
   '/conseiller/': typeof AuthenticatedConseillerIndexRoute
   '/etudiant/': typeof AuthenticatedEtudiantIndexRoute
 }
@@ -151,7 +158,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/unauthorized': typeof UnauthorizedRoute
-  '/admin': typeof AuthenticatedAdminRoute
   '/app': typeof AuthenticatedAppRoute
   '/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRoute
   '/conseiller/messages': typeof AuthenticatedConseillerMessagesRoute
@@ -161,6 +167,7 @@ export interface FileRoutesByTo {
   '/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
   '/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
   '/etudiant/rendez-vous': typeof AuthenticatedEtudiantRendezVousRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
   '/conseiller': typeof AuthenticatedConseillerIndexRoute
   '/etudiant': typeof AuthenticatedEtudiantIndexRoute
 }
@@ -170,7 +177,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
   '/unauthorized': typeof UnauthorizedRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/app': typeof AuthenticatedAppRoute
   '/_authenticated/conseiller': typeof AuthenticatedConseillerRouteWithChildren
   '/_authenticated/etudiant': typeof AuthenticatedEtudiantRouteWithChildren
@@ -182,6 +189,7 @@ export interface FileRoutesById {
   '/_authenticated/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
   '/_authenticated/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
   '/_authenticated/etudiant/rendez-vous': typeof AuthenticatedEtudiantRendezVousRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/conseiller/': typeof AuthenticatedConseillerIndexRoute
   '/_authenticated/etudiant/': typeof AuthenticatedEtudiantIndexRoute
 }
@@ -203,6 +211,7 @@ export interface FileRouteTypes {
     | '/etudiant/dossier'
     | '/etudiant/messages'
     | '/etudiant/rendez-vous'
+    | '/admin/'
     | '/conseiller/'
     | '/etudiant/'
   fileRoutesByTo: FileRoutesByTo
@@ -210,7 +219,6 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/unauthorized'
-    | '/admin'
     | '/app'
     | '/conseiller/etudiants'
     | '/conseiller/messages'
@@ -220,6 +228,7 @@ export interface FileRouteTypes {
     | '/etudiant/dossier'
     | '/etudiant/messages'
     | '/etudiant/rendez-vous'
+    | '/admin'
     | '/conseiller'
     | '/etudiant'
   id:
@@ -240,6 +249,7 @@ export interface FileRouteTypes {
     | '/_authenticated/etudiant/dossier'
     | '/_authenticated/etudiant/messages'
     | '/_authenticated/etudiant/rendez-vous'
+    | '/_authenticated/admin/'
     | '/_authenticated/conseiller/'
     | '/_authenticated/etudiant/'
   fileRoutesById: FileRoutesById
@@ -323,6 +333,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConseillerIndexRouteImport
       parentRoute: typeof AuthenticatedConseillerRoute
     }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/etudiant/rendez-vous': {
       id: '/_authenticated/etudiant/rendez-vous'
       path: '/rendez-vous'
@@ -382,6 +399,17 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
 interface AuthenticatedConseillerRouteChildren {
   AuthenticatedConseillerEtudiantsRoute: typeof AuthenticatedConseillerEtudiantsRoute
   AuthenticatedConseillerMessagesRoute: typeof AuthenticatedConseillerMessagesRoute
@@ -429,14 +457,14 @@ const AuthenticatedEtudiantRouteWithChildren =
   )
 
 interface AuthenticatedRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedAppRoute: typeof AuthenticatedAppRoute
   AuthenticatedConseillerRoute: typeof AuthenticatedConseillerRouteWithChildren
   AuthenticatedEtudiantRoute: typeof AuthenticatedEtudiantRouteWithChildren
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedAppRoute: AuthenticatedAppRoute,
   AuthenticatedConseillerRoute: AuthenticatedConseillerRouteWithChildren,
   AuthenticatedEtudiantRoute: AuthenticatedEtudiantRouteWithChildren,
@@ -455,3 +483,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
