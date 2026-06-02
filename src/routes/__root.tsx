@@ -122,6 +122,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  // En mode SPA (navigateur) : on ne re-rend pas <html>/<head>/<body>
+  // car index.html fournit déjà le shell — évite le freeze React
+  if (typeof window !== "undefined") {
+    return <>{children}</>;
+  }
+  // En mode SSR (TanStack Start dev) : shell complet
   return (
     <html lang="fr">
       <head>
