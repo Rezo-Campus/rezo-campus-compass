@@ -47,9 +47,7 @@ export function AppShell({
       <aside className="hidden w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex">
         <div className="flex h-16 items-center px-5">
           <Link to="/app">
-            <div className="flex items-center gap-2.5 text-sidebar-foreground">
-              <BrandMark size="sm" />
-            </div>
+            <BrandMark size="sm" variant="dark" />
           </Link>
         </div>
         <nav className="flex-1 space-y-1 px-3 py-4">
@@ -125,6 +123,13 @@ export function AppShell({
               </Link>
             );
           })}
+          <button
+            onClick={onLogout}
+            className="ml-auto flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10"
+          >
+            <LogOut className="size-3.5" />
+            Déconnexion
+          </button>
         </nav>
 
         <main className="flex-1 p-6 lg:p-10">{children}</main>

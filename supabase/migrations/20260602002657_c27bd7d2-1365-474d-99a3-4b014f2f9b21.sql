@@ -2,10 +2,21 @@
 -- =====================================================================
 -- ENUMS
 -- =====================================================================
-create type public.file_status as enum ('nouveau', 'en_cours', 'soumis', 'accepte', 'refuse', 'archive');
-create type public.document_type as enum ('identite', 'diplome', 'releve_notes', 'lettre_motivation', 'cv', 'autre');
-create type public.document_status as enum ('en_attente', 'valide', 'rejete');
-create type public.appointment_status as enum ('programme', 'termine', 'annule');
+do $$ begin
+  create type public.file_status as enum ('nouveau', 'en_cours', 'soumis', 'accepte', 'refuse', 'archive');
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  create type public.document_type as enum ('identite', 'diplome', 'releve_notes', 'lettre_motivation', 'cv', 'autre');
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  create type public.document_status as enum ('en_attente', 'valide', 'rejete');
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  create type public.appointment_status as enum ('programme', 'termine', 'annule');
+exception when duplicate_object then null; end $$;
 
 -- =====================================================================
 -- STUDENT FILES (dossiers étudiants)

@@ -79,18 +79,35 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Rézo Campus — Plateforme d'orientation académique" },
+      { title: "Rézo Campus — Plateforme d'orientation académique pan-africaine" },
       {
         name: "description",
         content:
-          "Plateforme pan-africaine d'accompagnement des étudiants vers le Maroc et l'international — Rézo Campus Consulting.",
+          "Rézo Campus Consulting accompagne les étudiants africains vers les meilleures universités au Maroc et à l'international. Suivi de dossier, documents, conseiller dédié. Casablanca · Brazzaville.",
       },
-      { property: "og:title", content: "Rézo Campus Consulting" },
-      { property: "og:description", content: "Gestion et accompagnement des étudiants." },
+      { name: "keywords", content: "orientation académique, études au Maroc, étudiants africains, admission université, Rézo Campus, Casablanca, Brazzaville, visa étudiant" },
+      { name: "author", content: "Rézo Campus Consulting" },
+      { name: "robots", content: "index, follow" },
+      /* Open Graph */
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Rézo Campus Consulting" },
+      { property: "og:title", content: "Rézo Campus — Votre passerelle vers les meilleures universités" },
+      { property: "og:description", content: "Accompagnement personnalisé des étudiants africains pour étudier au Maroc et à l'international. Suivi de dossier, documents sécurisés, conseiller dédié." },
+      { property: "og:url", content: "https://rezoboutique.shop" },
+      { property: "og:image", content: "https://rezoboutique.shop/og-image.png" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "Logo Rézo Campus Consulting" },
+      /* Twitter / X */
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Rézo Campus — Orientation académique pan-africaine" },
+      { name: "twitter:description", content: "Accompagnement des étudiants africains vers le Maroc et l'international." },
+      { name: "twitter:image", content: "/og-image.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      { rel: "icon", type: "image/png", href: "/faviconn.png" },
+      { rel: "shortcut icon", href: "/favicon.ico" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
       {

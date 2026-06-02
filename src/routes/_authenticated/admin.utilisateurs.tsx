@@ -23,6 +23,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 
 type Role = Database["public"]["Enums"]["app_role"];
+type RoleOrNull = Role | null;
 
 export const Route = createFileRoute("/_authenticated/admin/utilisateurs")({
   component: AdminUsers,
@@ -42,15 +43,14 @@ function AdminUsers() {
       const { data: roles } = await supabase.from("user_roles").select("user_id, role");
       return profs.map((p) => ({
         ...p,
-        role: (roles?.find((r) => r.user_id === p.id)?.role ?? "etudiant") as Role,
+        role: (roles?.find((r) => r.user_id === p.id)?.role ?? null) as RoleOrNull,
       }));
     },
   });
 
   const changeRole = useMutation({
     mutationFn: async ({ userId, role }: { userId: string; role: Role }) => {
-      const { error: del } = await supabase.from("user_roles").delete().eq("user_id", userId);
-      if (del) throw del;
+      await supabase.from("user_roles").delete().eq("user_id", userId);
       const { error } = await supabase.from("user_roles").insert({ user_id: userId, role });
       if (error) throw error;
     },
@@ -61,6 +61,8 @@ function AdminUsers() {
     onError: (e: Error) => toast.error("Erreur", { description: e.message }),
   });
 
+  const pending = rows.filter((r) => !r.role).length;
+
   return (
     <>
       <PageHeader
@@ -68,9 +70,16 @@ function AdminUsers() {
         title="Gestion des comptes"
         description="Attribuez les rôles étudiant, conseiller ou administrateur."
       />
-      <Panel title={`${rows.length} compte${rows.length > 1 ? "s" : ""}`}>
+      <Panel
+        title={`${rows.length} compte${rows.length > 1 ? "s" : ""}`}
+        description={pending > 0 ? `${pending} en attente d'attribution` : undefined}
+      >
         {isLoading ? (
           <Loader2 className="mx-auto size-5 animate-spin text-primary" />
+        ) : rows.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
+            Aucun utilisateur inscrit.
+          </div>
         ) : (
           <Table>
             <TableHeader>
@@ -78,7 +87,7 @@ function AdminUsers() {
                 <TableHead>Utilisateur</TableHead>
                 <TableHead>Inscription</TableHead>
                 <TableHead>Rôle actuel</TableHead>
-                <TableHead className="text-right">Changer</TableHead>
+                <TableHead className="text-right">Attribuer</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -91,13 +100,23 @@ function AdminUsers() {
                   <TableCell className="text-sm text-muted-foreground">
                     {new Date(u.created_at).toLocaleDateString("fr-FR")}
                   </TableCell>
-                  <TableCell><Badge variant="secondary" className="capitalize">{u.role}</Badge></TableCell>
+                  <TableCell>
+                    {u.role ? (
+                      <Badge variant="secondary" className="capitalize">{u.role}</Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-amber-600 border-amber-300 bg-amber-50">
+                        En attente
+                      </Badge>
+                    )}
+                  </TableCell>
                   <TableCell className="text-right">
                     <Select
-                      value={u.role}
-                      onValueChange={(v) => changeRole.mutate({ userId: u.id, role: v as Role })}
+                      value={u.role ?? ""}
+                      onValueChange={(v) => v && changeRole.mutate({ userId: u.id, role: v as Role })}
                     >
-                      <SelectTrigger className="ml-auto w-[160px]"><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="ml-auto w-[170px]">
+                        <SelectValue placeholder="Attribuer un rôle…" />
+                      </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="etudiant">Étudiant</SelectItem>
                         <SelectItem value="conseiller">Conseiller</SelectItem>

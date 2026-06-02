@@ -40,21 +40,27 @@ function LoginPage() {
       toast.success("Bienvenue !");
       navigate({ to: "/app", replace: true });
     } else {
-      const { error } = await supabase.auth.signUp({
+      const { data: signupData, error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/app`,
-          data: { full_name: fullName },
-        },
+        options: { data: { full_name: fullName } },
       });
       setLoading(false);
       if (error) {
         toast.error("Inscription impossible", { description: error.message });
         return;
       }
-      toast.success("Compte créé", { description: "Connectez-vous maintenant." });
-      setMode("signin");
+      if (signupData.session) {
+        toast.success("Compte créé !", {
+          description: "Votre accès sera activé par un administrateur.",
+        });
+        navigate({ to: "/app", replace: true });
+      } else {
+        toast.success("Compte créé", {
+          description: "Vérifiez votre email pour confirmer votre compte.",
+        });
+        setMode("signin");
+      }
     }
   };
 

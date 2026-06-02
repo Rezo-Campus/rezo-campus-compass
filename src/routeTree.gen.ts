@@ -28,7 +28,11 @@ import { Route as AuthenticatedConseillerValidationsRouteImport } from './routes
 import { Route as AuthenticatedConseillerRendezVousRouteImport } from './routes/_authenticated/conseiller.rendez-vous'
 import { Route as AuthenticatedConseillerMessagesRouteImport } from './routes/_authenticated/conseiller.messages'
 import { Route as AuthenticatedConseillerEtudiantsRouteImport } from './routes/_authenticated/conseiller.etudiants'
+import { Route as AuthenticatedAdminValidationsRouteImport } from './routes/_authenticated/admin.validations'
 import { Route as AuthenticatedAdminUtilisateursRouteImport } from './routes/_authenticated/admin.utilisateurs'
+import { Route as AuthenticatedAdminRendezVousRouteImport } from './routes/_authenticated/admin.rendez-vous'
+import { Route as AuthenticatedAdminMessagesRouteImport } from './routes/_authenticated/admin.messages'
+import { Route as AuthenticatedAdminDossiersRouteImport } from './routes/_authenticated/admin.dossiers'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
   id: '/unauthorized',
@@ -134,10 +138,34 @@ const AuthenticatedConseillerEtudiantsRoute =
     path: '/etudiants',
     getParentRoute: () => AuthenticatedConseillerRoute,
   } as any)
+const AuthenticatedAdminValidationsRoute =
+  AuthenticatedAdminValidationsRouteImport.update({
+    id: '/validations',
+    path: '/validations',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminUtilisateursRoute =
   AuthenticatedAdminUtilisateursRouteImport.update({
     id: '/utilisateurs',
     path: '/utilisateurs',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminRendezVousRoute =
+  AuthenticatedAdminRendezVousRouteImport.update({
+    id: '/rendez-vous',
+    path: '/rendez-vous',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminMessagesRoute =
+  AuthenticatedAdminMessagesRouteImport.update({
+    id: '/messages',
+    path: '/messages',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminDossiersRoute =
+  AuthenticatedAdminDossiersRouteImport.update({
+    id: '/dossiers',
+    path: '/dossiers',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 
@@ -149,7 +177,11 @@ export interface FileRoutesByFullPath {
   '/app': typeof AuthenticatedAppRoute
   '/conseiller': typeof AuthenticatedConseillerRouteWithChildren
   '/etudiant': typeof AuthenticatedEtudiantRouteWithChildren
+  '/admin/dossiers': typeof AuthenticatedAdminDossiersRoute
+  '/admin/messages': typeof AuthenticatedAdminMessagesRoute
+  '/admin/rendez-vous': typeof AuthenticatedAdminRendezVousRoute
   '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
+  '/admin/validations': typeof AuthenticatedAdminValidationsRoute
   '/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRoute
   '/conseiller/messages': typeof AuthenticatedConseillerMessagesRoute
   '/conseiller/rendez-vous': typeof AuthenticatedConseillerRendezVousRoute
@@ -167,7 +199,11 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/app': typeof AuthenticatedAppRoute
+  '/admin/dossiers': typeof AuthenticatedAdminDossiersRoute
+  '/admin/messages': typeof AuthenticatedAdminMessagesRoute
+  '/admin/rendez-vous': typeof AuthenticatedAdminRendezVousRoute
   '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
+  '/admin/validations': typeof AuthenticatedAdminValidationsRoute
   '/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRoute
   '/conseiller/messages': typeof AuthenticatedConseillerMessagesRoute
   '/conseiller/rendez-vous': typeof AuthenticatedConseillerRendezVousRoute
@@ -190,7 +226,11 @@ export interface FileRoutesById {
   '/_authenticated/app': typeof AuthenticatedAppRoute
   '/_authenticated/conseiller': typeof AuthenticatedConseillerRouteWithChildren
   '/_authenticated/etudiant': typeof AuthenticatedEtudiantRouteWithChildren
+  '/_authenticated/admin/dossiers': typeof AuthenticatedAdminDossiersRoute
+  '/_authenticated/admin/messages': typeof AuthenticatedAdminMessagesRoute
+  '/_authenticated/admin/rendez-vous': typeof AuthenticatedAdminRendezVousRoute
   '/_authenticated/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
+  '/_authenticated/admin/validations': typeof AuthenticatedAdminValidationsRoute
   '/_authenticated/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRoute
   '/_authenticated/conseiller/messages': typeof AuthenticatedConseillerMessagesRoute
   '/_authenticated/conseiller/rendez-vous': typeof AuthenticatedConseillerRendezVousRoute
@@ -213,7 +253,11 @@ export interface FileRouteTypes {
     | '/app'
     | '/conseiller'
     | '/etudiant'
+    | '/admin/dossiers'
+    | '/admin/messages'
+    | '/admin/rendez-vous'
     | '/admin/utilisateurs'
+    | '/admin/validations'
     | '/conseiller/etudiants'
     | '/conseiller/messages'
     | '/conseiller/rendez-vous'
@@ -231,7 +275,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/unauthorized'
     | '/app'
+    | '/admin/dossiers'
+    | '/admin/messages'
+    | '/admin/rendez-vous'
     | '/admin/utilisateurs'
+    | '/admin/validations'
     | '/conseiller/etudiants'
     | '/conseiller/messages'
     | '/conseiller/rendez-vous'
@@ -253,7 +301,11 @@ export interface FileRouteTypes {
     | '/_authenticated/app'
     | '/_authenticated/conseiller'
     | '/_authenticated/etudiant'
+    | '/_authenticated/admin/dossiers'
+    | '/_authenticated/admin/messages'
+    | '/_authenticated/admin/rendez-vous'
     | '/_authenticated/admin/utilisateurs'
+    | '/_authenticated/admin/validations'
     | '/_authenticated/conseiller/etudiants'
     | '/_authenticated/conseiller/messages'
     | '/_authenticated/conseiller/rendez-vous'
@@ -409,6 +461,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConseillerEtudiantsRouteImport
       parentRoute: typeof AuthenticatedConseillerRoute
     }
+    '/_authenticated/admin/validations': {
+      id: '/_authenticated/admin/validations'
+      path: '/validations'
+      fullPath: '/admin/validations'
+      preLoaderRoute: typeof AuthenticatedAdminValidationsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/utilisateurs': {
       id: '/_authenticated/admin/utilisateurs'
       path: '/utilisateurs'
@@ -416,16 +475,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUtilisateursRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/rendez-vous': {
+      id: '/_authenticated/admin/rendez-vous'
+      path: '/rendez-vous'
+      fullPath: '/admin/rendez-vous'
+      preLoaderRoute: typeof AuthenticatedAdminRendezVousRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/messages': {
+      id: '/_authenticated/admin/messages'
+      path: '/messages'
+      fullPath: '/admin/messages'
+      preLoaderRoute: typeof AuthenticatedAdminMessagesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/dossiers': {
+      id: '/_authenticated/admin/dossiers'
+      path: '/dossiers'
+      fullPath: '/admin/dossiers'
+      preLoaderRoute: typeof AuthenticatedAdminDossiersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
   }
 }
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminDossiersRoute: typeof AuthenticatedAdminDossiersRoute
+  AuthenticatedAdminMessagesRoute: typeof AuthenticatedAdminMessagesRoute
+  AuthenticatedAdminRendezVousRoute: typeof AuthenticatedAdminRendezVousRoute
   AuthenticatedAdminUtilisateursRoute: typeof AuthenticatedAdminUtilisateursRoute
+  AuthenticatedAdminValidationsRoute: typeof AuthenticatedAdminValidationsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminDossiersRoute: AuthenticatedAdminDossiersRoute,
+  AuthenticatedAdminMessagesRoute: AuthenticatedAdminMessagesRoute,
+  AuthenticatedAdminRendezVousRoute: AuthenticatedAdminRendezVousRoute,
   AuthenticatedAdminUtilisateursRoute: AuthenticatedAdminUtilisateursRoute,
+  AuthenticatedAdminValidationsRoute: AuthenticatedAdminValidationsRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
@@ -505,3 +593,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

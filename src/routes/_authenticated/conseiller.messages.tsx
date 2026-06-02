@@ -10,7 +10,7 @@ export const Route = createFileRoute("/_authenticated/conseiller/messages")({
   component: MessagesConseiller,
 });
 
-function MessagesConseiller() {
+export function MessagesConseiller() {
   const { data: auth } = useAuth();
   const uid = auth?.user?.id;
   const isAdmin = auth?.role === "admin";

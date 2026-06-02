@@ -4,7 +4,13 @@ import { Loader2, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -20,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/conseiller/etudiants")({
   component: MesEtudiants,
 });
 
-function MesEtudiants() {
+export function MesEtudiants() {
   const { data: auth } = useAuth();
   const uid = auth?.user?.id;
   const isAdmin = auth?.role === "admin";
@@ -50,16 +56,35 @@ function MesEtudiants() {
     },
   });
 
-  const claim = useMutation({
-    mutationFn: async (studentId: string) => {
+  // Liste des conseillers pour le dropdown d'assignation (admin uniquement)
+  const { data: conseillers = [] } = useQuery({
+    enabled: !!uid && isAdmin,
+    queryKey: ["conseillers-list"],
+    queryFn: async () => {
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "conseiller");
+      const ids = (roles ?? []).map((r) => r.user_id);
+      if (!ids.length) return [];
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, full_name, email")
+        .in("id", ids);
+      return data ?? [];
+    },
+  });
+
+  const assign = useMutation({
+    mutationFn: async ({ studentId, advisorId }: { studentId: string; advisorId: string | null }) => {
       const { error } = await supabase
         .from("student_files")
-        .update({ advisor_id: uid! })
+        .update({ advisor_id: advisorId })
         .eq("student_id", studentId);
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Étudiant assigné");
+      toast.success("Conseiller assigné");
       qc.invalidateQueries({ queryKey: ["my-students"] });
     },
     onError: (e: Error) => toast.error("Erreur", { description: e.message }),
@@ -69,10 +94,10 @@ function MesEtudiants() {
     <>
       <PageHeader
         eyebrow="Étudiants"
-        title={isAdmin ? "Tous les étudiants" : "Mes étudiants"}
+        title={isAdmin ? "Tous les dossiers" : "Mes étudiants"}
         description={
           isAdmin
-            ? "Liste complète des dossiers de la plateforme."
+            ? "Assignez chaque étudiant à un conseiller."
             : "Les étudiants qui vous sont assignés."
         }
       />
@@ -82,7 +107,7 @@ function MesEtudiants() {
           <Loader2 className="mx-auto size-5 animate-spin text-primary" />
         ) : rows.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
-            Aucun étudiant pour l'instant.
+            {isAdmin ? "Aucun étudiant inscrit pour l'instant." : "Aucun étudiant ne vous est assigné."}
           </div>
         ) : (
           <Table>
@@ -92,7 +117,9 @@ function MesEtudiants() {
                 <TableHead>Projet</TableHead>
                 <TableHead>Statut</TableHead>
                 <TableHead>Progression</TableHead>
-                <TableHead className="text-right">Action</TableHead>
+                <TableHead className="text-right">
+                  {isAdmin ? "Conseiller assigné" : "Statut"}
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -115,7 +142,9 @@ function MesEtudiants() {
                       <div className="text-xs text-muted-foreground">{r.target_country} · {r.target_level}</div>
                     )}
                   </TableCell>
-                  <TableCell><Badge variant="secondary" className="capitalize">{r.status.replace("_", " ")}</Badge></TableCell>
+                  <TableCell>
+                    <Badge variant="secondary" className="capitalize">{r.status.replace("_", " ")}</Badge>
+                  </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <div className="h-1.5 w-24 overflow-hidden rounded-full bg-muted">
@@ -125,14 +154,28 @@ function MesEtudiants() {
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
-                    {!r.advisor_id ? (
-                      <Button size="sm" onClick={() => claim.mutate(r.student_id)} disabled={claim.isPending}>
-                        Prendre en charge
-                      </Button>
-                    ) : r.advisor_id === uid ? (
-                      <span className="text-xs text-muted-foreground">Vous</span>
+                    {isAdmin ? (
+                      <Select
+                        value={r.advisor_id ?? "none"}
+                        onValueChange={(v) =>
+                          assign.mutate({ studentId: r.student_id, advisorId: v === "none" ? null : v })
+                        }
+                        disabled={assign.isPending}
+                      >
+                        <SelectTrigger className="ml-auto w-[180px]">
+                          <SelectValue placeholder="Non assigné" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Non assigné</SelectItem>
+                          {conseillers.map((c) => (
+                            <SelectItem key={c.id} value={c.id}>
+                              {c.full_name || c.email}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     ) : (
-                      <span className="text-xs text-muted-foreground">Assigné</span>
+                      <span className="text-xs text-muted-foreground">Vous</span>
                     )}
                   </TableCell>
                 </TableRow>

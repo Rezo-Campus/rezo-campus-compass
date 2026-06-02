@@ -30,7 +30,7 @@ export const Route = createFileRoute("/_authenticated/conseiller/rendez-vous")({
   component: RdvConseiller,
 });
 
-function RdvConseiller() {
+export function RdvConseiller() {
   const { data: auth } = useAuth();
   const uid = auth?.user?.id;
   const isAdmin = auth?.role === "admin";

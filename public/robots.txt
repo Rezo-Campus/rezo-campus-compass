@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Allow: /login
+Disallow: /admin/
+Disallow: /etudiant/
+Disallow: /conseiller/
+Disallow: /app
+Disallow: /unauthorized
+
+Sitemap: https://rezoboutique.shop/sitemap.xml
