@@ -15,11 +15,12 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Redirige déjà-connecté vers le hub.
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) navigate({ to: "/app", replace: true });
@@ -29,19 +30,36 @@ function LoginPage() {
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
-    if (error) {
-      toast.error("Connexion impossible", { description: error.message });
-      return;
+    if (mode === "signin") {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      setLoading(false);
+      if (error) {
+        toast.error("Connexion impossible", { description: error.message });
+        return;
+      }
+      toast.success("Bienvenue !");
+      navigate({ to: "/app", replace: true });
+    } else {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/app`,
+          data: { full_name: fullName },
+        },
+      });
+      setLoading(false);
+      if (error) {
+        toast.error("Inscription impossible", { description: error.message });
+        return;
+      }
+      toast.success("Compte créé", { description: "Connectez-vous maintenant." });
+      setMode("signin");
     }
-    toast.success("Bienvenue !");
-    navigate({ to: "/app", replace: true });
   };
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
-      {/* Côté visuel */}
       <div
         className="relative hidden flex-col justify-between p-10 text-primary-foreground lg:flex"
         style={{ background: "var(--gradient-hero)" }}
@@ -59,18 +77,53 @@ function LoginPage() {
         <p className="text-xs text-white/60">© Rézo Campus Consulting</p>
       </div>
 
-      {/* Formulaire */}
       <div className="flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm">
           <div className="mb-8 lg:hidden">
             <BrandMark />
           </div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight">Connexion</h1>
+
+          <div className="mb-6 inline-flex rounded-lg border border-border bg-muted/40 p-1 text-sm">
+            <button
+              type="button"
+              onClick={() => setMode("signin")}
+              className={`rounded-md px-4 py-1.5 font-medium transition ${mode === "signin" ? "bg-background shadow-sm" : "text-muted-foreground"}`}
+            >
+              Connexion
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("signup")}
+              className={`rounded-md px-4 py-1.5 font-medium transition ${mode === "signup" ? "bg-background shadow-sm" : "text-muted-foreground"}`}
+            >
+              Créer un compte
+            </button>
+          </div>
+
+          <h1 className="font-display text-2xl font-semibold tracking-tight">
+            {mode === "signin" ? "Connexion" : "Créer un compte"}
+          </h1>
           <p className="mt-1.5 text-sm text-muted-foreground">
-            Accédez à votre espace Rézo Campus.
+            {mode === "signin"
+              ? "Accédez à votre espace Rézo Campus."
+              : "Renseignez vos informations pour démarrer."}
           </p>
 
           <form onSubmit={onSubmit} className="mt-8 space-y-4">
+            {mode === "signup" && (
+              <div className="space-y-1.5">
+                <Label htmlFor="fullName">Nom complet</Label>
+                <Input
+                  id="fullName"
+                  type="text"
+                  autoComplete="name"
+                  required
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Prénom Nom"
+                />
+              </div>
+            )}
             <div className="space-y-1.5">
               <Label htmlFor="email">Adresse email</Label>
               <Input
@@ -88,8 +141,9 @@ function LoginPage() {
               <Input
                 id="password"
                 type="password"
-                autoComplete="current-password"
+                autoComplete={mode === "signin" ? "current-password" : "new-password"}
                 required
+                minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
@@ -97,13 +151,12 @@ function LoginPage() {
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
-              Se connecter
+              {mode === "signin" ? "Se connecter" : "Créer mon compte"}
             </Button>
           </form>
 
           <p className="mt-6 rounded-lg border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
-            Les accès sont délivrés par l'administrateur Rézo Campus. Si vous n'avez pas
-            encore de compte, contactez{" "}
+            Besoin d'aide ? Contactez{" "}
             <a href="mailto:campusrezo@gmail.com" className="font-medium text-primary underline-offset-2 hover:underline">
               campusrezo@gmail.com
             </a>.
