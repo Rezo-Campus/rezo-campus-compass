@@ -99,13 +99,22 @@ function Landing() {
             </a>
           </nav>
 
-          {/* CTA */}
-          <Link
-            to="/login"
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition hover:opacity-90"
-          >
-            Se connecter
-          </Link>
+          {/* CTAs */}
+          <div className="flex items-center gap-2">
+            <Link
+              to="/login"
+              className="rounded-lg border border-primary/30 px-4 py-2 text-sm font-medium text-primary transition hover:bg-primary/5"
+            >
+              Se connecter
+            </Link>
+            <Link
+              to="/login"
+              search={{ mode: "signup" }}
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition hover:opacity-90"
+            >
+              Créer un compte
+            </Link>
+          </div>
         </div>
       </header>
 

@@ -10,12 +10,18 @@ import { BrandMark } from "@/components/BrandMark";
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Connexion — Rézo Campus" }] }),
+  validateSearch: (search: Record<string, unknown>): { mode?: "signin" | "signup" } => {
+    if (search.mode === "signup") return { mode: "signup" };
+    if (search.mode === "signin") return { mode: "signin" };
+    return {};
+  },
   component: LoginPage,
 });
 
 function LoginPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const { mode: urlMode } = Route.useSearch();
+  const [mode, setMode] = useState<"signin" | "signup">(urlMode ?? "signin");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,7 +33,7 @@ function LoginPage() {
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const onSubmit = async (e: FormEvent) => {
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     if (mode === "signin") {
