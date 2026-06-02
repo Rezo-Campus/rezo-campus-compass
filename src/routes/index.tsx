@@ -110,44 +110,44 @@ function Landing() {
       </header>
 
       <main>
-        <section className="relative overflow-hidden">
+        <section className="relative overflow-hidden bg-[oklch(0.97_0.01_200)]">
+          {/* Décoration de fond */}
           <div
-            className="absolute inset-0 -z-10 opacity-90"
-            style={{ background: "var(--gradient-hero)" }}
-          />
-          <div
-            className="absolute inset-0 -z-10 opacity-20"
+            className="absolute inset-0 -z-10"
             style={{
               backgroundImage:
-                "radial-gradient(circle at 20% 20%, white 0, transparent 40%), radial-gradient(circle at 80% 80%, white 0, transparent 40%)",
+                "radial-gradient(ellipse 80% 60% at 50% -20%, oklch(0.55 0.11 195 / 0.15) 0%, transparent 70%)",
             }}
           />
-          <div className="mx-auto max-w-6xl px-6 py-24 text-primary-foreground sm:py-32">
+          <div className="mx-auto max-w-6xl px-6 py-24 sm:py-32">
             <div className="flex flex-col items-start gap-10 lg:flex-row lg:items-center">
               <div className="max-w-3xl flex-1">
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3 py-1 text-xs font-medium backdrop-blur">
+                <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/8 px-3 py-1 text-xs font-medium text-primary">
                   <span className="size-1.5 rounded-full bg-accent" /> Casablanca · Brazzaville
                 </span>
-                <h1 className="mt-6 font-display text-4xl font-semibold leading-tight sm:text-6xl">
+                <h1 className="mt-6 font-display text-4xl font-semibold leading-tight text-[oklch(0.22_0.055_210)] sm:text-6xl">
                   Votre passerelle vers les <span className="text-accent">meilleures universités</span>
                   <br />
                   au Maroc et à l'international.
                 </h1>
-                <p className="mt-6 max-w-2xl text-base text-white/85 sm:text-lg">
+                <p className="mt-6 max-w-2xl text-base text-[oklch(0.35_0.05_210)] sm:text-lg">
                   Rézo Campus Consulting accompagne les étudiants africains de bout en bout :
                   orientation, dossiers d'admission, visas et suivi personnalisé.
+                </p>
+                <p className="mt-2 text-sm font-medium text-primary">
+                  Casablanca · Brazzaville
                 </p>
                 <div className="mt-10 flex flex-wrap gap-3">
                   <Link
                     to="/login"
-                    className="group inline-flex items-center gap-2 rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground shadow-[var(--shadow-elegant)] transition hover:brightness-110"
+                    className="group inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg transition hover:opacity-90"
                   >
                     Accéder à mon espace
                     <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
                   </Link>
                   <a
                     href="mailto:campusrezo@gmail.com"
-                    className="inline-flex items-center gap-2 rounded-xl border border-white/30 bg-white/5 px-6 py-3 text-sm font-medium text-white backdrop-blur transition hover:bg-white/10"
+                    className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-6 py-3 text-sm font-medium text-primary transition hover:bg-primary/10"
                   >
                     Nous contacter
                   </a>
@@ -161,7 +161,7 @@ function Landing() {
                   alt="Rézo Campus Consulting — Depuis 2025"
                   width={260}
                   height={260}
-                  className="drop-shadow-2xl"
+                  className="drop-shadow-xl"
                 />
               </div>
             </div>

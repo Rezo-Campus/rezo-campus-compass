@@ -3,7 +3,6 @@ import {
   Outlet,
   Link,
   createRootRouteWithContext,
-  useRouter,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -148,14 +147,17 @@ function RootComponent() {
 }
 
 function AuthSync() {
-  const router = useRouter();
   const queryClient = useQueryClient();
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      queryClient.invalidateQueries();
-      router.invalidate();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Invalide uniquement la query auth — pas router.invalidate() qui cause un freeze
+      queryClient.invalidateQueries({ queryKey: ["auth-session"] });
+      // Si déconnexion, vide aussi les queries de données
+      if (!session) {
+        queryClient.clear();
+      }
     });
     return () => subscription.unsubscribe();
-  }, [router, queryClient]);
+  }, [queryClient]); // queryClient est stable, pas de boucle infinie
   return null;
 }

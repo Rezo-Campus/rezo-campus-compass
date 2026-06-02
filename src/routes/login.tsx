@@ -25,7 +25,7 @@ function LoginPage() {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) navigate({ to: "/app", replace: true });
     });
-  }, [navigate]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
