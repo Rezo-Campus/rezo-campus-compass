@@ -28,6 +28,7 @@ import { Route as AuthenticatedConseillerValidationsRouteImport } from './routes
 import { Route as AuthenticatedConseillerRendezVousRouteImport } from './routes/_authenticated/conseiller.rendez-vous'
 import { Route as AuthenticatedConseillerMessagesRouteImport } from './routes/_authenticated/conseiller.messages'
 import { Route as AuthenticatedConseillerEtudiantsRouteImport } from './routes/_authenticated/conseiller.etudiants'
+import { Route as AuthenticatedAdminUtilisateursRouteImport } from './routes/_authenticated/admin.utilisateurs'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
   id: '/unauthorized',
@@ -133,6 +134,12 @@ const AuthenticatedConseillerEtudiantsRoute =
     path: '/etudiants',
     getParentRoute: () => AuthenticatedConseillerRoute,
   } as any)
+const AuthenticatedAdminUtilisateursRoute =
+  AuthenticatedAdminUtilisateursRouteImport.update({
+    id: '/utilisateurs',
+    path: '/utilisateurs',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -142,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AuthenticatedAppRoute
   '/conseiller': typeof AuthenticatedConseillerRouteWithChildren
   '/etudiant': typeof AuthenticatedEtudiantRouteWithChildren
+  '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRoute
   '/conseiller/messages': typeof AuthenticatedConseillerMessagesRoute
   '/conseiller/rendez-vous': typeof AuthenticatedConseillerRendezVousRoute
@@ -159,6 +167,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/app': typeof AuthenticatedAppRoute
+  '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRoute
   '/conseiller/messages': typeof AuthenticatedConseillerMessagesRoute
   '/conseiller/rendez-vous': typeof AuthenticatedConseillerRendezVousRoute
@@ -181,6 +190,7 @@ export interface FileRoutesById {
   '/_authenticated/app': typeof AuthenticatedAppRoute
   '/_authenticated/conseiller': typeof AuthenticatedConseillerRouteWithChildren
   '/_authenticated/etudiant': typeof AuthenticatedEtudiantRouteWithChildren
+  '/_authenticated/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/_authenticated/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRoute
   '/_authenticated/conseiller/messages': typeof AuthenticatedConseillerMessagesRoute
   '/_authenticated/conseiller/rendez-vous': typeof AuthenticatedConseillerRendezVousRoute
@@ -203,6 +213,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/conseiller'
     | '/etudiant'
+    | '/admin/utilisateurs'
     | '/conseiller/etudiants'
     | '/conseiller/messages'
     | '/conseiller/rendez-vous'
@@ -220,6 +231,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/unauthorized'
     | '/app'
+    | '/admin/utilisateurs'
     | '/conseiller/etudiants'
     | '/conseiller/messages'
     | '/conseiller/rendez-vous'
@@ -241,6 +253,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app'
     | '/_authenticated/conseiller'
     | '/_authenticated/etudiant'
+    | '/_authenticated/admin/utilisateurs'
     | '/_authenticated/conseiller/etudiants'
     | '/_authenticated/conseiller/messages'
     | '/_authenticated/conseiller/rendez-vous'
@@ -396,14 +409,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConseillerEtudiantsRouteImport
       parentRoute: typeof AuthenticatedConseillerRoute
     }
+    '/_authenticated/admin/utilisateurs': {
+      id: '/_authenticated/admin/utilisateurs'
+      path: '/utilisateurs'
+      fullPath: '/admin/utilisateurs'
+      preLoaderRoute: typeof AuthenticatedAdminUtilisateursRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
   }
 }
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminUtilisateursRoute: typeof AuthenticatedAdminUtilisateursRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminUtilisateursRoute: AuthenticatedAdminUtilisateursRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
