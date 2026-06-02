@@ -18,6 +18,7 @@ import { Route as AuthenticatedConseillerRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedEtudiantIndexRouteImport } from './routes/_authenticated/etudiant.index'
+import { Route as AuthenticatedEtudiantRendezVousRouteImport } from './routes/_authenticated/etudiant.rendez-vous'
 import { Route as AuthenticatedEtudiantMessagesRouteImport } from './routes/_authenticated/etudiant.messages'
 import { Route as AuthenticatedEtudiantDossierRouteImport } from './routes/_authenticated/etudiant.dossier'
 import { Route as AuthenticatedEtudiantDocumentsRouteImport } from './routes/_authenticated/etudiant.documents'
@@ -67,6 +68,12 @@ const AuthenticatedEtudiantIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedEtudiantRoute,
   } as any)
+const AuthenticatedEtudiantRendezVousRoute =
+  AuthenticatedEtudiantRendezVousRouteImport.update({
+    id: '/rendez-vous',
+    path: '/rendez-vous',
+    getParentRoute: () => AuthenticatedEtudiantRoute,
+  } as any)
 const AuthenticatedEtudiantMessagesRoute =
   AuthenticatedEtudiantMessagesRouteImport.update({
     id: '/messages',
@@ -97,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
   '/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
   '/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
+  '/etudiant/rendez-vous': typeof AuthenticatedEtudiantRendezVousRoute
   '/etudiant/': typeof AuthenticatedEtudiantIndexRoute
 }
 export interface FileRoutesByTo {
@@ -109,6 +117,7 @@ export interface FileRoutesByTo {
   '/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
   '/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
   '/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
+  '/etudiant/rendez-vous': typeof AuthenticatedEtudiantRendezVousRoute
   '/etudiant': typeof AuthenticatedEtudiantIndexRoute
 }
 export interface FileRoutesById {
@@ -124,6 +133,7 @@ export interface FileRoutesById {
   '/_authenticated/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
   '/_authenticated/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
   '/_authenticated/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
+  '/_authenticated/etudiant/rendez-vous': typeof AuthenticatedEtudiantRendezVousRoute
   '/_authenticated/etudiant/': typeof AuthenticatedEtudiantIndexRoute
 }
 export interface FileRouteTypes {
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/etudiant/documents'
     | '/etudiant/dossier'
     | '/etudiant/messages'
+    | '/etudiant/rendez-vous'
     | '/etudiant/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/etudiant/documents'
     | '/etudiant/dossier'
     | '/etudiant/messages'
+    | '/etudiant/rendez-vous'
     | '/etudiant'
   id:
     | '__root__'
@@ -165,6 +177,7 @@ export interface FileRouteTypes {
     | '/_authenticated/etudiant/documents'
     | '/_authenticated/etudiant/dossier'
     | '/_authenticated/etudiant/messages'
+    | '/_authenticated/etudiant/rendez-vous'
     | '/_authenticated/etudiant/'
   fileRoutesById: FileRoutesById
 }
@@ -240,6 +253,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEtudiantIndexRouteImport
       parentRoute: typeof AuthenticatedEtudiantRoute
     }
+    '/_authenticated/etudiant/rendez-vous': {
+      id: '/_authenticated/etudiant/rendez-vous'
+      path: '/rendez-vous'
+      fullPath: '/etudiant/rendez-vous'
+      preLoaderRoute: typeof AuthenticatedEtudiantRendezVousRouteImport
+      parentRoute: typeof AuthenticatedEtudiantRoute
+    }
     '/_authenticated/etudiant/messages': {
       id: '/_authenticated/etudiant/messages'
       path: '/messages'
@@ -268,6 +288,7 @@ interface AuthenticatedEtudiantRouteChildren {
   AuthenticatedEtudiantDocumentsRoute: typeof AuthenticatedEtudiantDocumentsRoute
   AuthenticatedEtudiantDossierRoute: typeof AuthenticatedEtudiantDossierRoute
   AuthenticatedEtudiantMessagesRoute: typeof AuthenticatedEtudiantMessagesRoute
+  AuthenticatedEtudiantRendezVousRoute: typeof AuthenticatedEtudiantRendezVousRoute
   AuthenticatedEtudiantIndexRoute: typeof AuthenticatedEtudiantIndexRoute
 }
 
@@ -275,6 +296,7 @@ const AuthenticatedEtudiantRouteChildren: AuthenticatedEtudiantRouteChildren = {
   AuthenticatedEtudiantDocumentsRoute: AuthenticatedEtudiantDocumentsRoute,
   AuthenticatedEtudiantDossierRoute: AuthenticatedEtudiantDossierRoute,
   AuthenticatedEtudiantMessagesRoute: AuthenticatedEtudiantMessagesRoute,
+  AuthenticatedEtudiantRendezVousRoute: AuthenticatedEtudiantRendezVousRoute,
   AuthenticatedEtudiantIndexRoute: AuthenticatedEtudiantIndexRoute,
 }
 
