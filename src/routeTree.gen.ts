@@ -23,6 +23,7 @@ import { Route as AuthenticatedEtudiantRendezVousRouteImport } from './routes/_a
 import { Route as AuthenticatedEtudiantMessagesRouteImport } from './routes/_authenticated/etudiant.messages'
 import { Route as AuthenticatedEtudiantDossierRouteImport } from './routes/_authenticated/etudiant.dossier'
 import { Route as AuthenticatedEtudiantDocumentsRouteImport } from './routes/_authenticated/etudiant.documents'
+import { Route as AuthenticatedConseillerValidationsRouteImport } from './routes/_authenticated/conseiller.validations'
 import { Route as AuthenticatedConseillerEtudiantsRouteImport } from './routes/_authenticated/conseiller.etudiants'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
@@ -100,6 +101,12 @@ const AuthenticatedEtudiantDocumentsRoute =
     path: '/documents',
     getParentRoute: () => AuthenticatedEtudiantRoute,
   } as any)
+const AuthenticatedConseillerValidationsRoute =
+  AuthenticatedConseillerValidationsRouteImport.update({
+    id: '/validations',
+    path: '/validations',
+    getParentRoute: () => AuthenticatedConseillerRoute,
+  } as any)
 const AuthenticatedConseillerEtudiantsRoute =
   AuthenticatedConseillerEtudiantsRouteImport.update({
     id: '/etudiants',
@@ -116,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/conseiller': typeof AuthenticatedConseillerRouteWithChildren
   '/etudiant': typeof AuthenticatedEtudiantRouteWithChildren
   '/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRoute
+  '/conseiller/validations': typeof AuthenticatedConseillerValidationsRoute
   '/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
   '/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
   '/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
@@ -130,6 +138,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/app': typeof AuthenticatedAppRoute
   '/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRoute
+  '/conseiller/validations': typeof AuthenticatedConseillerValidationsRoute
   '/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
   '/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
   '/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
@@ -148,6 +157,7 @@ export interface FileRoutesById {
   '/_authenticated/conseiller': typeof AuthenticatedConseillerRouteWithChildren
   '/_authenticated/etudiant': typeof AuthenticatedEtudiantRouteWithChildren
   '/_authenticated/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRoute
+  '/_authenticated/conseiller/validations': typeof AuthenticatedConseillerValidationsRoute
   '/_authenticated/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
   '/_authenticated/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
   '/_authenticated/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/conseiller'
     | '/etudiant'
     | '/conseiller/etudiants'
+    | '/conseiller/validations'
     | '/etudiant/documents'
     | '/etudiant/dossier'
     | '/etudiant/messages'
@@ -180,6 +191,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/conseiller/etudiants'
+    | '/conseiller/validations'
     | '/etudiant/documents'
     | '/etudiant/dossier'
     | '/etudiant/messages'
@@ -197,6 +209,7 @@ export interface FileRouteTypes {
     | '/_authenticated/conseiller'
     | '/_authenticated/etudiant'
     | '/_authenticated/conseiller/etudiants'
+    | '/_authenticated/conseiller/validations'
     | '/_authenticated/etudiant/documents'
     | '/_authenticated/etudiant/dossier'
     | '/_authenticated/etudiant/messages'
@@ -312,6 +325,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEtudiantDocumentsRouteImport
       parentRoute: typeof AuthenticatedEtudiantRoute
     }
+    '/_authenticated/conseiller/validations': {
+      id: '/_authenticated/conseiller/validations'
+      path: '/validations'
+      fullPath: '/conseiller/validations'
+      preLoaderRoute: typeof AuthenticatedConseillerValidationsRouteImport
+      parentRoute: typeof AuthenticatedConseillerRoute
+    }
     '/_authenticated/conseiller/etudiants': {
       id: '/_authenticated/conseiller/etudiants'
       path: '/etudiants'
@@ -324,6 +344,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedConseillerRouteChildren {
   AuthenticatedConseillerEtudiantsRoute: typeof AuthenticatedConseillerEtudiantsRoute
+  AuthenticatedConseillerValidationsRoute: typeof AuthenticatedConseillerValidationsRoute
   AuthenticatedConseillerIndexRoute: typeof AuthenticatedConseillerIndexRoute
 }
 
@@ -331,6 +352,8 @@ const AuthenticatedConseillerRouteChildren: AuthenticatedConseillerRouteChildren
   {
     AuthenticatedConseillerEtudiantsRoute:
       AuthenticatedConseillerEtudiantsRoute,
+    AuthenticatedConseillerValidationsRoute:
+      AuthenticatedConseillerValidationsRoute,
     AuthenticatedConseillerIndexRoute: AuthenticatedConseillerIndexRoute,
   }
 
