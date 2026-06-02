@@ -17,6 +17,18 @@ import { Route as AuthenticatedEtudiantRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedConseillerRouteImport } from './routes/_authenticated/conseiller'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedEtudiantIndexRouteImport } from './routes/_authenticated/etudiant.index'
+import { Route as AuthenticatedConseillerIndexRouteImport } from './routes/_authenticated/conseiller.index'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as AuthenticatedEtudiantRendezVousRouteImport } from './routes/_authenticated/etudiant.rendez-vous'
+import { Route as AuthenticatedEtudiantMessagesRouteImport } from './routes/_authenticated/etudiant.messages'
+import { Route as AuthenticatedEtudiantDossierRouteImport } from './routes/_authenticated/etudiant.dossier'
+import { Route as AuthenticatedEtudiantDocumentsRouteImport } from './routes/_authenticated/etudiant.documents'
+import { Route as AuthenticatedConseillerValidationsRouteImport } from './routes/_authenticated/conseiller.validations'
+import { Route as AuthenticatedConseillerRendezVousRouteImport } from './routes/_authenticated/conseiller.rendez-vous'
+import { Route as AuthenticatedConseillerMessagesRouteImport } from './routes/_authenticated/conseiller.messages'
+import { Route as AuthenticatedConseillerEtudiantsRouteImport } from './routes/_authenticated/conseiller.etudiants'
+import { Route as AuthenticatedAdminUtilisateursRouteImport } from './routes/_authenticated/admin.utilisateurs'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
   id: '/unauthorized',
@@ -57,24 +69,116 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedEtudiantIndexRoute =
+  AuthenticatedEtudiantIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedEtudiantRoute,
+  } as any)
+const AuthenticatedConseillerIndexRoute =
+  AuthenticatedConseillerIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedConseillerRoute,
+  } as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
+const AuthenticatedEtudiantRendezVousRoute =
+  AuthenticatedEtudiantRendezVousRouteImport.update({
+    id: '/rendez-vous',
+    path: '/rendez-vous',
+    getParentRoute: () => AuthenticatedEtudiantRoute,
+  } as any)
+const AuthenticatedEtudiantMessagesRoute =
+  AuthenticatedEtudiantMessagesRouteImport.update({
+    id: '/messages',
+    path: '/messages',
+    getParentRoute: () => AuthenticatedEtudiantRoute,
+  } as any)
+const AuthenticatedEtudiantDossierRoute =
+  AuthenticatedEtudiantDossierRouteImport.update({
+    id: '/dossier',
+    path: '/dossier',
+    getParentRoute: () => AuthenticatedEtudiantRoute,
+  } as any)
+const AuthenticatedEtudiantDocumentsRoute =
+  AuthenticatedEtudiantDocumentsRouteImport.update({
+    id: '/documents',
+    path: '/documents',
+    getParentRoute: () => AuthenticatedEtudiantRoute,
+  } as any)
+const AuthenticatedConseillerValidationsRoute =
+  AuthenticatedConseillerValidationsRouteImport.update({
+    id: '/validations',
+    path: '/validations',
+    getParentRoute: () => AuthenticatedConseillerRoute,
+  } as any)
+const AuthenticatedConseillerRendezVousRoute =
+  AuthenticatedConseillerRendezVousRouteImport.update({
+    id: '/rendez-vous',
+    path: '/rendez-vous',
+    getParentRoute: () => AuthenticatedConseillerRoute,
+  } as any)
+const AuthenticatedConseillerMessagesRoute =
+  AuthenticatedConseillerMessagesRouteImport.update({
+    id: '/messages',
+    path: '/messages',
+    getParentRoute: () => AuthenticatedConseillerRoute,
+  } as any)
+const AuthenticatedConseillerEtudiantsRoute =
+  AuthenticatedConseillerEtudiantsRouteImport.update({
+    id: '/etudiants',
+    path: '/etudiants',
+    getParentRoute: () => AuthenticatedConseillerRoute,
+  } as any)
+const AuthenticatedAdminUtilisateursRoute =
+  AuthenticatedAdminUtilisateursRouteImport.update({
+    id: '/utilisateurs',
+    path: '/utilisateurs',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/unauthorized': typeof UnauthorizedRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/app': typeof AuthenticatedAppRoute
-  '/conseiller': typeof AuthenticatedConseillerRoute
-  '/etudiant': typeof AuthenticatedEtudiantRoute
+  '/conseiller': typeof AuthenticatedConseillerRouteWithChildren
+  '/etudiant': typeof AuthenticatedEtudiantRouteWithChildren
+  '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
+  '/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRoute
+  '/conseiller/messages': typeof AuthenticatedConseillerMessagesRoute
+  '/conseiller/rendez-vous': typeof AuthenticatedConseillerRendezVousRoute
+  '/conseiller/validations': typeof AuthenticatedConseillerValidationsRoute
+  '/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
+  '/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
+  '/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
+  '/etudiant/rendez-vous': typeof AuthenticatedEtudiantRendezVousRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/conseiller/': typeof AuthenticatedConseillerIndexRoute
+  '/etudiant/': typeof AuthenticatedEtudiantIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/unauthorized': typeof UnauthorizedRoute
-  '/admin': typeof AuthenticatedAdminRoute
   '/app': typeof AuthenticatedAppRoute
-  '/conseiller': typeof AuthenticatedConseillerRoute
-  '/etudiant': typeof AuthenticatedEtudiantRoute
+  '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
+  '/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRoute
+  '/conseiller/messages': typeof AuthenticatedConseillerMessagesRoute
+  '/conseiller/rendez-vous': typeof AuthenticatedConseillerRendezVousRoute
+  '/conseiller/validations': typeof AuthenticatedConseillerValidationsRoute
+  '/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
+  '/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
+  '/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
+  '/etudiant/rendez-vous': typeof AuthenticatedEtudiantRendezVousRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
+  '/conseiller': typeof AuthenticatedConseillerIndexRoute
+  '/etudiant': typeof AuthenticatedEtudiantIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -82,10 +186,22 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
   '/unauthorized': typeof UnauthorizedRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/app': typeof AuthenticatedAppRoute
-  '/_authenticated/conseiller': typeof AuthenticatedConseillerRoute
-  '/_authenticated/etudiant': typeof AuthenticatedEtudiantRoute
+  '/_authenticated/conseiller': typeof AuthenticatedConseillerRouteWithChildren
+  '/_authenticated/etudiant': typeof AuthenticatedEtudiantRouteWithChildren
+  '/_authenticated/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
+  '/_authenticated/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRoute
+  '/_authenticated/conseiller/messages': typeof AuthenticatedConseillerMessagesRoute
+  '/_authenticated/conseiller/rendez-vous': typeof AuthenticatedConseillerRendezVousRoute
+  '/_authenticated/conseiller/validations': typeof AuthenticatedConseillerValidationsRoute
+  '/_authenticated/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
+  '/_authenticated/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
+  '/_authenticated/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
+  '/_authenticated/etudiant/rendez-vous': typeof AuthenticatedEtudiantRendezVousRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/conseiller/': typeof AuthenticatedConseillerIndexRoute
+  '/_authenticated/etudiant/': typeof AuthenticatedEtudiantIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -97,13 +213,34 @@ export interface FileRouteTypes {
     | '/app'
     | '/conseiller'
     | '/etudiant'
+    | '/admin/utilisateurs'
+    | '/conseiller/etudiants'
+    | '/conseiller/messages'
+    | '/conseiller/rendez-vous'
+    | '/conseiller/validations'
+    | '/etudiant/documents'
+    | '/etudiant/dossier'
+    | '/etudiant/messages'
+    | '/etudiant/rendez-vous'
+    | '/admin/'
+    | '/conseiller/'
+    | '/etudiant/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/unauthorized'
-    | '/admin'
     | '/app'
+    | '/admin/utilisateurs'
+    | '/conseiller/etudiants'
+    | '/conseiller/messages'
+    | '/conseiller/rendez-vous'
+    | '/conseiller/validations'
+    | '/etudiant/documents'
+    | '/etudiant/dossier'
+    | '/etudiant/messages'
+    | '/etudiant/rendez-vous'
+    | '/admin'
     | '/conseiller'
     | '/etudiant'
   id:
@@ -116,6 +253,18 @@ export interface FileRouteTypes {
     | '/_authenticated/app'
     | '/_authenticated/conseiller'
     | '/_authenticated/etudiant'
+    | '/_authenticated/admin/utilisateurs'
+    | '/_authenticated/conseiller/etudiants'
+    | '/_authenticated/conseiller/messages'
+    | '/_authenticated/conseiller/rendez-vous'
+    | '/_authenticated/conseiller/validations'
+    | '/_authenticated/etudiant/documents'
+    | '/_authenticated/etudiant/dossier'
+    | '/_authenticated/etudiant/messages'
+    | '/_authenticated/etudiant/rendez-vous'
+    | '/_authenticated/admin/'
+    | '/_authenticated/conseiller/'
+    | '/_authenticated/etudiant/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -183,21 +332,164 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/etudiant/': {
+      id: '/_authenticated/etudiant/'
+      path: '/'
+      fullPath: '/etudiant/'
+      preLoaderRoute: typeof AuthenticatedEtudiantIndexRouteImport
+      parentRoute: typeof AuthenticatedEtudiantRoute
+    }
+    '/_authenticated/conseiller/': {
+      id: '/_authenticated/conseiller/'
+      path: '/'
+      fullPath: '/conseiller/'
+      preLoaderRoute: typeof AuthenticatedConseillerIndexRouteImport
+      parentRoute: typeof AuthenticatedConseillerRoute
+    }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/etudiant/rendez-vous': {
+      id: '/_authenticated/etudiant/rendez-vous'
+      path: '/rendez-vous'
+      fullPath: '/etudiant/rendez-vous'
+      preLoaderRoute: typeof AuthenticatedEtudiantRendezVousRouteImport
+      parentRoute: typeof AuthenticatedEtudiantRoute
+    }
+    '/_authenticated/etudiant/messages': {
+      id: '/_authenticated/etudiant/messages'
+      path: '/messages'
+      fullPath: '/etudiant/messages'
+      preLoaderRoute: typeof AuthenticatedEtudiantMessagesRouteImport
+      parentRoute: typeof AuthenticatedEtudiantRoute
+    }
+    '/_authenticated/etudiant/dossier': {
+      id: '/_authenticated/etudiant/dossier'
+      path: '/dossier'
+      fullPath: '/etudiant/dossier'
+      preLoaderRoute: typeof AuthenticatedEtudiantDossierRouteImport
+      parentRoute: typeof AuthenticatedEtudiantRoute
+    }
+    '/_authenticated/etudiant/documents': {
+      id: '/_authenticated/etudiant/documents'
+      path: '/documents'
+      fullPath: '/etudiant/documents'
+      preLoaderRoute: typeof AuthenticatedEtudiantDocumentsRouteImport
+      parentRoute: typeof AuthenticatedEtudiantRoute
+    }
+    '/_authenticated/conseiller/validations': {
+      id: '/_authenticated/conseiller/validations'
+      path: '/validations'
+      fullPath: '/conseiller/validations'
+      preLoaderRoute: typeof AuthenticatedConseillerValidationsRouteImport
+      parentRoute: typeof AuthenticatedConseillerRoute
+    }
+    '/_authenticated/conseiller/rendez-vous': {
+      id: '/_authenticated/conseiller/rendez-vous'
+      path: '/rendez-vous'
+      fullPath: '/conseiller/rendez-vous'
+      preLoaderRoute: typeof AuthenticatedConseillerRendezVousRouteImport
+      parentRoute: typeof AuthenticatedConseillerRoute
+    }
+    '/_authenticated/conseiller/messages': {
+      id: '/_authenticated/conseiller/messages'
+      path: '/messages'
+      fullPath: '/conseiller/messages'
+      preLoaderRoute: typeof AuthenticatedConseillerMessagesRouteImport
+      parentRoute: typeof AuthenticatedConseillerRoute
+    }
+    '/_authenticated/conseiller/etudiants': {
+      id: '/_authenticated/conseiller/etudiants'
+      path: '/etudiants'
+      fullPath: '/conseiller/etudiants'
+      preLoaderRoute: typeof AuthenticatedConseillerEtudiantsRouteImport
+      parentRoute: typeof AuthenticatedConseillerRoute
+    }
+    '/_authenticated/admin/utilisateurs': {
+      id: '/_authenticated/admin/utilisateurs'
+      path: '/utilisateurs'
+      fullPath: '/admin/utilisateurs'
+      preLoaderRoute: typeof AuthenticatedAdminUtilisateursRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
   }
 }
 
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminUtilisateursRoute: typeof AuthenticatedAdminUtilisateursRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminUtilisateursRoute: AuthenticatedAdminUtilisateursRoute,
+  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
+interface AuthenticatedConseillerRouteChildren {
+  AuthenticatedConseillerEtudiantsRoute: typeof AuthenticatedConseillerEtudiantsRoute
+  AuthenticatedConseillerMessagesRoute: typeof AuthenticatedConseillerMessagesRoute
+  AuthenticatedConseillerRendezVousRoute: typeof AuthenticatedConseillerRendezVousRoute
+  AuthenticatedConseillerValidationsRoute: typeof AuthenticatedConseillerValidationsRoute
+  AuthenticatedConseillerIndexRoute: typeof AuthenticatedConseillerIndexRoute
+}
+
+const AuthenticatedConseillerRouteChildren: AuthenticatedConseillerRouteChildren =
+  {
+    AuthenticatedConseillerEtudiantsRoute:
+      AuthenticatedConseillerEtudiantsRoute,
+    AuthenticatedConseillerMessagesRoute: AuthenticatedConseillerMessagesRoute,
+    AuthenticatedConseillerRendezVousRoute:
+      AuthenticatedConseillerRendezVousRoute,
+    AuthenticatedConseillerValidationsRoute:
+      AuthenticatedConseillerValidationsRoute,
+    AuthenticatedConseillerIndexRoute: AuthenticatedConseillerIndexRoute,
+  }
+
+const AuthenticatedConseillerRouteWithChildren =
+  AuthenticatedConseillerRoute._addFileChildren(
+    AuthenticatedConseillerRouteChildren,
+  )
+
+interface AuthenticatedEtudiantRouteChildren {
+  AuthenticatedEtudiantDocumentsRoute: typeof AuthenticatedEtudiantDocumentsRoute
+  AuthenticatedEtudiantDossierRoute: typeof AuthenticatedEtudiantDossierRoute
+  AuthenticatedEtudiantMessagesRoute: typeof AuthenticatedEtudiantMessagesRoute
+  AuthenticatedEtudiantRendezVousRoute: typeof AuthenticatedEtudiantRendezVousRoute
+  AuthenticatedEtudiantIndexRoute: typeof AuthenticatedEtudiantIndexRoute
+}
+
+const AuthenticatedEtudiantRouteChildren: AuthenticatedEtudiantRouteChildren = {
+  AuthenticatedEtudiantDocumentsRoute: AuthenticatedEtudiantDocumentsRoute,
+  AuthenticatedEtudiantDossierRoute: AuthenticatedEtudiantDossierRoute,
+  AuthenticatedEtudiantMessagesRoute: AuthenticatedEtudiantMessagesRoute,
+  AuthenticatedEtudiantRendezVousRoute: AuthenticatedEtudiantRendezVousRoute,
+  AuthenticatedEtudiantIndexRoute: AuthenticatedEtudiantIndexRoute,
+}
+
+const AuthenticatedEtudiantRouteWithChildren =
+  AuthenticatedEtudiantRoute._addFileChildren(
+    AuthenticatedEtudiantRouteChildren,
+  )
+
 interface AuthenticatedRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedAppRoute: typeof AuthenticatedAppRoute
-  AuthenticatedConseillerRoute: typeof AuthenticatedConseillerRoute
-  AuthenticatedEtudiantRoute: typeof AuthenticatedEtudiantRoute
+  AuthenticatedConseillerRoute: typeof AuthenticatedConseillerRouteWithChildren
+  AuthenticatedEtudiantRoute: typeof AuthenticatedEtudiantRouteWithChildren
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedAppRoute: AuthenticatedAppRoute,
-  AuthenticatedConseillerRoute: AuthenticatedConseillerRoute,
-  AuthenticatedEtudiantRoute: AuthenticatedEtudiantRoute,
+  AuthenticatedConseillerRoute: AuthenticatedConseillerRouteWithChildren,
+  AuthenticatedEtudiantRoute: AuthenticatedEtudiantRouteWithChildren,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
