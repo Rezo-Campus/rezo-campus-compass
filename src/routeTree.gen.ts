@@ -23,6 +23,7 @@ import { Route as AuthenticatedEtudiantRendezVousRouteImport } from './routes/_a
 import { Route as AuthenticatedEtudiantMessagesRouteImport } from './routes/_authenticated/etudiant.messages'
 import { Route as AuthenticatedEtudiantDossierRouteImport } from './routes/_authenticated/etudiant.dossier'
 import { Route as AuthenticatedEtudiantDocumentsRouteImport } from './routes/_authenticated/etudiant.documents'
+import { Route as AuthenticatedConseillerEtudiantsRouteImport } from './routes/_authenticated/conseiller.etudiants'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
   id: '/unauthorized',
@@ -99,6 +100,12 @@ const AuthenticatedEtudiantDocumentsRoute =
     path: '/documents',
     getParentRoute: () => AuthenticatedEtudiantRoute,
   } as any)
+const AuthenticatedConseillerEtudiantsRoute =
+  AuthenticatedConseillerEtudiantsRouteImport.update({
+    id: '/etudiants',
+    path: '/etudiants',
+    getParentRoute: () => AuthenticatedConseillerRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -108,6 +115,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AuthenticatedAppRoute
   '/conseiller': typeof AuthenticatedConseillerRouteWithChildren
   '/etudiant': typeof AuthenticatedEtudiantRouteWithChildren
+  '/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRoute
   '/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
   '/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
   '/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
@@ -121,6 +129,7 @@ export interface FileRoutesByTo {
   '/unauthorized': typeof UnauthorizedRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/app': typeof AuthenticatedAppRoute
+  '/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRoute
   '/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
   '/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
   '/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
@@ -138,6 +147,7 @@ export interface FileRoutesById {
   '/_authenticated/app': typeof AuthenticatedAppRoute
   '/_authenticated/conseiller': typeof AuthenticatedConseillerRouteWithChildren
   '/_authenticated/etudiant': typeof AuthenticatedEtudiantRouteWithChildren
+  '/_authenticated/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRoute
   '/_authenticated/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
   '/_authenticated/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
   '/_authenticated/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/conseiller'
     | '/etudiant'
+    | '/conseiller/etudiants'
     | '/etudiant/documents'
     | '/etudiant/dossier'
     | '/etudiant/messages'
@@ -168,6 +179,7 @@ export interface FileRouteTypes {
     | '/unauthorized'
     | '/admin'
     | '/app'
+    | '/conseiller/etudiants'
     | '/etudiant/documents'
     | '/etudiant/dossier'
     | '/etudiant/messages'
@@ -184,6 +196,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app'
     | '/_authenticated/conseiller'
     | '/_authenticated/etudiant'
+    | '/_authenticated/conseiller/etudiants'
     | '/_authenticated/etudiant/documents'
     | '/_authenticated/etudiant/dossier'
     | '/_authenticated/etudiant/messages'
@@ -299,15 +312,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEtudiantDocumentsRouteImport
       parentRoute: typeof AuthenticatedEtudiantRoute
     }
+    '/_authenticated/conseiller/etudiants': {
+      id: '/_authenticated/conseiller/etudiants'
+      path: '/etudiants'
+      fullPath: '/conseiller/etudiants'
+      preLoaderRoute: typeof AuthenticatedConseillerEtudiantsRouteImport
+      parentRoute: typeof AuthenticatedConseillerRoute
+    }
   }
 }
 
 interface AuthenticatedConseillerRouteChildren {
+  AuthenticatedConseillerEtudiantsRoute: typeof AuthenticatedConseillerEtudiantsRoute
   AuthenticatedConseillerIndexRoute: typeof AuthenticatedConseillerIndexRoute
 }
 
 const AuthenticatedConseillerRouteChildren: AuthenticatedConseillerRouteChildren =
   {
+    AuthenticatedConseillerEtudiantsRoute:
+      AuthenticatedConseillerEtudiantsRoute,
     AuthenticatedConseillerIndexRoute: AuthenticatedConseillerIndexRoute,
   }
 
