@@ -19,6 +19,7 @@ import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/ap
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedEtudiantIndexRouteImport } from './routes/_authenticated/etudiant.index'
 import { Route as AuthenticatedEtudiantDossierRouteImport } from './routes/_authenticated/etudiant.dossier'
+import { Route as AuthenticatedEtudiantDocumentsRouteImport } from './routes/_authenticated/etudiant.documents'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
   id: '/unauthorized',
@@ -71,6 +72,12 @@ const AuthenticatedEtudiantDossierRoute =
     path: '/dossier',
     getParentRoute: () => AuthenticatedEtudiantRoute,
   } as any)
+const AuthenticatedEtudiantDocumentsRoute =
+  AuthenticatedEtudiantDocumentsRouteImport.update({
+    id: '/documents',
+    path: '/documents',
+    getParentRoute: () => AuthenticatedEtudiantRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AuthenticatedAppRoute
   '/conseiller': typeof AuthenticatedConseillerRoute
   '/etudiant': typeof AuthenticatedEtudiantRouteWithChildren
+  '/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
   '/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
   '/etudiant/': typeof AuthenticatedEtudiantIndexRoute
 }
@@ -90,6 +98,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/app': typeof AuthenticatedAppRoute
   '/conseiller': typeof AuthenticatedConseillerRoute
+  '/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
   '/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
   '/etudiant': typeof AuthenticatedEtudiantIndexRoute
 }
@@ -103,6 +112,7 @@ export interface FileRoutesById {
   '/_authenticated/app': typeof AuthenticatedAppRoute
   '/_authenticated/conseiller': typeof AuthenticatedConseillerRoute
   '/_authenticated/etudiant': typeof AuthenticatedEtudiantRouteWithChildren
+  '/_authenticated/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
   '/_authenticated/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
   '/_authenticated/etudiant/': typeof AuthenticatedEtudiantIndexRoute
 }
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/conseiller'
     | '/etudiant'
+    | '/etudiant/documents'
     | '/etudiant/dossier'
     | '/etudiant/'
   fileRoutesByTo: FileRoutesByTo
@@ -126,6 +137,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/conseiller'
+    | '/etudiant/documents'
     | '/etudiant/dossier'
     | '/etudiant'
   id:
@@ -138,6 +150,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app'
     | '/_authenticated/conseiller'
     | '/_authenticated/etudiant'
+    | '/_authenticated/etudiant/documents'
     | '/_authenticated/etudiant/dossier'
     | '/_authenticated/etudiant/'
   fileRoutesById: FileRoutesById
@@ -221,15 +234,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEtudiantDossierRouteImport
       parentRoute: typeof AuthenticatedEtudiantRoute
     }
+    '/_authenticated/etudiant/documents': {
+      id: '/_authenticated/etudiant/documents'
+      path: '/documents'
+      fullPath: '/etudiant/documents'
+      preLoaderRoute: typeof AuthenticatedEtudiantDocumentsRouteImport
+      parentRoute: typeof AuthenticatedEtudiantRoute
+    }
   }
 }
 
 interface AuthenticatedEtudiantRouteChildren {
+  AuthenticatedEtudiantDocumentsRoute: typeof AuthenticatedEtudiantDocumentsRoute
   AuthenticatedEtudiantDossierRoute: typeof AuthenticatedEtudiantDossierRoute
   AuthenticatedEtudiantIndexRoute: typeof AuthenticatedEtudiantIndexRoute
 }
 
 const AuthenticatedEtudiantRouteChildren: AuthenticatedEtudiantRouteChildren = {
+  AuthenticatedEtudiantDocumentsRoute: AuthenticatedEtudiantDocumentsRoute,
   AuthenticatedEtudiantDossierRoute: AuthenticatedEtudiantDossierRoute,
   AuthenticatedEtudiantIndexRoute: AuthenticatedEtudiantIndexRoute,
 }
