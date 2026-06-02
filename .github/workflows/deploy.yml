@@ -25,14 +25,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build (static SPA)
-        env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
-          VITE_SUPABASE_PROJECT_ID: ${{ secrets.VITE_SUPABASE_PROJECT_ID }}
+      - name: Build static SPA
         run: npm run build:static
 
-      - name: Add 404.html (SPA routing)
+      - name: Add 404.html for SPA routing
         run: cp dist/index.html dist/404.html
 
       - name: Deploy to gh-pages branch
