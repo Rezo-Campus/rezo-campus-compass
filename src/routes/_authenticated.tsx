@@ -12,12 +12,25 @@ function AuthenticatedLayout() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isLoading && !data?.user) {
+    if (isLoading) return;
+    if (!data?.user) {
       navigate({ to: "/login", replace: true });
+      return;
+    }
+    if (data.profile?.blocked_at) {
+      navigate({ to: "/blocked", replace: true });
     }
   }, [data, isLoading, navigate]);
 
   if (isLoading || !data?.user) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-background">
+        <Loader2 className="size-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (data.profile?.blocked_at) {
     return (
       <div className="grid min-h-screen place-items-center bg-background">
         <Loader2 className="size-6 animate-spin text-primary" />

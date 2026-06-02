@@ -6,7 +6,7 @@ export type AppRole = "etudiant" | "conseiller" | "admin";
 export interface AuthSession {
   user: { id: string; email: string | null } | null;
   role: AppRole | null;
-  profile: { full_name: string | null; email: string } | null;
+  profile: { full_name: string | null; email: string; blocked_at: string | null } | null;
 }
 
 /** Récupère la session courante, le rôle et le profil de l'utilisateur. */
@@ -29,7 +29,7 @@ export function useAuth() {
           .maybeSingle(),
         supabase
           .from("profiles")
-          .select("full_name, email")
+          .select("full_name, email, blocked_at")
           .eq("id", user.id)
           .maybeSingle(),
       ]);
