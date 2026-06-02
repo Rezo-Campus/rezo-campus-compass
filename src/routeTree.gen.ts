@@ -18,6 +18,7 @@ import { Route as AuthenticatedConseillerRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedEtudiantIndexRouteImport } from './routes/_authenticated/etudiant.index'
+import { Route as AuthenticatedEtudiantMessagesRouteImport } from './routes/_authenticated/etudiant.messages'
 import { Route as AuthenticatedEtudiantDossierRouteImport } from './routes/_authenticated/etudiant.dossier'
 import { Route as AuthenticatedEtudiantDocumentsRouteImport } from './routes/_authenticated/etudiant.documents'
 
@@ -66,6 +67,12 @@ const AuthenticatedEtudiantIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedEtudiantRoute,
   } as any)
+const AuthenticatedEtudiantMessagesRoute =
+  AuthenticatedEtudiantMessagesRouteImport.update({
+    id: '/messages',
+    path: '/messages',
+    getParentRoute: () => AuthenticatedEtudiantRoute,
+  } as any)
 const AuthenticatedEtudiantDossierRoute =
   AuthenticatedEtudiantDossierRouteImport.update({
     id: '/dossier',
@@ -89,6 +96,7 @@ export interface FileRoutesByFullPath {
   '/etudiant': typeof AuthenticatedEtudiantRouteWithChildren
   '/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
   '/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
+  '/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
   '/etudiant/': typeof AuthenticatedEtudiantIndexRoute
 }
 export interface FileRoutesByTo {
@@ -100,6 +108,7 @@ export interface FileRoutesByTo {
   '/conseiller': typeof AuthenticatedConseillerRoute
   '/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
   '/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
+  '/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
   '/etudiant': typeof AuthenticatedEtudiantIndexRoute
 }
 export interface FileRoutesById {
@@ -114,6 +123,7 @@ export interface FileRoutesById {
   '/_authenticated/etudiant': typeof AuthenticatedEtudiantRouteWithChildren
   '/_authenticated/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
   '/_authenticated/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
+  '/_authenticated/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
   '/_authenticated/etudiant/': typeof AuthenticatedEtudiantIndexRoute
 }
 export interface FileRouteTypes {
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/etudiant'
     | '/etudiant/documents'
     | '/etudiant/dossier'
+    | '/etudiant/messages'
     | '/etudiant/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '/conseiller'
     | '/etudiant/documents'
     | '/etudiant/dossier'
+    | '/etudiant/messages'
     | '/etudiant'
   id:
     | '__root__'
@@ -152,6 +164,7 @@ export interface FileRouteTypes {
     | '/_authenticated/etudiant'
     | '/_authenticated/etudiant/documents'
     | '/_authenticated/etudiant/dossier'
+    | '/_authenticated/etudiant/messages'
     | '/_authenticated/etudiant/'
   fileRoutesById: FileRoutesById
 }
@@ -227,6 +240,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEtudiantIndexRouteImport
       parentRoute: typeof AuthenticatedEtudiantRoute
     }
+    '/_authenticated/etudiant/messages': {
+      id: '/_authenticated/etudiant/messages'
+      path: '/messages'
+      fullPath: '/etudiant/messages'
+      preLoaderRoute: typeof AuthenticatedEtudiantMessagesRouteImport
+      parentRoute: typeof AuthenticatedEtudiantRoute
+    }
     '/_authenticated/etudiant/dossier': {
       id: '/_authenticated/etudiant/dossier'
       path: '/dossier'
@@ -247,12 +267,14 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedEtudiantRouteChildren {
   AuthenticatedEtudiantDocumentsRoute: typeof AuthenticatedEtudiantDocumentsRoute
   AuthenticatedEtudiantDossierRoute: typeof AuthenticatedEtudiantDossierRoute
+  AuthenticatedEtudiantMessagesRoute: typeof AuthenticatedEtudiantMessagesRoute
   AuthenticatedEtudiantIndexRoute: typeof AuthenticatedEtudiantIndexRoute
 }
 
 const AuthenticatedEtudiantRouteChildren: AuthenticatedEtudiantRouteChildren = {
   AuthenticatedEtudiantDocumentsRoute: AuthenticatedEtudiantDocumentsRoute,
   AuthenticatedEtudiantDossierRoute: AuthenticatedEtudiantDossierRoute,
+  AuthenticatedEtudiantMessagesRoute: AuthenticatedEtudiantMessagesRoute,
   AuthenticatedEtudiantIndexRoute: AuthenticatedEtudiantIndexRoute,
 }
 
