@@ -14,6 +14,120 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          advisor_id: string
+          created_at: string
+          created_by: string
+          duration_min: number
+          id: string
+          location: string | null
+          notes: string | null
+          scheduled_at: string
+          status: Database["public"]["Enums"]["appointment_status"]
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          advisor_id: string
+          created_at?: string
+          created_by: string
+          duration_min?: number
+          id?: string
+          location?: string | null
+          notes?: string | null
+          scheduled_at: string
+          status?: Database["public"]["Enums"]["appointment_status"]
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          advisor_id?: string
+          created_at?: string
+          created_by?: string
+          duration_min?: number
+          id?: string
+          location?: string | null
+          notes?: string | null
+          scheduled_at?: string
+          status?: Database["public"]["Enums"]["appointment_status"]
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      documents: {
+        Row: {
+          id: string
+          mime_type: string | null
+          name: string
+          notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          size_bytes: number | null
+          status: Database["public"]["Enums"]["document_status"]
+          storage_path: string
+          student_id: string
+          type: Database["public"]["Enums"]["document_type"]
+          uploaded_at: string
+        }
+        Insert: {
+          id?: string
+          mime_type?: string | null
+          name: string
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          size_bytes?: number | null
+          status?: Database["public"]["Enums"]["document_status"]
+          storage_path: string
+          student_id: string
+          type?: Database["public"]["Enums"]["document_type"]
+          uploaded_at?: string
+        }
+        Update: {
+          id?: string
+          mime_type?: string | null
+          name?: string
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          size_bytes?: number | null
+          status?: Database["public"]["Enums"]["document_status"]
+          storage_path?: string
+          student_id?: string
+          type?: Database["public"]["Enums"]["document_type"]
+          uploaded_at?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          read_at: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id?: string
+          sender_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -37,6 +151,48 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      student_files: {
+        Row: {
+          advisor_id: string | null
+          bio: string | null
+          created_at: string
+          id: string
+          progress: number
+          status: Database["public"]["Enums"]["file_status"]
+          student_id: string
+          target_country: string | null
+          target_level: string | null
+          target_program: string | null
+          updated_at: string
+        }
+        Insert: {
+          advisor_id?: string | null
+          bio?: string | null
+          created_at?: string
+          id?: string
+          progress?: number
+          status?: Database["public"]["Enums"]["file_status"]
+          student_id: string
+          target_country?: string | null
+          target_level?: string | null
+          target_program?: string | null
+          updated_at?: string
+        }
+        Update: {
+          advisor_id?: string | null
+          bio?: string | null
+          created_at?: string
+          id?: string
+          progress?: number
+          status?: Database["public"]["Enums"]["file_status"]
+          student_id?: string
+          target_country?: string | null
+          target_level?: string | null
+          target_program?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -78,9 +234,29 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_assigned_advisor: {
+        Args: { _advisor: string; _student: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "etudiant" | "conseiller" | "admin"
+      appointment_status: "programme" | "termine" | "annule"
+      document_status: "en_attente" | "valide" | "rejete"
+      document_type:
+        | "identite"
+        | "diplome"
+        | "releve_notes"
+        | "lettre_motivation"
+        | "cv"
+        | "autre"
+      file_status:
+        | "nouveau"
+        | "en_cours"
+        | "soumis"
+        | "accepte"
+        | "refuse"
+        | "archive"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -209,6 +385,24 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["etudiant", "conseiller", "admin"],
+      appointment_status: ["programme", "termine", "annule"],
+      document_status: ["en_attente", "valide", "rejete"],
+      document_type: [
+        "identite",
+        "diplome",
+        "releve_notes",
+        "lettre_motivation",
+        "cv",
+        "autre",
+      ],
+      file_status: [
+        "nouveau",
+        "en_cours",
+        "soumis",
+        "accepte",
+        "refuse",
+        "archive",
+      ],
     },
   },
 } as const
