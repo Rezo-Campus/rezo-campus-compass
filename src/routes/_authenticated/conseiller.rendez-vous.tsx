@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
 import { Button } from "@/components/ui/button";
@@ -66,32 +66,65 @@ export function RdvConseiller() {
     },
   });
 
-  const [form, setForm] = useState({
-    student_id: "",
-    scheduled_at: "",
-    duration_min: 30,
-    location: "",
-    notes: "",
-  });
+  const emptyForm = { student_id: "", scheduled_at: "", duration_min: 30, location: "", notes: "" };
+  const [form, setForm] = useState(emptyForm);
+  const [editingRdv, setEditingRdv] = useState<string | null>(null);
 
-  const create = useMutation({
+  const resetAndClose = () => {
+    setOpen(false);
+    setEditingRdv(null);
+    setForm(emptyForm);
+  };
+
+  const openEdit = (r: typeof rdvs[0]) => {
+    const dt = new Date(r.scheduled_at);
+    const local = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000)
+      .toISOString().slice(0, 16);
+    setForm({
+      student_id: r.student_id,
+      scheduled_at: local,
+      duration_min: r.duration_min,
+      location: r.location ?? "",
+      notes: r.notes ?? "",
+    });
+    setEditingRdv(r.id);
+    setOpen(true);
+  };
+
+  const save = useMutation({
     mutationFn: async () => {
       if (!form.student_id || !form.scheduled_at) throw new Error("Étudiant et date requis");
-      const { error } = await supabase.from("appointments").insert({
+      const payload = {
         student_id: form.student_id,
         advisor_id: uid!,
         scheduled_at: new Date(form.scheduled_at).toISOString(),
         duration_min: form.duration_min,
         location: form.location || null,
         notes: form.notes || null,
-        created_by: uid!,
-      });
+      };
+      if (editingRdv) {
+        const { error } = await supabase.from("appointments").update(payload).eq("id", editingRdv);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("appointments").insert({ ...payload, created_by: uid! });
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success(editingRdv ? "Rendez-vous modifié" : "Rendez-vous créé");
+      resetAndClose();
+      qc.invalidateQueries({ queryKey: ["rdv-conseiller"] });
+    },
+    onError: (e: Error) => toast.error("Erreur", { description: e.message }),
+  });
+
+  const deleteRdv = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("appointments").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Rendez-vous créé");
-      setOpen(false);
-      setForm({ student_id: "", scheduled_at: "", duration_min: 30, location: "", notes: "" });
+      toast.success("Rendez-vous supprimé");
       qc.invalidateQueries({ queryKey: ["rdv-conseiller"] });
     },
     onError: (e: Error) => toast.error("Erreur", { description: e.message }),
@@ -99,6 +132,28 @@ export function RdvConseiller() {
 
   const upcoming = rdvs.filter((r) => new Date(r.scheduled_at) >= new Date() && r.status === "programme");
   const past = rdvs.filter((r) => !upcoming.includes(r));
+
+  const RdvCard = ({ r }: { r: typeof rdvs[0] }) => (
+    <li className="flex items-start gap-3 rounded-xl border border-border p-3">
+      <RdvRow r={r} />
+      {r.status === "programme" && (
+        <div className="ml-auto flex shrink-0 gap-1">
+          <Button size="sm" variant="ghost" onClick={() => openEdit(r)} title="Modifier">
+            <Pencil className="size-4" />
+          </Button>
+          <Button
+            size="sm" variant="ghost"
+            className="text-destructive hover:bg-destructive/10"
+            onClick={() => deleteRdv.mutate(r.id)}
+            disabled={deleteRdv.isPending}
+            title="Supprimer"
+          >
+            <Trash2 className="size-4" />
+          </Button>
+        </div>
+      )}
+    </li>
+  );
 
   return (
     <>
@@ -109,19 +164,22 @@ export function RdvConseiller() {
       />
 
       <div className="mb-4 flex justify-end">
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={(v) => { if (!v) resetAndClose(); else setOpen(true); }}>
           <DialogTrigger asChild>
             <Button><Plus className="mr-2 size-4" /> Nouveau RDV</Button>
           </DialogTrigger>
           <DialogContent>
-            <DialogHeader><DialogTitle>Planifier un rendez-vous</DialogTitle></DialogHeader>
-            <form
-              onSubmit={(e) => { e.preventDefault(); create.mutate(); }}
-              className="space-y-4"
-            >
+            <DialogHeader>
+              <DialogTitle>{editingRdv ? "Modifier le rendez-vous" : "Planifier un rendez-vous"}</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={(e) => { e.preventDefault(); save.mutate(); }} className="space-y-4">
               <div className="space-y-1.5">
                 <Label>Étudiant</Label>
-                <Select value={form.student_id} onValueChange={(v) => setForm((f) => ({ ...f, student_id: v }))}>
+                <Select
+                  value={form.student_id}
+                  disabled={!!editingRdv}
+                  onValueChange={(v) => setForm((f) => ({ ...f, student_id: v }))}
+                >
                   <SelectTrigger><SelectValue placeholder="Choisir un étudiant" /></SelectTrigger>
                   <SelectContent>
                     {students.map((s) => (
@@ -165,9 +223,9 @@ export function RdvConseiller() {
                   onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={create.isPending}>
-                {create.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-                Créer le rendez-vous
+              <Button type="submit" className="w-full" disabled={save.isPending}>
+                {save.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+                {editingRdv ? "Enregistrer les modifications" : "Créer le rendez-vous"}
               </Button>
             </form>
           </DialogContent>
@@ -175,16 +233,15 @@ export function RdvConseiller() {
       </div>
 
       <Panel title={`À venir (${upcoming.length})`}>
-        {upcoming.length === 0 ? (
-          <Empty />
-        ) : (
-          <ul className="space-y-3">{upcoming.map((r) => <RdvRow key={r.id} r={r} />)}</ul>
+        {upcoming.length === 0 ? <Empty /> : (
+          <ul className="space-y-3">{upcoming.map((r) => <RdvCard key={r.id} r={r} />)}</ul>
         )}
       </Panel>
-
       <div className="mt-6">
         <Panel title={`Historique (${past.length})`}>
-          {past.length === 0 ? <Empty /> : <ul className="space-y-3">{past.map((r) => <RdvRow key={r.id} r={r} />)}</ul>}
+          {past.length === 0 ? <Empty /> : (
+            <ul className="space-y-3">{past.map((r) => <RdvCard key={r.id} r={r} />)}</ul>
+          )}
         </Panel>
       </div>
     </>

@@ -105,6 +105,7 @@ export type Database = {
         Row: {
           body: string
           created_at: string
+          edited_at: string | null
           id: string
           read_at: string | null
           recipient_id: string
@@ -113,6 +114,7 @@ export type Database = {
         Insert: {
           body: string
           created_at?: string
+          edited_at?: string | null
           id?: string
           read_at?: string | null
           recipient_id: string
@@ -121,6 +123,7 @@ export type Database = {
         Update: {
           body?: string
           created_at?: string
+          edited_at?: string | null
           id?: string
           read_at?: string | null
           recipient_id?: string
@@ -130,6 +133,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          blocked_at: string | null
           created_at: string
           email: string
           full_name: string | null
@@ -138,6 +142,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          blocked_at?: string | null
           created_at?: string
           email: string
           full_name?: string | null
@@ -146,6 +151,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          blocked_at?: string | null
           created_at?: string
           email?: string
           full_name?: string | null
