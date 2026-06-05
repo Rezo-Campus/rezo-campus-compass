@@ -3,7 +3,6 @@ import { Loader2 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useAuth, type AppRole } from "@/hooks/use-auth";
 
-/** Garde de rôle: redirige si le rôle ne correspond pas. */
 export function RoleGuard({
   allow,
   children,
@@ -20,7 +19,7 @@ export function RoleGuard({
       </div>
     );
   }
-  if (!data.role || !allow.includes(data.role)) {
+  if (!data.roles.some((r) => allow.includes(r))) {
     return <Navigate to="/unauthorized" replace />;
   }
   return <>{children}</>;

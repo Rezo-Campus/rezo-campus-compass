@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { LogOut } from "lucide-react";
+import { LogOut, GraduationCap, Users, BookOpen, Calculator, FolderOpen, BarChart3, ShieldCheck } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, type AppRole } from "@/hooks/use-auth";
@@ -11,11 +11,23 @@ export interface NavItem {
   icon: ComponentType<{ className?: string }>;
 }
 
-const ROLE_LABEL: Record<AppRole, string> = {
+export const ROLE_LABEL: Record<AppRole, string> = {
   etudiant: "Étudiant",
   conseiller: "Conseiller",
   admin: "Administrateur",
+  comptable: "Comptable",
+  chef_projet: "Chef de projet",
+  commercial: "Commercial",
 };
+
+const SECTION_LINKS: { role: AppRole; label: string; to: string; icon: ComponentType<{ className?: string }> }[] = [
+  { role: "admin", label: "Administration", to: "/admin", icon: ShieldCheck },
+  { role: "conseiller", label: "Conseiller", to: "/conseiller", icon: Users },
+  { role: "etudiant", label: "Étudiant", to: "/etudiant", icon: BookOpen },
+  { role: "comptable", label: "Comptabilité", to: "/comptabilite", icon: Calculator },
+  { role: "chef_projet", label: "Projets", to: "/projets", icon: FolderOpen },
+  { role: "commercial", label: "Commercial", to: "/commercial", icon: BarChart3 },
+];
 
 export function AppShell({
   nav,
@@ -40,6 +52,10 @@ export function AppShell({
       .slice(0, 2)
       .join("")
       .toUpperCase();
+
+  const otherSections = SECTION_LINKS.filter(
+    (s) => auth?.roles?.includes(s.role) && !pathname.startsWith(s.to),
+  );
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -70,6 +86,26 @@ export function AppShell({
             );
           })}
         </nav>
+
+        {/* Multi-section switcher */}
+        {otherSections.length > 0 && (
+          <div className="border-t border-sidebar-border px-3 py-3">
+            <div className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/40">
+              Autres espaces
+            </div>
+            {otherSections.map((s) => (
+              <Link
+                key={s.to}
+                to={s.to}
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/70 transition hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              >
+                <s.icon className="size-4" />
+                {s.label}
+              </Link>
+            ))}
+          </div>
+        )}
+
         <div className="border-t border-sidebar-border p-4">
           <button
             onClick={onLogout}

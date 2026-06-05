@@ -11,15 +11,23 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnauthorizedRouteImport } from './routes/unauthorized'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as BlockedRouteImport } from './routes/blocked'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedProjetsRouteImport } from './routes/_authenticated/projets'
 import { Route as AuthenticatedEtudiantRouteImport } from './routes/_authenticated/etudiant'
 import { Route as AuthenticatedConseillerRouteImport } from './routes/_authenticated/conseiller'
+import { Route as AuthenticatedComptabiliteRouteImport } from './routes/_authenticated/comptabilite'
+import { Route as AuthenticatedCommercialRouteImport } from './routes/_authenticated/commercial'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedProjetsIndexRouteImport } from './routes/_authenticated/projets.index'
 import { Route as AuthenticatedEtudiantIndexRouteImport } from './routes/_authenticated/etudiant.index'
 import { Route as AuthenticatedConseillerIndexRouteImport } from './routes/_authenticated/conseiller.index'
+import { Route as AuthenticatedComptabiliteIndexRouteImport } from './routes/_authenticated/comptabilite.index'
+import { Route as AuthenticatedCommercialIndexRouteImport } from './routes/_authenticated/commercial.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as AuthenticatedProjetsListeRouteImport } from './routes/_authenticated/projets.liste'
 import { Route as AuthenticatedEtudiantRendezVousRouteImport } from './routes/_authenticated/etudiant.rendez-vous'
 import { Route as AuthenticatedEtudiantMessagesRouteImport } from './routes/_authenticated/etudiant.messages'
 import { Route as AuthenticatedEtudiantDossierRouteImport } from './routes/_authenticated/etudiant.dossier'
@@ -28,6 +36,8 @@ import { Route as AuthenticatedConseillerValidationsRouteImport } from './routes
 import { Route as AuthenticatedConseillerRendezVousRouteImport } from './routes/_authenticated/conseiller.rendez-vous'
 import { Route as AuthenticatedConseillerMessagesRouteImport } from './routes/_authenticated/conseiller.messages'
 import { Route as AuthenticatedConseillerEtudiantsRouteImport } from './routes/_authenticated/conseiller.etudiants'
+import { Route as AuthenticatedComptabiliteTransactionsRouteImport } from './routes/_authenticated/comptabilite.transactions'
+import { Route as AuthenticatedCommercialActivitesRouteImport } from './routes/_authenticated/commercial.activites'
 import { Route as AuthenticatedAdminValidationsRouteImport } from './routes/_authenticated/admin.validations'
 import { Route as AuthenticatedAdminUtilisateursRouteImport } from './routes/_authenticated/admin.utilisateurs'
 import { Route as AuthenticatedAdminRendezVousRouteImport } from './routes/_authenticated/admin.rendez-vous'
@@ -44,6 +54,11 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlockedRoute = BlockedRouteImport.update({
+  id: '/blocked',
+  path: '/blocked',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
@@ -53,6 +68,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedProjetsRoute = AuthenticatedProjetsRouteImport.update({
+  id: '/projets',
+  path: '/projets',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedEtudiantRoute = AuthenticatedEtudiantRouteImport.update({
   id: '/etudiant',
   path: '/etudiant',
@@ -61,6 +81,17 @@ const AuthenticatedEtudiantRoute = AuthenticatedEtudiantRouteImport.update({
 const AuthenticatedConseillerRoute = AuthenticatedConseillerRouteImport.update({
   id: '/conseiller',
   path: '/conseiller',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedComptabiliteRoute =
+  AuthenticatedComptabiliteRouteImport.update({
+    id: '/comptabilite',
+    path: '/comptabilite',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedCommercialRoute = AuthenticatedCommercialRouteImport.update({
+  id: '/commercial',
+  path: '/commercial',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
@@ -73,6 +104,12 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedProjetsIndexRoute =
+  AuthenticatedProjetsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedProjetsRoute,
+  } as any)
 const AuthenticatedEtudiantIndexRoute =
   AuthenticatedEtudiantIndexRouteImport.update({
     id: '/',
@@ -85,11 +122,29 @@ const AuthenticatedConseillerIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedConseillerRoute,
   } as any)
+const AuthenticatedComptabiliteIndexRoute =
+  AuthenticatedComptabiliteIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedComptabiliteRoute,
+  } as any)
+const AuthenticatedCommercialIndexRoute =
+  AuthenticatedCommercialIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedCommercialRoute,
+  } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedProjetsListeRoute =
+  AuthenticatedProjetsListeRouteImport.update({
+    id: '/liste',
+    path: '/liste',
+    getParentRoute: () => AuthenticatedProjetsRoute,
+  } as any)
 const AuthenticatedEtudiantRendezVousRoute =
   AuthenticatedEtudiantRendezVousRouteImport.update({
     id: '/rendez-vous',
@@ -138,6 +193,18 @@ const AuthenticatedConseillerEtudiantsRoute =
     path: '/etudiants',
     getParentRoute: () => AuthenticatedConseillerRoute,
   } as any)
+const AuthenticatedComptabiliteTransactionsRoute =
+  AuthenticatedComptabiliteTransactionsRouteImport.update({
+    id: '/transactions',
+    path: '/transactions',
+    getParentRoute: () => AuthenticatedComptabiliteRoute,
+  } as any)
+const AuthenticatedCommercialActivitesRoute =
+  AuthenticatedCommercialActivitesRouteImport.update({
+    id: '/activites',
+    path: '/activites',
+    getParentRoute: () => AuthenticatedCommercialRoute,
+  } as any)
 const AuthenticatedAdminValidationsRoute =
   AuthenticatedAdminValidationsRouteImport.update({
     id: '/validations',
@@ -171,17 +238,23 @@ const AuthenticatedAdminDossiersRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/blocked': typeof BlockedRoute
   '/login': typeof LoginRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/app': typeof AuthenticatedAppRoute
+  '/commercial': typeof AuthenticatedCommercialRouteWithChildren
+  '/comptabilite': typeof AuthenticatedComptabiliteRouteWithChildren
   '/conseiller': typeof AuthenticatedConseillerRouteWithChildren
   '/etudiant': typeof AuthenticatedEtudiantRouteWithChildren
+  '/projets': typeof AuthenticatedProjetsRouteWithChildren
   '/admin/dossiers': typeof AuthenticatedAdminDossiersRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
   '/admin/rendez-vous': typeof AuthenticatedAdminRendezVousRoute
   '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/admin/validations': typeof AuthenticatedAdminValidationsRoute
+  '/commercial/activites': typeof AuthenticatedCommercialActivitesRoute
+  '/comptabilite/transactions': typeof AuthenticatedComptabiliteTransactionsRoute
   '/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRoute
   '/conseiller/messages': typeof AuthenticatedConseillerMessagesRoute
   '/conseiller/rendez-vous': typeof AuthenticatedConseillerRendezVousRoute
@@ -190,12 +263,17 @@ export interface FileRoutesByFullPath {
   '/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
   '/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
   '/etudiant/rendez-vous': typeof AuthenticatedEtudiantRendezVousRoute
+  '/projets/liste': typeof AuthenticatedProjetsListeRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/commercial/': typeof AuthenticatedCommercialIndexRoute
+  '/comptabilite/': typeof AuthenticatedComptabiliteIndexRoute
   '/conseiller/': typeof AuthenticatedConseillerIndexRoute
   '/etudiant/': typeof AuthenticatedEtudiantIndexRoute
+  '/projets/': typeof AuthenticatedProjetsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/blocked': typeof BlockedRoute
   '/login': typeof LoginRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/app': typeof AuthenticatedAppRoute
@@ -204,6 +282,8 @@ export interface FileRoutesByTo {
   '/admin/rendez-vous': typeof AuthenticatedAdminRendezVousRoute
   '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/admin/validations': typeof AuthenticatedAdminValidationsRoute
+  '/commercial/activites': typeof AuthenticatedCommercialActivitesRoute
+  '/comptabilite/transactions': typeof AuthenticatedComptabiliteTransactionsRoute
   '/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRoute
   '/conseiller/messages': typeof AuthenticatedConseillerMessagesRoute
   '/conseiller/rendez-vous': typeof AuthenticatedConseillerRendezVousRoute
@@ -212,25 +292,35 @@ export interface FileRoutesByTo {
   '/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
   '/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
   '/etudiant/rendez-vous': typeof AuthenticatedEtudiantRendezVousRoute
+  '/projets/liste': typeof AuthenticatedProjetsListeRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/commercial': typeof AuthenticatedCommercialIndexRoute
+  '/comptabilite': typeof AuthenticatedComptabiliteIndexRoute
   '/conseiller': typeof AuthenticatedConseillerIndexRoute
   '/etudiant': typeof AuthenticatedEtudiantIndexRoute
+  '/projets': typeof AuthenticatedProjetsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/blocked': typeof BlockedRoute
   '/login': typeof LoginRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/app': typeof AuthenticatedAppRoute
+  '/_authenticated/commercial': typeof AuthenticatedCommercialRouteWithChildren
+  '/_authenticated/comptabilite': typeof AuthenticatedComptabiliteRouteWithChildren
   '/_authenticated/conseiller': typeof AuthenticatedConseillerRouteWithChildren
   '/_authenticated/etudiant': typeof AuthenticatedEtudiantRouteWithChildren
+  '/_authenticated/projets': typeof AuthenticatedProjetsRouteWithChildren
   '/_authenticated/admin/dossiers': typeof AuthenticatedAdminDossiersRoute
   '/_authenticated/admin/messages': typeof AuthenticatedAdminMessagesRoute
   '/_authenticated/admin/rendez-vous': typeof AuthenticatedAdminRendezVousRoute
   '/_authenticated/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/_authenticated/admin/validations': typeof AuthenticatedAdminValidationsRoute
+  '/_authenticated/commercial/activites': typeof AuthenticatedCommercialActivitesRoute
+  '/_authenticated/comptabilite/transactions': typeof AuthenticatedComptabiliteTransactionsRoute
   '/_authenticated/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRoute
   '/_authenticated/conseiller/messages': typeof AuthenticatedConseillerMessagesRoute
   '/_authenticated/conseiller/rendez-vous': typeof AuthenticatedConseillerRendezVousRoute
@@ -239,25 +329,35 @@ export interface FileRoutesById {
   '/_authenticated/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
   '/_authenticated/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
   '/_authenticated/etudiant/rendez-vous': typeof AuthenticatedEtudiantRendezVousRoute
+  '/_authenticated/projets/liste': typeof AuthenticatedProjetsListeRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/commercial/': typeof AuthenticatedCommercialIndexRoute
+  '/_authenticated/comptabilite/': typeof AuthenticatedComptabiliteIndexRoute
   '/_authenticated/conseiller/': typeof AuthenticatedConseillerIndexRoute
   '/_authenticated/etudiant/': typeof AuthenticatedEtudiantIndexRoute
+  '/_authenticated/projets/': typeof AuthenticatedProjetsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/blocked'
     | '/login'
     | '/unauthorized'
     | '/admin'
     | '/app'
+    | '/commercial'
+    | '/comptabilite'
     | '/conseiller'
     | '/etudiant'
+    | '/projets'
     | '/admin/dossiers'
     | '/admin/messages'
     | '/admin/rendez-vous'
     | '/admin/utilisateurs'
     | '/admin/validations'
+    | '/commercial/activites'
+    | '/comptabilite/transactions'
     | '/conseiller/etudiants'
     | '/conseiller/messages'
     | '/conseiller/rendez-vous'
@@ -266,12 +366,17 @@ export interface FileRouteTypes {
     | '/etudiant/dossier'
     | '/etudiant/messages'
     | '/etudiant/rendez-vous'
+    | '/projets/liste'
     | '/admin/'
+    | '/commercial/'
+    | '/comptabilite/'
     | '/conseiller/'
     | '/etudiant/'
+    | '/projets/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/blocked'
     | '/login'
     | '/unauthorized'
     | '/app'
@@ -280,6 +385,8 @@ export interface FileRouteTypes {
     | '/admin/rendez-vous'
     | '/admin/utilisateurs'
     | '/admin/validations'
+    | '/commercial/activites'
+    | '/comptabilite/transactions'
     | '/conseiller/etudiants'
     | '/conseiller/messages'
     | '/conseiller/rendez-vous'
@@ -288,24 +395,34 @@ export interface FileRouteTypes {
     | '/etudiant/dossier'
     | '/etudiant/messages'
     | '/etudiant/rendez-vous'
+    | '/projets/liste'
     | '/admin'
+    | '/commercial'
+    | '/comptabilite'
     | '/conseiller'
     | '/etudiant'
+    | '/projets'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/blocked'
     | '/login'
     | '/unauthorized'
     | '/_authenticated/admin'
     | '/_authenticated/app'
+    | '/_authenticated/commercial'
+    | '/_authenticated/comptabilite'
     | '/_authenticated/conseiller'
     | '/_authenticated/etudiant'
+    | '/_authenticated/projets'
     | '/_authenticated/admin/dossiers'
     | '/_authenticated/admin/messages'
     | '/_authenticated/admin/rendez-vous'
     | '/_authenticated/admin/utilisateurs'
     | '/_authenticated/admin/validations'
+    | '/_authenticated/commercial/activites'
+    | '/_authenticated/comptabilite/transactions'
     | '/_authenticated/conseiller/etudiants'
     | '/_authenticated/conseiller/messages'
     | '/_authenticated/conseiller/rendez-vous'
@@ -314,14 +431,19 @@ export interface FileRouteTypes {
     | '/_authenticated/etudiant/dossier'
     | '/_authenticated/etudiant/messages'
     | '/_authenticated/etudiant/rendez-vous'
+    | '/_authenticated/projets/liste'
     | '/_authenticated/admin/'
+    | '/_authenticated/commercial/'
+    | '/_authenticated/comptabilite/'
     | '/_authenticated/conseiller/'
     | '/_authenticated/etudiant/'
+    | '/_authenticated/projets/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  BlockedRoute: typeof BlockedRoute
   LoginRoute: typeof LoginRoute
   UnauthorizedRoute: typeof UnauthorizedRoute
 }
@@ -342,6 +464,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blocked': {
+      id: '/blocked'
+      path: '/blocked'
+      fullPath: '/blocked'
+      preLoaderRoute: typeof BlockedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
@@ -356,6 +485,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/projets': {
+      id: '/_authenticated/projets'
+      path: '/projets'
+      fullPath: '/projets'
+      preLoaderRoute: typeof AuthenticatedProjetsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/etudiant': {
       id: '/_authenticated/etudiant'
       path: '/etudiant'
@@ -368,6 +504,20 @@ declare module '@tanstack/react-router' {
       path: '/conseiller'
       fullPath: '/conseiller'
       preLoaderRoute: typeof AuthenticatedConseillerRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/comptabilite': {
+      id: '/_authenticated/comptabilite'
+      path: '/comptabilite'
+      fullPath: '/comptabilite'
+      preLoaderRoute: typeof AuthenticatedComptabiliteRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/commercial': {
+      id: '/_authenticated/commercial'
+      path: '/commercial'
+      fullPath: '/commercial'
+      preLoaderRoute: typeof AuthenticatedCommercialRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/app': {
@@ -384,6 +534,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/projets/': {
+      id: '/_authenticated/projets/'
+      path: '/'
+      fullPath: '/projets/'
+      preLoaderRoute: typeof AuthenticatedProjetsIndexRouteImport
+      parentRoute: typeof AuthenticatedProjetsRoute
+    }
     '/_authenticated/etudiant/': {
       id: '/_authenticated/etudiant/'
       path: '/'
@@ -398,12 +555,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConseillerIndexRouteImport
       parentRoute: typeof AuthenticatedConseillerRoute
     }
+    '/_authenticated/comptabilite/': {
+      id: '/_authenticated/comptabilite/'
+      path: '/'
+      fullPath: '/comptabilite/'
+      preLoaderRoute: typeof AuthenticatedComptabiliteIndexRouteImport
+      parentRoute: typeof AuthenticatedComptabiliteRoute
+    }
+    '/_authenticated/commercial/': {
+      id: '/_authenticated/commercial/'
+      path: '/'
+      fullPath: '/commercial/'
+      preLoaderRoute: typeof AuthenticatedCommercialIndexRouteImport
+      parentRoute: typeof AuthenticatedCommercialRoute
+    }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/projets/liste': {
+      id: '/_authenticated/projets/liste'
+      path: '/liste'
+      fullPath: '/projets/liste'
+      preLoaderRoute: typeof AuthenticatedProjetsListeRouteImport
+      parentRoute: typeof AuthenticatedProjetsRoute
     }
     '/_authenticated/etudiant/rendez-vous': {
       id: '/_authenticated/etudiant/rendez-vous'
@@ -460,6 +638,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/conseiller/etudiants'
       preLoaderRoute: typeof AuthenticatedConseillerEtudiantsRouteImport
       parentRoute: typeof AuthenticatedConseillerRoute
+    }
+    '/_authenticated/comptabilite/transactions': {
+      id: '/_authenticated/comptabilite/transactions'
+      path: '/transactions'
+      fullPath: '/comptabilite/transactions'
+      preLoaderRoute: typeof AuthenticatedComptabiliteTransactionsRouteImport
+      parentRoute: typeof AuthenticatedComptabiliteRoute
+    }
+    '/_authenticated/commercial/activites': {
+      id: '/_authenticated/commercial/activites'
+      path: '/activites'
+      fullPath: '/commercial/activites'
+      preLoaderRoute: typeof AuthenticatedCommercialActivitesRouteImport
+      parentRoute: typeof AuthenticatedCommercialRoute
     }
     '/_authenticated/admin/validations': {
       id: '/_authenticated/admin/validations'
@@ -520,6 +712,40 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
 const AuthenticatedAdminRouteWithChildren =
   AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
 
+interface AuthenticatedCommercialRouteChildren {
+  AuthenticatedCommercialActivitesRoute: typeof AuthenticatedCommercialActivitesRoute
+  AuthenticatedCommercialIndexRoute: typeof AuthenticatedCommercialIndexRoute
+}
+
+const AuthenticatedCommercialRouteChildren: AuthenticatedCommercialRouteChildren =
+  {
+    AuthenticatedCommercialActivitesRoute:
+      AuthenticatedCommercialActivitesRoute,
+    AuthenticatedCommercialIndexRoute: AuthenticatedCommercialIndexRoute,
+  }
+
+const AuthenticatedCommercialRouteWithChildren =
+  AuthenticatedCommercialRoute._addFileChildren(
+    AuthenticatedCommercialRouteChildren,
+  )
+
+interface AuthenticatedComptabiliteRouteChildren {
+  AuthenticatedComptabiliteTransactionsRoute: typeof AuthenticatedComptabiliteTransactionsRoute
+  AuthenticatedComptabiliteIndexRoute: typeof AuthenticatedComptabiliteIndexRoute
+}
+
+const AuthenticatedComptabiliteRouteChildren: AuthenticatedComptabiliteRouteChildren =
+  {
+    AuthenticatedComptabiliteTransactionsRoute:
+      AuthenticatedComptabiliteTransactionsRoute,
+    AuthenticatedComptabiliteIndexRoute: AuthenticatedComptabiliteIndexRoute,
+  }
+
+const AuthenticatedComptabiliteRouteWithChildren =
+  AuthenticatedComptabiliteRoute._addFileChildren(
+    AuthenticatedComptabiliteRouteChildren,
+  )
+
 interface AuthenticatedConseillerRouteChildren {
   AuthenticatedConseillerEtudiantsRoute: typeof AuthenticatedConseillerEtudiantsRoute
   AuthenticatedConseillerMessagesRoute: typeof AuthenticatedConseillerMessagesRoute
@@ -566,18 +792,37 @@ const AuthenticatedEtudiantRouteWithChildren =
     AuthenticatedEtudiantRouteChildren,
   )
 
+interface AuthenticatedProjetsRouteChildren {
+  AuthenticatedProjetsListeRoute: typeof AuthenticatedProjetsListeRoute
+  AuthenticatedProjetsIndexRoute: typeof AuthenticatedProjetsIndexRoute
+}
+
+const AuthenticatedProjetsRouteChildren: AuthenticatedProjetsRouteChildren = {
+  AuthenticatedProjetsListeRoute: AuthenticatedProjetsListeRoute,
+  AuthenticatedProjetsIndexRoute: AuthenticatedProjetsIndexRoute,
+}
+
+const AuthenticatedProjetsRouteWithChildren =
+  AuthenticatedProjetsRoute._addFileChildren(AuthenticatedProjetsRouteChildren)
+
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedAppRoute: typeof AuthenticatedAppRoute
+  AuthenticatedCommercialRoute: typeof AuthenticatedCommercialRouteWithChildren
+  AuthenticatedComptabiliteRoute: typeof AuthenticatedComptabiliteRouteWithChildren
   AuthenticatedConseillerRoute: typeof AuthenticatedConseillerRouteWithChildren
   AuthenticatedEtudiantRoute: typeof AuthenticatedEtudiantRouteWithChildren
+  AuthenticatedProjetsRoute: typeof AuthenticatedProjetsRouteWithChildren
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedAppRoute: AuthenticatedAppRoute,
+  AuthenticatedCommercialRoute: AuthenticatedCommercialRouteWithChildren,
+  AuthenticatedComptabiliteRoute: AuthenticatedComptabiliteRouteWithChildren,
   AuthenticatedConseillerRoute: AuthenticatedConseillerRouteWithChildren,
   AuthenticatedEtudiantRoute: AuthenticatedEtudiantRouteWithChildren,
+  AuthenticatedProjetsRoute: AuthenticatedProjetsRouteWithChildren,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
@@ -587,6 +832,7 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  BlockedRoute: BlockedRoute,
   LoginRoute: LoginRoute,
   UnauthorizedRoute: UnauthorizedRoute,
 }

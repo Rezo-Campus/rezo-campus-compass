@@ -203,6 +203,186 @@ export type Database = {
         }
         Relationships: []
       }
+      commercial_leads: {
+        Row: {
+          id: string
+          type: string
+          title: string
+          description: string | null
+          contact_name: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          status: string
+          value: number | null
+          scheduled_at: string | null
+          closed_at: string | null
+          notes: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          type: string
+          title: string
+          description?: string | null
+          contact_name?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          status?: string
+          value?: number | null
+          scheduled_at?: string | null
+          closed_at?: string | null
+          notes?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          type?: string
+          title?: string
+          description?: string | null
+          contact_name?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          status?: string
+          value?: number | null
+          scheduled_at?: string | null
+          closed_at?: string | null
+          notes?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      project_tasks: {
+        Row: {
+          id: string
+          project_id: string
+          title: string
+          description: string | null
+          status: string
+          assigned_to: string | null
+          due_date: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          project_id: string
+          title: string
+          description?: string | null
+          status?: string
+          assigned_to?: string | null
+          due_date?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          project_id?: string
+          title?: string
+          description?: string | null
+          status?: string
+          assigned_to?: string | null
+          due_date?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          client: string | null
+          branch: string
+          status: string
+          priority: string
+          start_date: string | null
+          end_date: string | null
+          budget: number | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          client?: string | null
+          branch?: string
+          status?: string
+          priority?: string
+          start_date?: string | null
+          end_date?: string | null
+          budget?: number | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          client?: string | null
+          branch?: string
+          status?: string
+          priority?: string
+          start_date?: string | null
+          end_date?: string | null
+          budget?: number | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          id: string
+          date: string
+          type: string
+          amount: number
+          category: string
+          branch: string
+          description: string | null
+          reference: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          date?: string
+          type: string
+          amount: number
+          category: string
+          branch?: string
+          description?: string | null
+          reference?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          date?: string
+          type?: string
+          amount?: number
+          category?: string
+          branch?: string
+          description?: string | null
+          reference?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -246,7 +426,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "etudiant" | "conseiller" | "admin"
+      app_role: "etudiant" | "conseiller" | "admin" | "comptable" | "chef_projet" | "commercial"
       appointment_status: "programme" | "termine" | "annule"
       document_status: "en_attente" | "valide" | "rejete"
       document_type:
@@ -390,7 +570,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["etudiant", "conseiller", "admin"],
+      app_role: ["etudiant", "conseiller", "admin", "comptable", "chef_projet", "commercial"],
       appointment_status: ["programme", "termine", "annule"],
       document_status: ["en_attente", "valide", "rejete"],
       document_type: [

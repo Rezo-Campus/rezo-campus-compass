@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
-/** Hub: redirige vers le dashboard selon le rôle. */
 export const Route = createFileRoute("/_authenticated/app")({
   component: AppHub,
 });
@@ -14,16 +13,18 @@ function AppHub() {
 
   useEffect(() => {
     if (isLoading || !data) return;
-    if (!data.role) {
+    const roles = data.roles;
+    if (!roles.length) {
       navigate({ to: "/unauthorized", replace: true });
       return;
     }
-    const target =
-      data.role === "admin"
-        ? "/admin"
-        : data.role === "conseiller"
-          ? "/conseiller"
-          : "/etudiant";
+    let target = "/unauthorized";
+    if (roles.includes("admin")) target = "/admin";
+    else if (roles.includes("conseiller")) target = "/conseiller";
+    else if (roles.includes("chef_projet")) target = "/projets";
+    else if (roles.includes("comptable")) target = "/comptabilite";
+    else if (roles.includes("commercial")) target = "/commercial";
+    else if (roles.includes("etudiant")) target = "/etudiant";
     navigate({ to: target, replace: true });
   }, [data, isLoading, navigate]);
 
