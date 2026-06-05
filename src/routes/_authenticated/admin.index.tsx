@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import type { ComponentType } from "react";
 import {
   GraduationCap, Users, FolderOpen, FileCheck2,
   MessageSquare, CalendarDays, AlertCircle, CheckCircle2, Clock,
+  DollarSign, TrendingUp, TrendingDown, BarChart3, Kanban,
 } from "lucide-react";
 import { PageHeader, Panel, StatCard } from "@/components/dashboard-bits";
-import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
@@ -36,6 +37,67 @@ function AdminDashboard() {
         upcomingRdv: upcomingRdv.count ?? 0,
         unreadMsgs: unreadMsgs.count ?? 0,
         openFiles: openFiles.count ?? 0,
+      };
+    },
+  });
+
+  /* Aperçu des 3 départements */
+  const { data: deptStats } = useQuery({
+    queryKey: ["admin-dept-overview"],
+    queryFn: async () => {
+      const firstOfMonth = new Date(
+        new Date().getFullYear(),
+        new Date().getMonth(),
+        1,
+      )
+        .toISOString()
+        .slice(0, 10);
+
+      const [txResult, projResult, leadResult] = await Promise.allSettled([
+        supabase
+          .from("transactions")
+          .select("type, amount")
+          .gte("date", firstOfMonth),
+        supabase.from("projects").select("status"),
+        supabase.from("commercial_leads").select("status, value"),
+      ]);
+
+      const txData =
+        txResult.status === "fulfilled" ? (txResult.value.data ?? []) : [];
+      const recettes = txData
+        .filter((t) => t.type === "recette")
+        .reduce((s, t) => s + (t.amount ?? 0), 0);
+      const depenses = txData
+        .filter((t) => t.type === "depense")
+        .reduce((s, t) => s + (t.amount ?? 0), 0);
+
+      const projData =
+        projResult.status === "fulfilled" ? (projResult.value.data ?? []) : [];
+      const projEnCours = projData.filter((p) => p.status === "en_cours").length;
+      const projPlanifie = projData.filter((p) => p.status === "planifie").length;
+      const projLivre = projData.filter((p) => p.status === "livre").length;
+
+      const leadData =
+        leadResult.status === "fulfilled" ? (leadResult.value.data ?? []) : [];
+      const pipeline = leadData.filter((l) =>
+        ["prospection", "en_negociation"].includes(l.status),
+      );
+      const gagnes = leadData.filter((l) => l.status === "gagne").length;
+      const valeurPipeline = pipeline.reduce(
+        (s, l) => s + (l.value ?? 0),
+        0,
+      );
+
+      return {
+        recettes,
+        depenses,
+        solde: recettes - depenses,
+        projEnCours,
+        projPlanifie,
+        projLivre,
+        pipeline: pipeline.length,
+        gagnes,
+        valeurPipeline,
       };
     },
   });
@@ -92,6 +154,9 @@ function AdminDashboard() {
     },
   });
 
+  const fmt = (n: number) =>
+    n.toLocaleString("fr-FR", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
   return (
     <>
       <PageHeader
@@ -100,7 +165,7 @@ function AdminDashboard() {
         description="Supervision complète de la plateforme en temps réel."
       />
 
-      {/* Stats */}
+      {/* Stats orientation */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <StatCard label="Étudiants" value={String(stats?.students ?? 0)} icon={GraduationCap} />
         <StatCard label="Conseillers" value={String(stats?.advisors ?? 0)} icon={Users} />
@@ -110,6 +175,117 @@ function AdminDashboard() {
         <StatCard label="Msgs non lus" value={String(stats?.unreadMsgs ?? 0)} icon={MessageSquare} />
       </div>
 
+      {/* ── Aperçu des 3 départements ── */}
+      <h2 className="mb-4 mt-10 font-display text-xl font-semibold tracking-tight">
+        Aperçu des départements
+      </h2>
+      <div className="grid gap-4 lg:grid-cols-3">
+
+        {/* Comptabilité */}
+        <Panel
+          title="Comptabilité"
+          description="Finances du mois en cours"
+          action={
+            <Link
+              to="/comptabilite"
+              className="text-xs text-primary hover:underline"
+            >
+              Ouvrir →
+            </Link>
+          }
+        >
+          <div className="grid grid-cols-3 gap-3">
+            <MiniStat
+              label="Recettes"
+              value={`${fmt(deptStats?.recettes ?? 0)} F`}
+              icon={TrendingUp}
+              color="text-green-600"
+            />
+            <MiniStat
+              label="Dépenses"
+              value={`${fmt(deptStats?.depenses ?? 0)} F`}
+              icon={TrendingDown}
+              color="text-red-500"
+            />
+            <MiniStat
+              label="Solde"
+              value={`${fmt(deptStats?.solde ?? 0)} F`}
+              icon={DollarSign}
+              color={
+                (deptStats?.solde ?? 0) >= 0
+                  ? "text-primary"
+                  : "text-red-600"
+              }
+            />
+          </div>
+        </Panel>
+
+        {/* Projets */}
+        <Panel
+          title="Projets informatiques"
+          description="Suivi global des projets"
+          action={
+            <Link to="/projets" className="text-xs text-primary hover:underline">
+              Ouvrir →
+            </Link>
+          }
+        >
+          <div className="grid grid-cols-3 gap-3">
+            <MiniStat
+              label="En cours"
+              value={String(deptStats?.projEnCours ?? 0)}
+              icon={Kanban}
+            />
+            <MiniStat
+              label="Planifiés"
+              value={String(deptStats?.projPlanifie ?? 0)}
+              icon={CalendarDays}
+            />
+            <MiniStat
+              label="Livrés"
+              value={String(deptStats?.projLivre ?? 0)}
+              icon={CheckCircle2}
+              color="text-green-600"
+            />
+          </div>
+        </Panel>
+
+        {/* Commercial */}
+        <Panel
+          title="Marketing & Commercial"
+          description="Pipeline et opportunités"
+          action={
+            <Link
+              to="/commercial"
+              className="text-xs text-primary hover:underline"
+            >
+              Ouvrir →
+            </Link>
+          }
+        >
+          <div className="grid grid-cols-3 gap-3">
+            <MiniStat
+              label="Pipeline"
+              value={String(deptStats?.pipeline ?? 0)}
+              icon={BarChart3}
+            />
+            <MiniStat
+              label="Gagnés"
+              value={String(deptStats?.gagnes ?? 0)}
+              icon={CheckCircle2}
+              color="text-green-600"
+            />
+            <MiniStat
+              label="Potentiel"
+              value={`${fmt(deptStats?.valeurPipeline ?? 0)} F`}
+              icon={TrendingUp}
+              color="text-primary"
+            />
+          </div>
+        </Panel>
+      </div>
+
+      {/* ── Détails orientation ── */}
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
         {/* Dossiers récents */}
         <Panel title="Dossiers récents" description="Dernières activités sur les dossiers étudiants.">
@@ -206,8 +382,10 @@ function AdminDashboard() {
             {[
               { label: "Gérer les accès", to: "/admin/utilisateurs", icon: Users, desc: "Attribuer les rôles" },
               { label: "Tous les dossiers", to: "/admin/dossiers", icon: FolderOpen, desc: "Assigner conseillers" },
+              { label: "Comptabilité", to: "/comptabilite", icon: DollarSign, desc: "Recettes & dépenses" },
+              { label: "Projets", to: "/projets", icon: Kanban, desc: "Suivi des projets" },
+              { label: "Commercial", to: "/commercial", icon: BarChart3, desc: "Pipeline & leads" },
               { label: "Validations", to: "/admin/validations", icon: FileCheck2, desc: "Réviser documents" },
-              { label: "Messages", to: "/admin/messages", icon: MessageSquare, desc: "Toutes conversations" },
             ].map((item) => (
               <Link
                 key={item.to}
@@ -223,6 +401,26 @@ function AdminDashboard() {
         </Panel>
       </div>
     </>
+  );
+}
+
+function MiniStat({
+  label,
+  value,
+  icon: Icon,
+  color = "text-foreground",
+}: {
+  label: string;
+  value: string;
+  icon: ComponentType<{ className?: string }>;
+  color?: string;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-1 rounded-xl border border-border/60 bg-muted/30 p-3 text-center">
+      <Icon className={`size-4 ${color}`} />
+      <div className={`text-base font-semibold tabular-nums ${color}`}>{value}</div>
+      <div className="text-[10px] text-muted-foreground">{label}</div>
+    </div>
   );
 }
 
