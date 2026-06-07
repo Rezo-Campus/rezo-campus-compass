@@ -1,1 +1,0 @@
-import{j as t}from"./index-DtuFYfI8.js";function e({size:s="md",variant:r="light"}){const a=s==="lg"?"h-14":s==="sm"?"h-8":"h-11";return t.jsx("div",{className:"flex items-center gap-2.5",children:t.jsx("img",{src:r==="dark"?"/og-image.png":"/1.png",alt:"Rézo Campus Consulting",className:`${a} w-auto ${r==="dark"?"brightness-0 invert":""}`})})}export{e as B};
