@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as BlockedRouteImport } from './routes/blocked'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRhRouteImport } from './routes/_authenticated/rh'
 import { Route as AuthenticatedProjetsRouteImport } from './routes/_authenticated/projets'
 import { Route as AuthenticatedEtudiantRouteImport } from './routes/_authenticated/etudiant'
 import { Route as AuthenticatedConseillerRouteImport } from './routes/_authenticated/conseiller'
@@ -21,12 +22,14 @@ import { Route as AuthenticatedComptabiliteRouteImport } from './routes/_authent
 import { Route as AuthenticatedCommercialRouteImport } from './routes/_authenticated/commercial'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedRhIndexRouteImport } from './routes/_authenticated/rh.index'
 import { Route as AuthenticatedProjetsIndexRouteImport } from './routes/_authenticated/projets.index'
 import { Route as AuthenticatedEtudiantIndexRouteImport } from './routes/_authenticated/etudiant.index'
 import { Route as AuthenticatedConseillerIndexRouteImport } from './routes/_authenticated/conseiller.index'
 import { Route as AuthenticatedComptabiliteIndexRouteImport } from './routes/_authenticated/comptabilite.index'
 import { Route as AuthenticatedCommercialIndexRouteImport } from './routes/_authenticated/commercial.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as AuthenticatedRhPersonnelRouteImport } from './routes/_authenticated/rh.personnel'
 import { Route as AuthenticatedProjetsListeRouteImport } from './routes/_authenticated/projets.liste'
 import { Route as AuthenticatedEtudiantRendezVousRouteImport } from './routes/_authenticated/etudiant.rendez-vous'
 import { Route as AuthenticatedEtudiantMessagesRouteImport } from './routes/_authenticated/etudiant.messages'
@@ -68,6 +71,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRhRoute = AuthenticatedRhRouteImport.update({
+  id: '/rh',
+  path: '/rh',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedProjetsRoute = AuthenticatedProjetsRouteImport.update({
   id: '/projets',
   path: '/projets',
@@ -104,6 +112,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedRhIndexRoute = AuthenticatedRhIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedRhRoute,
+} as any)
 const AuthenticatedProjetsIndexRoute =
   AuthenticatedProjetsIndexRouteImport.update({
     id: '/',
@@ -139,6 +152,12 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedRhPersonnelRoute =
+  AuthenticatedRhPersonnelRouteImport.update({
+    id: '/personnel',
+    path: '/personnel',
+    getParentRoute: () => AuthenticatedRhRoute,
+  } as any)
 const AuthenticatedProjetsListeRoute =
   AuthenticatedProjetsListeRouteImport.update({
     id: '/liste',
@@ -248,6 +267,7 @@ export interface FileRoutesByFullPath {
   '/conseiller': typeof AuthenticatedConseillerRouteWithChildren
   '/etudiant': typeof AuthenticatedEtudiantRouteWithChildren
   '/projets': typeof AuthenticatedProjetsRouteWithChildren
+  '/rh': typeof AuthenticatedRhRouteWithChildren
   '/admin/dossiers': typeof AuthenticatedAdminDossiersRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
   '/admin/rendez-vous': typeof AuthenticatedAdminRendezVousRoute
@@ -264,12 +284,14 @@ export interface FileRoutesByFullPath {
   '/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
   '/etudiant/rendez-vous': typeof AuthenticatedEtudiantRendezVousRoute
   '/projets/liste': typeof AuthenticatedProjetsListeRoute
+  '/rh/personnel': typeof AuthenticatedRhPersonnelRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/commercial/': typeof AuthenticatedCommercialIndexRoute
   '/comptabilite/': typeof AuthenticatedComptabiliteIndexRoute
   '/conseiller/': typeof AuthenticatedConseillerIndexRoute
   '/etudiant/': typeof AuthenticatedEtudiantIndexRoute
   '/projets/': typeof AuthenticatedProjetsIndexRoute
+  '/rh/': typeof AuthenticatedRhIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -293,12 +315,14 @@ export interface FileRoutesByTo {
   '/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
   '/etudiant/rendez-vous': typeof AuthenticatedEtudiantRendezVousRoute
   '/projets/liste': typeof AuthenticatedProjetsListeRoute
+  '/rh/personnel': typeof AuthenticatedRhPersonnelRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/commercial': typeof AuthenticatedCommercialIndexRoute
   '/comptabilite': typeof AuthenticatedComptabiliteIndexRoute
   '/conseiller': typeof AuthenticatedConseillerIndexRoute
   '/etudiant': typeof AuthenticatedEtudiantIndexRoute
   '/projets': typeof AuthenticatedProjetsIndexRoute
+  '/rh': typeof AuthenticatedRhIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -314,6 +338,7 @@ export interface FileRoutesById {
   '/_authenticated/conseiller': typeof AuthenticatedConseillerRouteWithChildren
   '/_authenticated/etudiant': typeof AuthenticatedEtudiantRouteWithChildren
   '/_authenticated/projets': typeof AuthenticatedProjetsRouteWithChildren
+  '/_authenticated/rh': typeof AuthenticatedRhRouteWithChildren
   '/_authenticated/admin/dossiers': typeof AuthenticatedAdminDossiersRoute
   '/_authenticated/admin/messages': typeof AuthenticatedAdminMessagesRoute
   '/_authenticated/admin/rendez-vous': typeof AuthenticatedAdminRendezVousRoute
@@ -330,12 +355,14 @@ export interface FileRoutesById {
   '/_authenticated/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
   '/_authenticated/etudiant/rendez-vous': typeof AuthenticatedEtudiantRendezVousRoute
   '/_authenticated/projets/liste': typeof AuthenticatedProjetsListeRoute
+  '/_authenticated/rh/personnel': typeof AuthenticatedRhPersonnelRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/commercial/': typeof AuthenticatedCommercialIndexRoute
   '/_authenticated/comptabilite/': typeof AuthenticatedComptabiliteIndexRoute
   '/_authenticated/conseiller/': typeof AuthenticatedConseillerIndexRoute
   '/_authenticated/etudiant/': typeof AuthenticatedEtudiantIndexRoute
   '/_authenticated/projets/': typeof AuthenticatedProjetsIndexRoute
+  '/_authenticated/rh/': typeof AuthenticatedRhIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -351,6 +378,7 @@ export interface FileRouteTypes {
     | '/conseiller'
     | '/etudiant'
     | '/projets'
+    | '/rh'
     | '/admin/dossiers'
     | '/admin/messages'
     | '/admin/rendez-vous'
@@ -367,12 +395,14 @@ export interface FileRouteTypes {
     | '/etudiant/messages'
     | '/etudiant/rendez-vous'
     | '/projets/liste'
+    | '/rh/personnel'
     | '/admin/'
     | '/commercial/'
     | '/comptabilite/'
     | '/conseiller/'
     | '/etudiant/'
     | '/projets/'
+    | '/rh/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -396,12 +426,14 @@ export interface FileRouteTypes {
     | '/etudiant/messages'
     | '/etudiant/rendez-vous'
     | '/projets/liste'
+    | '/rh/personnel'
     | '/admin'
     | '/commercial'
     | '/comptabilite'
     | '/conseiller'
     | '/etudiant'
     | '/projets'
+    | '/rh'
   id:
     | '__root__'
     | '/'
@@ -416,6 +448,7 @@ export interface FileRouteTypes {
     | '/_authenticated/conseiller'
     | '/_authenticated/etudiant'
     | '/_authenticated/projets'
+    | '/_authenticated/rh'
     | '/_authenticated/admin/dossiers'
     | '/_authenticated/admin/messages'
     | '/_authenticated/admin/rendez-vous'
@@ -432,12 +465,14 @@ export interface FileRouteTypes {
     | '/_authenticated/etudiant/messages'
     | '/_authenticated/etudiant/rendez-vous'
     | '/_authenticated/projets/liste'
+    | '/_authenticated/rh/personnel'
     | '/_authenticated/admin/'
     | '/_authenticated/commercial/'
     | '/_authenticated/comptabilite/'
     | '/_authenticated/conseiller/'
     | '/_authenticated/etudiant/'
     | '/_authenticated/projets/'
+    | '/_authenticated/rh/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -484,6 +519,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/rh': {
+      id: '/_authenticated/rh'
+      path: '/rh'
+      fullPath: '/rh'
+      preLoaderRoute: typeof AuthenticatedRhRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/projets': {
       id: '/_authenticated/projets'
@@ -534,6 +576,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/rh/': {
+      id: '/_authenticated/rh/'
+      path: '/'
+      fullPath: '/rh/'
+      preLoaderRoute: typeof AuthenticatedRhIndexRouteImport
+      parentRoute: typeof AuthenticatedRhRoute
+    }
     '/_authenticated/projets/': {
       id: '/_authenticated/projets/'
       path: '/'
@@ -575,6 +624,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/rh/personnel': {
+      id: '/_authenticated/rh/personnel'
+      path: '/personnel'
+      fullPath: '/rh/personnel'
+      preLoaderRoute: typeof AuthenticatedRhPersonnelRouteImport
+      parentRoute: typeof AuthenticatedRhRoute
     }
     '/_authenticated/projets/liste': {
       id: '/_authenticated/projets/liste'
@@ -805,6 +861,20 @@ const AuthenticatedProjetsRouteChildren: AuthenticatedProjetsRouteChildren = {
 const AuthenticatedProjetsRouteWithChildren =
   AuthenticatedProjetsRoute._addFileChildren(AuthenticatedProjetsRouteChildren)
 
+interface AuthenticatedRhRouteChildren {
+  AuthenticatedRhPersonnelRoute: typeof AuthenticatedRhPersonnelRoute
+  AuthenticatedRhIndexRoute: typeof AuthenticatedRhIndexRoute
+}
+
+const AuthenticatedRhRouteChildren: AuthenticatedRhRouteChildren = {
+  AuthenticatedRhPersonnelRoute: AuthenticatedRhPersonnelRoute,
+  AuthenticatedRhIndexRoute: AuthenticatedRhIndexRoute,
+}
+
+const AuthenticatedRhRouteWithChildren = AuthenticatedRhRoute._addFileChildren(
+  AuthenticatedRhRouteChildren,
+)
+
 interface AuthenticatedRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedAppRoute: typeof AuthenticatedAppRoute
@@ -813,6 +883,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedConseillerRoute: typeof AuthenticatedConseillerRouteWithChildren
   AuthenticatedEtudiantRoute: typeof AuthenticatedEtudiantRouteWithChildren
   AuthenticatedProjetsRoute: typeof AuthenticatedProjetsRouteWithChildren
+  AuthenticatedRhRoute: typeof AuthenticatedRhRouteWithChildren
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -823,6 +894,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedConseillerRoute: AuthenticatedConseillerRouteWithChildren,
   AuthenticatedEtudiantRoute: AuthenticatedEtudiantRouteWithChildren,
   AuthenticatedProjetsRoute: AuthenticatedProjetsRouteWithChildren,
+  AuthenticatedRhRoute: AuthenticatedRhRouteWithChildren,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

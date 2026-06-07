@@ -381,6 +381,60 @@ export type Database = {
         }
         Relationships: []
       }
+      personnel: {
+        Row: {
+          id: string
+          full_name: string
+          email: string | null
+          phone: string | null
+          address: string | null
+          birth_date: string | null
+          hire_date: string | null
+          department: string
+          last_diploma: string | null
+          mission: string | null
+          cv_path: string | null
+          status: string
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          full_name: string
+          email?: string | null
+          phone?: string | null
+          address?: string | null
+          birth_date?: string | null
+          hire_date?: string | null
+          department: string
+          last_diploma?: string | null
+          mission?: string | null
+          cv_path?: string | null
+          status?: string
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          full_name?: string
+          email?: string | null
+          phone?: string | null
+          address?: string | null
+          birth_date?: string | null
+          hire_date?: string | null
+          department?: string
+          last_diploma?: string | null
+          mission?: string | null
+          cv_path?: string | null
+          status?: string
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -424,7 +478,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "etudiant" | "conseiller" | "admin" | "comptable" | "chef_projet" | "commercial"
+      app_role: "etudiant" | "conseiller" | "admin" | "comptable" | "chef_projet" | "commercial" | "rh"
       appointment_status: "programme" | "termine" | "annule"
       document_status: "en_attente" | "valide" | "rejete"
       document_type:
@@ -568,7 +622,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["etudiant", "conseiller", "admin", "comptable", "chef_projet", "commercial"],
+      app_role: ["etudiant", "conseiller", "admin", "comptable", "chef_projet", "commercial", "rh"],
       appointment_status: ["programme", "termine", "annule"],
       document_status: ["en_attente", "valide", "rejete"],
       document_type: [

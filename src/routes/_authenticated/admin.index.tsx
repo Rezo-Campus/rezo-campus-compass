@@ -4,7 +4,7 @@ import type { ComponentType } from "react";
 import {
   GraduationCap, Users, FolderOpen, FileCheck2,
   MessageSquare, CalendarDays, AlertCircle, CheckCircle2, Clock,
-  DollarSign, TrendingUp, TrendingDown, BarChart3, Kanban,
+  DollarSign, TrendingUp, TrendingDown, BarChart3, Kanban, UserCheck,
 } from "lucide-react";
 import { PageHeader, Panel, StatCard } from "@/components/dashboard-bits";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,13 +53,14 @@ function AdminDashboard() {
         .toISOString()
         .slice(0, 10);
 
-      const [txResult, projResult, leadResult] = await Promise.allSettled([
+      const [txResult, projResult, leadResult, rhResult] = await Promise.allSettled([
         supabase
           .from("transactions")
           .select("type, amount")
           .gte("date", firstOfMonth),
         supabase.from("projects").select("status"),
         supabase.from("commercial_leads").select("status, value"),
+        supabase.from("personnel").select("status"),
       ]);
 
       const txData =
@@ -88,6 +89,12 @@ function AdminDashboard() {
         0,
       );
 
+      const rhData =
+        rhResult.status === "fulfilled" ? (rhResult.value.data ?? []) : [];
+      const rhTotal = rhData.length;
+      const rhActifs = rhData.filter((p) => p.status === "actif").length;
+      const rhConge = rhData.filter((p) => p.status === "conge").length;
+
       return {
         recettes,
         depenses,
@@ -98,6 +105,9 @@ function AdminDashboard() {
         pipeline: pipeline.length,
         gagnes,
         valeurPipeline,
+        rhTotal,
+        rhActifs,
+        rhConge,
       };
     },
   });
@@ -175,11 +185,11 @@ function AdminDashboard() {
         <StatCard label="Msgs non lus" value={String(stats?.unreadMsgs ?? 0)} icon={MessageSquare} />
       </div>
 
-      {/* ── Aperçu des 3 départements ── */}
+      {/* ── Aperçu des 4 départements ── */}
       <h2 className="mb-4 mt-10 font-display text-xl font-semibold tracking-tight">
         Aperçu des départements
       </h2>
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
         {/* Comptabilité */}
         <Panel
@@ -280,6 +290,37 @@ function AdminDashboard() {
               value={`${fmt(deptStats?.valeurPipeline ?? 0)} F`}
               icon={TrendingUp}
               color="text-primary"
+            />
+          </div>
+        </Panel>
+
+        {/* Ressources Humaines */}
+        <Panel
+          title="Ressources Humaines"
+          description="Effectif du personnel"
+          action={
+            <Link to="/rh" className="text-xs text-primary hover:underline">
+              Ouvrir →
+            </Link>
+          }
+        >
+          <div className="grid grid-cols-3 gap-3">
+            <MiniStat
+              label="Effectif"
+              value={String(deptStats?.rhTotal ?? 0)}
+              icon={UserCheck}
+            />
+            <MiniStat
+              label="Actifs"
+              value={String(deptStats?.rhActifs ?? 0)}
+              icon={CheckCircle2}
+              color="text-green-600"
+            />
+            <MiniStat
+              label="Congés"
+              value={String(deptStats?.rhConge ?? 0)}
+              icon={Clock}
+              color="text-amber-500"
             />
           </div>
         </Panel>
@@ -385,6 +426,7 @@ function AdminDashboard() {
               { label: "Comptabilité", to: "/comptabilite", icon: DollarSign, desc: "Recettes & dépenses" },
               { label: "Projets", to: "/projets", icon: Kanban, desc: "Suivi des projets" },
               { label: "Commercial", to: "/commercial", icon: BarChart3, desc: "Pipeline & leads" },
+              { label: "Ressources Humaines", to: "/rh", icon: UserCheck, desc: "Gestion du personnel" },
               { label: "Validations", to: "/admin/validations", icon: FileCheck2, desc: "Réviser documents" },
             ].map((item) => (
               <Link
