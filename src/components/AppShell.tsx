@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { LogOut, GraduationCap, Users, BookOpen, Calculator, FolderOpen, BarChart3, ShieldCheck } from "lucide-react";
+import { LogOut, Users, BookOpen, Calculator, FolderOpen, BarChart3, ShieldCheck } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, type AppRole } from "@/hooks/use-auth";
@@ -159,6 +159,22 @@ export function AppShell({
               </Link>
             );
           })}
+          {/* Autres espaces en mobile */}
+          {otherSections.length > 0 && (
+            <>
+              <div className="mx-1 my-auto h-4 w-px shrink-0 bg-border" />
+              {otherSections.map((s) => (
+                <Link
+                  key={s.to}
+                  to={s.to}
+                  className="flex shrink-0 items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium text-muted-foreground/70 hover:bg-muted hover:text-foreground"
+                >
+                  <s.icon className="size-3.5" />
+                  {s.label}
+                </Link>
+              ))}
+            </>
+          )}
           <button
             onClick={onLogout}
             className="ml-auto flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10"
