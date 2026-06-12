@@ -291,6 +291,48 @@ export type Database = {
         }
         Relationships: []
       }
+      project_features: {
+        Row: {
+          id: string
+          project_id: string
+          title: string
+          description: string | null
+          acceptance_criteria: string | null
+          priority: string
+          status: string
+          r_and_d_comment: string | null
+          estimated_hours: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          project_id: string
+          title: string
+          description?: string | null
+          acceptance_criteria?: string | null
+          priority?: string
+          status?: string
+          r_and_d_comment?: string | null
+          estimated_hours?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          project_id?: string
+          title?: string
+          description?: string | null
+          acceptance_criteria?: string | null
+          priority?: string
+          status?: string
+          r_and_d_comment?: string | null
+          estimated_hours?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       projects: {
         Row: {
           id: string
@@ -303,6 +345,11 @@ export type Database = {
           start_date: string | null
           end_date: string | null
           budget: number | null
+          objectives: string | null
+          target_audience: string | null
+          tech_constraints: string | null
+          r_and_d_notes: string | null
+          validated_spec: boolean
           created_by: string | null
           created_at: string
           updated_at: string
@@ -318,6 +365,11 @@ export type Database = {
           start_date?: string | null
           end_date?: string | null
           budget?: number | null
+          objectives?: string | null
+          target_audience?: string | null
+          tech_constraints?: string | null
+          r_and_d_notes?: string | null
+          validated_spec?: boolean
           created_by?: string | null
           created_at?: string
           updated_at?: string
@@ -333,6 +385,11 @@ export type Database = {
           start_date?: string | null
           end_date?: string | null
           budget?: number | null
+          objectives?: string | null
+          target_audience?: string | null
+          tech_constraints?: string | null
+          r_and_d_notes?: string | null
+          validated_spec?: boolean
           created_by?: string | null
           created_at?: string
           updated_at?: string
