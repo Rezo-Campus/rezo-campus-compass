@@ -406,7 +406,7 @@ function ProjetsListe() {
       <PageHeader
         eyebrow="Projets"
         title="Liste des projets"
-        description="Cahier des charges, fonctionnalités et suivi de réalisation."
+        description="Détails des Projets, fonctionnalités et suivi de réalisation."
       />
 
       {/* Barre de filtres */}
@@ -492,10 +492,10 @@ function ProjetsListe() {
                   </div>
                 </div>
 
-                {/* Section : Cahier des charges */}
+                {/* Section : Détails du Projet */}
                 <div className="rounded-lg border border-border p-4 space-y-3">
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Cahier des charges
+                    Détails du Projet
                   </p>
                   <div className="space-y-1.5">
                     <Label>Objectifs du projet</Label>
@@ -522,7 +522,7 @@ function ProjetsListe() {
                       onChange={(e) => setProjectForm((f) => ({ ...f, validated_spec: e.target.checked }))}
                       className="size-4 accent-primary"
                     />
-                    <span className="text-sm font-medium">Cahier des charges validé — prêt pour l'équipe R&D</span>
+                    <span className="text-sm font-medium">Détails du Projet validé — prêt pour l'équipe R&D</span>
                   </label>
                 </div>
 
@@ -703,7 +703,7 @@ function ProjetsListe() {
                       {/* Barre d'onglets */}
                       <div className="flex border-b border-border bg-muted/20 px-3">
                         {([
-                          { key: "specs" as ActiveTab, label: "Cahier des charges", icon: FileText },
+                          { key: "specs" as ActiveTab, label: "Détails du Projet", icon: FileText },
                           { key: "features" as ActiveTab, label: "Fonctionnalités", icon: Lightbulb, count: projectFeatures.length },
                           { key: "tasks" as ActiveTab, label: "Tâches R&D", icon: CheckSquare, count: projectTasks.length },
                         ]).map((t) => (
@@ -729,7 +729,7 @@ function ProjetsListe() {
 
                       <div className="bg-muted/10 p-3">
 
-                        {/* ── Onglet : Cahier des charges ── */}
+                        {/* ── Onglet : Détails du Projet ── */}
                         {tab === "specs" && (
                           <div className="space-y-3">
                             <div className="flex justify-end">
@@ -740,9 +740,9 @@ function ProjetsListe() {
 
                             {!p.objectives && !p.tech_constraints && !p.target_audience && !p.description && !p.r_and_d_notes ? (
                               <div className="py-6 text-center text-sm text-muted-foreground">
-                                <p>Aucun cahier des charges rédigé.</p>
+                                <p>Aucun Détails du Projet disponibles.</p>
                                 <Button size="sm" variant="outline" className="mt-2" onClick={() => openEditProject(p)}>
-                                  Rédiger le cahier des charges
+                                  Rédiger le Détails du Projet
                                 </Button>
                               </div>
                             ) : (
@@ -788,8 +788,8 @@ function ProjetsListe() {
                             }`}>
                               <CheckCircle2 className={`size-4 ${p.validated_spec ? "text-green-500" : "text-gray-300"}`} />
                               {p.validated_spec
-                                ? "Cahier des charges validé — transmis à l'équipe R&D"
-                                : "Cahier des charges en cours de rédaction"}
+                                ? "Détails du Projet validé — transmis à l'équipe R&D"
+                                : "Détails du Projet en cours de rédaction"}
                             </div>
                           </div>
                         )}
