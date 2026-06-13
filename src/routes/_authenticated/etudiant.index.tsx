@@ -6,6 +6,10 @@ import {
   CalendarDays,
   Sparkles,
   CheckCircle2,
+  User,
+  GraduationCap,
+  School,
+  Send,
 } from "lucide-react";
 import { PageHeader, Panel, StatCard } from "@/components/dashboard-bits";
 import { useAuth } from "@/hooks/use-auth";
@@ -83,10 +87,14 @@ function EtudiantDashboard() {
           <Panel title="Prochaines étapes" description="Complétez votre dossier dans cet ordre.">
             <ol className="space-y-3">
               {[
-                { label: "Compléter votre profil", done: !!data?.file?.bio, to: "/etudiant/dossier" },
-                { label: "Téléverser vos documents", done: totalDocs > 0, to: "/etudiant/documents" },
-                { label: "Échanger avec votre conseiller", done: false, to: "/etudiant/messages" },
-                { label: "Confirmer un rendez-vous", done: !!data?.nextRdv, to: "/etudiant/rendez-vous" },
+                { label: "Compléter votre profil personnel", done: !!data?.file?.bio, to: "/etudiant/profil", icon: User },
+                { label: "Remplir votre dossier", done: !!(data?.file?.target_country && data?.file?.target_level && data?.file?.target_program), to: "/etudiant/dossier", icon: FileText },
+                { label: "Ajouter votre parcours scolaire", done: totalDocs > 0, to: "/etudiant/parcours", icon: GraduationCap },
+                { label: "Téléverser vos documents", done: totalDocs > 0, to: "/etudiant/documents", icon: FileText },
+                { label: "Choisir des formations", done: false, to: "/etudiant/ecoles", icon: School },
+                { label: "Rédiger vos lettres de motivation", done: false, to: "/etudiant/candidatures", icon: Send },
+                { label: "Échanger avec votre conseiller", done: false, to: "/etudiant/messages", icon: MessageSquare },
+                { label: "Confirmer un rendez-vous", done: !!data?.nextRdv, to: "/etudiant/rendez-vous", icon: CalendarDays },
               ].map((step) => (
                 <li key={step.label}>
                   <Link

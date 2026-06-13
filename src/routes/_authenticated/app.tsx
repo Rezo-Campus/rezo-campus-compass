@@ -25,6 +25,7 @@ function AppHub() {
     else if (roles.includes("comptable")) target = "/comptabilite";
     else if (roles.includes("commercial")) target = "/commercial";
     else if (roles.includes("rh")) target = "/rh";
+    else if (roles.includes("ecole")) target = "/ecole";
     else if (roles.includes("etudiant")) target = "/etudiant";
     navigate({ to: target, replace: true });
   }, [data, isLoading, navigate]);

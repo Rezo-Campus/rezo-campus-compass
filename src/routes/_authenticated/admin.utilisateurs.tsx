@@ -26,7 +26,7 @@ import type { Database } from "@/integrations/supabase/types";
 
 type Role = Database["public"]["Enums"]["app_role"];
 
-const ALL_ROLES: Role[] = ["etudiant", "conseiller", "admin", "comptable", "chef_projet", "commercial", "rh"];
+const ALL_ROLES: Role[] = ["etudiant", "conseiller", "admin", "comptable", "chef_projet", "commercial", "rh", "ecole"];
 
 const ROLE_LABELS: Record<Role, string> = {
   etudiant: "Étudiant",
@@ -36,6 +36,7 @@ const ROLE_LABELS: Record<Role, string> = {
   chef_projet: "Chef de projet",
   commercial: "Commercial",
   rh: "Ressources Humaines",
+  ecole: "Établissement",
 };
 
 export const Route = createFileRoute("/_authenticated/admin/utilisateurs")({

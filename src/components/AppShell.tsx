@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { LogOut, Users, BookOpen, Calculator, FolderOpen, BarChart3, ShieldCheck, UserCheck } from "lucide-react";
+import { LogOut, Users, BookOpen, Calculator, FolderOpen, BarChart3, ShieldCheck, UserCheck, School } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, type AppRole } from "@/hooks/use-auth";
@@ -19,6 +19,7 @@ export const ROLE_LABEL: Record<AppRole, string> = {
   chef_projet: "Chef de projet",
   commercial: "Commercial",
   rh: "Ressources Humaines",
+  ecole: "Établissement",
 };
 
 const SECTION_LINKS: { role: AppRole; label: string; to: string; icon: ComponentType<{ className?: string }> }[] = [
@@ -29,6 +30,7 @@ const SECTION_LINKS: { role: AppRole; label: string; to: string; icon: Component
   { role: "chef_projet", label: "Projets", to: "/projets", icon: FolderOpen },
   { role: "commercial", label: "Commercial", to: "/commercial", icon: BarChart3 },
   { role: "rh", label: "Ressources Humaines", to: "/rh", icon: UserCheck },
+  { role: "ecole", label: "Espace École", to: "/ecole", icon: School },
 ];
 
 export function AppShell({

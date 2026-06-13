@@ -137,6 +137,7 @@ export type Database = {
           full_name: string | null
           id: string
           phone: string | null
+          photo_url: string | null
           updated_at: string
         }
         Insert: {
@@ -146,6 +147,7 @@ export type Database = {
           full_name?: string | null
           id: string
           phone?: string | null
+          photo_url?: string | null
           updated_at?: string
         }
         Update: {
@@ -155,6 +157,142 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          photo_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      schools: {
+        Row: {
+          id: string
+          name: string
+          logo_url: string | null
+          address: string | null
+          city: string | null
+          country: string | null
+          website: string | null
+          email: string | null
+          phone: string | null
+          description: string | null
+          is_active: boolean
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          logo_url?: string | null
+          address?: string | null
+          city?: string | null
+          country?: string | null
+          website?: string | null
+          email?: string | null
+          phone?: string | null
+          description?: string | null
+          is_active?: boolean
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          logo_url?: string | null
+          address?: string | null
+          city?: string | null
+          country?: string | null
+          website?: string | null
+          email?: string | null
+          phone?: string | null
+          description?: string | null
+          is_active?: boolean
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      school_programs: {
+        Row: {
+          id: string
+          school_id: string
+          name: string
+          description: string | null
+          domain: string | null
+          level: string | null
+          duration: string | null
+          language: string | null
+          tuition_fee: number | null
+          requirements: string | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          school_id: string
+          name: string
+          description?: string | null
+          domain?: string | null
+          level?: string | null
+          duration?: string | null
+          language?: string | null
+          tuition_fee?: number | null
+          requirements?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          school_id?: string
+          name?: string
+          description?: string | null
+          domain?: string | null
+          level?: string | null
+          duration?: string | null
+          language?: string | null
+          tuition_fee?: number | null
+          requirements?: string | null
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      student_applications: {
+        Row: {
+          id: string
+          student_id: string
+          program_id: string
+          school_id: string
+          status: string
+          motivation_letter: string | null
+          counselor_notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          student_id: string
+          program_id: string
+          school_id: string
+          status?: string
+          motivation_letter?: string | null
+          counselor_notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          student_id?: string
+          program_id?: string
+          school_id?: string
+          status?: string
+          motivation_letter?: string | null
+          counselor_notes?: string | null
+          created_at?: string
           updated_at?: string
         }
         Relationships: []
@@ -535,7 +673,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "etudiant" | "conseiller" | "admin" | "comptable" | "chef_projet" | "commercial" | "rh"
+      app_role: "etudiant" | "conseiller" | "admin" | "comptable" | "chef_projet" | "commercial" | "rh" | "ecole"
       appointment_status: "programme" | "termine" | "annule"
       document_status: "en_attente" | "valide" | "rejete"
       document_type:
@@ -679,7 +817,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["etudiant", "conseiller", "admin", "comptable", "chef_projet", "commercial", "rh"],
+      app_role: ["etudiant", "conseiller", "admin", "comptable", "chef_projet", "commercial", "rh", "ecole"],
       appointment_status: ["programme", "termine", "annule"],
       document_status: ["en_attente", "valide", "rejete"],
       document_type: [

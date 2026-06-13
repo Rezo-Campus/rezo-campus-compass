@@ -17,6 +17,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRhRouteImport } from './routes/_authenticated/rh'
 import { Route as AuthenticatedProjetsRouteImport } from './routes/_authenticated/projets'
 import { Route as AuthenticatedEtudiantRouteImport } from './routes/_authenticated/etudiant'
+import { Route as AuthenticatedEcoleRouteImport } from './routes/_authenticated/ecole'
 import { Route as AuthenticatedConseillerRouteImport } from './routes/_authenticated/conseiller'
 import { Route as AuthenticatedComptabiliteRouteImport } from './routes/_authenticated/comptabilite'
 import { Route as AuthenticatedCommercialRouteImport } from './routes/_authenticated/commercial'
@@ -25,6 +26,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedRhIndexRouteImport } from './routes/_authenticated/rh.index'
 import { Route as AuthenticatedProjetsIndexRouteImport } from './routes/_authenticated/projets.index'
 import { Route as AuthenticatedEtudiantIndexRouteImport } from './routes/_authenticated/etudiant.index'
+import { Route as AuthenticatedEcoleIndexRouteImport } from './routes/_authenticated/ecole.index'
 import { Route as AuthenticatedConseillerIndexRouteImport } from './routes/_authenticated/conseiller.index'
 import { Route as AuthenticatedComptabiliteIndexRouteImport } from './routes/_authenticated/comptabilite.index'
 import { Route as AuthenticatedCommercialIndexRouteImport } from './routes/_authenticated/commercial.index'
@@ -32,9 +34,14 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedRhPersonnelRouteImport } from './routes/_authenticated/rh.personnel'
 import { Route as AuthenticatedProjetsListeRouteImport } from './routes/_authenticated/projets.liste'
 import { Route as AuthenticatedEtudiantRendezVousRouteImport } from './routes/_authenticated/etudiant.rendez-vous'
+import { Route as AuthenticatedEtudiantProfilRouteImport } from './routes/_authenticated/etudiant.profil'
+import { Route as AuthenticatedEtudiantParcoursRouteImport } from './routes/_authenticated/etudiant.parcours'
 import { Route as AuthenticatedEtudiantMessagesRouteImport } from './routes/_authenticated/etudiant.messages'
+import { Route as AuthenticatedEtudiantEcolesRouteImport } from './routes/_authenticated/etudiant.ecoles'
 import { Route as AuthenticatedEtudiantDossierRouteImport } from './routes/_authenticated/etudiant.dossier'
 import { Route as AuthenticatedEtudiantDocumentsRouteImport } from './routes/_authenticated/etudiant.documents'
+import { Route as AuthenticatedEtudiantCandidaturesRouteImport } from './routes/_authenticated/etudiant.candidatures'
+import { Route as AuthenticatedEcoleCandidatsRouteImport } from './routes/_authenticated/ecole.candidats'
 import { Route as AuthenticatedConseillerValidationsRouteImport } from './routes/_authenticated/conseiller.validations'
 import { Route as AuthenticatedConseillerRendezVousRouteImport } from './routes/_authenticated/conseiller.rendez-vous'
 import { Route as AuthenticatedConseillerMessagesRouteImport } from './routes/_authenticated/conseiller.messages'
@@ -45,6 +52,7 @@ import { Route as AuthenticatedAdminValidationsRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminUtilisateursRouteImport } from './routes/_authenticated/admin.utilisateurs'
 import { Route as AuthenticatedAdminRendezVousRouteImport } from './routes/_authenticated/admin.rendez-vous'
 import { Route as AuthenticatedAdminMessagesRouteImport } from './routes/_authenticated/admin.messages'
+import { Route as AuthenticatedAdminEcolesRouteImport } from './routes/_authenticated/admin.ecoles'
 import { Route as AuthenticatedAdminDossiersRouteImport } from './routes/_authenticated/admin.dossiers'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
@@ -84,6 +92,11 @@ const AuthenticatedProjetsRoute = AuthenticatedProjetsRouteImport.update({
 const AuthenticatedEtudiantRoute = AuthenticatedEtudiantRouteImport.update({
   id: '/etudiant',
   path: '/etudiant',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedEcoleRoute = AuthenticatedEcoleRouteImport.update({
+  id: '/ecole',
+  path: '/ecole',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedConseillerRoute = AuthenticatedConseillerRouteImport.update({
@@ -129,6 +142,11 @@ const AuthenticatedEtudiantIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedEtudiantRoute,
   } as any)
+const AuthenticatedEcoleIndexRoute = AuthenticatedEcoleIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedEcoleRoute,
+} as any)
 const AuthenticatedConseillerIndexRoute =
   AuthenticatedConseillerIndexRouteImport.update({
     id: '/',
@@ -170,10 +188,28 @@ const AuthenticatedEtudiantRendezVousRoute =
     path: '/rendez-vous',
     getParentRoute: () => AuthenticatedEtudiantRoute,
   } as any)
+const AuthenticatedEtudiantProfilRoute =
+  AuthenticatedEtudiantProfilRouteImport.update({
+    id: '/profil',
+    path: '/profil',
+    getParentRoute: () => AuthenticatedEtudiantRoute,
+  } as any)
+const AuthenticatedEtudiantParcoursRoute =
+  AuthenticatedEtudiantParcoursRouteImport.update({
+    id: '/parcours',
+    path: '/parcours',
+    getParentRoute: () => AuthenticatedEtudiantRoute,
+  } as any)
 const AuthenticatedEtudiantMessagesRoute =
   AuthenticatedEtudiantMessagesRouteImport.update({
     id: '/messages',
     path: '/messages',
+    getParentRoute: () => AuthenticatedEtudiantRoute,
+  } as any)
+const AuthenticatedEtudiantEcolesRoute =
+  AuthenticatedEtudiantEcolesRouteImport.update({
+    id: '/ecoles',
+    path: '/ecoles',
     getParentRoute: () => AuthenticatedEtudiantRoute,
   } as any)
 const AuthenticatedEtudiantDossierRoute =
@@ -187,6 +223,18 @@ const AuthenticatedEtudiantDocumentsRoute =
     id: '/documents',
     path: '/documents',
     getParentRoute: () => AuthenticatedEtudiantRoute,
+  } as any)
+const AuthenticatedEtudiantCandidaturesRoute =
+  AuthenticatedEtudiantCandidaturesRouteImport.update({
+    id: '/candidatures',
+    path: '/candidatures',
+    getParentRoute: () => AuthenticatedEtudiantRoute,
+  } as any)
+const AuthenticatedEcoleCandidatsRoute =
+  AuthenticatedEcoleCandidatsRouteImport.update({
+    id: '/candidats',
+    path: '/candidats',
+    getParentRoute: () => AuthenticatedEcoleRoute,
   } as any)
 const AuthenticatedConseillerValidationsRoute =
   AuthenticatedConseillerValidationsRouteImport.update({
@@ -248,6 +296,12 @@ const AuthenticatedAdminMessagesRoute =
     path: '/messages',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminEcolesRoute =
+  AuthenticatedAdminEcolesRouteImport.update({
+    id: '/ecoles',
+    path: '/ecoles',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminDossiersRoute =
   AuthenticatedAdminDossiersRouteImport.update({
     id: '/dossiers',
@@ -265,10 +319,12 @@ export interface FileRoutesByFullPath {
   '/commercial': typeof AuthenticatedCommercialRouteWithChildren
   '/comptabilite': typeof AuthenticatedComptabiliteRouteWithChildren
   '/conseiller': typeof AuthenticatedConseillerRouteWithChildren
+  '/ecole': typeof AuthenticatedEcoleRouteWithChildren
   '/etudiant': typeof AuthenticatedEtudiantRouteWithChildren
   '/projets': typeof AuthenticatedProjetsRouteWithChildren
   '/rh': typeof AuthenticatedRhRouteWithChildren
   '/admin/dossiers': typeof AuthenticatedAdminDossiersRoute
+  '/admin/ecoles': typeof AuthenticatedAdminEcolesRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
   '/admin/rendez-vous': typeof AuthenticatedAdminRendezVousRoute
   '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
@@ -279,9 +335,14 @@ export interface FileRoutesByFullPath {
   '/conseiller/messages': typeof AuthenticatedConseillerMessagesRoute
   '/conseiller/rendez-vous': typeof AuthenticatedConseillerRendezVousRoute
   '/conseiller/validations': typeof AuthenticatedConseillerValidationsRoute
+  '/ecole/candidats': typeof AuthenticatedEcoleCandidatsRoute
+  '/etudiant/candidatures': typeof AuthenticatedEtudiantCandidaturesRoute
   '/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
   '/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
+  '/etudiant/ecoles': typeof AuthenticatedEtudiantEcolesRoute
   '/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
+  '/etudiant/parcours': typeof AuthenticatedEtudiantParcoursRoute
+  '/etudiant/profil': typeof AuthenticatedEtudiantProfilRoute
   '/etudiant/rendez-vous': typeof AuthenticatedEtudiantRendezVousRoute
   '/projets/liste': typeof AuthenticatedProjetsListeRoute
   '/rh/personnel': typeof AuthenticatedRhPersonnelRoute
@@ -289,6 +350,7 @@ export interface FileRoutesByFullPath {
   '/commercial/': typeof AuthenticatedCommercialIndexRoute
   '/comptabilite/': typeof AuthenticatedComptabiliteIndexRoute
   '/conseiller/': typeof AuthenticatedConseillerIndexRoute
+  '/ecole/': typeof AuthenticatedEcoleIndexRoute
   '/etudiant/': typeof AuthenticatedEtudiantIndexRoute
   '/projets/': typeof AuthenticatedProjetsIndexRoute
   '/rh/': typeof AuthenticatedRhIndexRoute
@@ -300,6 +362,7 @@ export interface FileRoutesByTo {
   '/unauthorized': typeof UnauthorizedRoute
   '/app': typeof AuthenticatedAppRoute
   '/admin/dossiers': typeof AuthenticatedAdminDossiersRoute
+  '/admin/ecoles': typeof AuthenticatedAdminEcolesRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
   '/admin/rendez-vous': typeof AuthenticatedAdminRendezVousRoute
   '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
@@ -310,9 +373,14 @@ export interface FileRoutesByTo {
   '/conseiller/messages': typeof AuthenticatedConseillerMessagesRoute
   '/conseiller/rendez-vous': typeof AuthenticatedConseillerRendezVousRoute
   '/conseiller/validations': typeof AuthenticatedConseillerValidationsRoute
+  '/ecole/candidats': typeof AuthenticatedEcoleCandidatsRoute
+  '/etudiant/candidatures': typeof AuthenticatedEtudiantCandidaturesRoute
   '/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
   '/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
+  '/etudiant/ecoles': typeof AuthenticatedEtudiantEcolesRoute
   '/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
+  '/etudiant/parcours': typeof AuthenticatedEtudiantParcoursRoute
+  '/etudiant/profil': typeof AuthenticatedEtudiantProfilRoute
   '/etudiant/rendez-vous': typeof AuthenticatedEtudiantRendezVousRoute
   '/projets/liste': typeof AuthenticatedProjetsListeRoute
   '/rh/personnel': typeof AuthenticatedRhPersonnelRoute
@@ -320,6 +388,7 @@ export interface FileRoutesByTo {
   '/commercial': typeof AuthenticatedCommercialIndexRoute
   '/comptabilite': typeof AuthenticatedComptabiliteIndexRoute
   '/conseiller': typeof AuthenticatedConseillerIndexRoute
+  '/ecole': typeof AuthenticatedEcoleIndexRoute
   '/etudiant': typeof AuthenticatedEtudiantIndexRoute
   '/projets': typeof AuthenticatedProjetsIndexRoute
   '/rh': typeof AuthenticatedRhIndexRoute
@@ -336,10 +405,12 @@ export interface FileRoutesById {
   '/_authenticated/commercial': typeof AuthenticatedCommercialRouteWithChildren
   '/_authenticated/comptabilite': typeof AuthenticatedComptabiliteRouteWithChildren
   '/_authenticated/conseiller': typeof AuthenticatedConseillerRouteWithChildren
+  '/_authenticated/ecole': typeof AuthenticatedEcoleRouteWithChildren
   '/_authenticated/etudiant': typeof AuthenticatedEtudiantRouteWithChildren
   '/_authenticated/projets': typeof AuthenticatedProjetsRouteWithChildren
   '/_authenticated/rh': typeof AuthenticatedRhRouteWithChildren
   '/_authenticated/admin/dossiers': typeof AuthenticatedAdminDossiersRoute
+  '/_authenticated/admin/ecoles': typeof AuthenticatedAdminEcolesRoute
   '/_authenticated/admin/messages': typeof AuthenticatedAdminMessagesRoute
   '/_authenticated/admin/rendez-vous': typeof AuthenticatedAdminRendezVousRoute
   '/_authenticated/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
@@ -350,9 +421,14 @@ export interface FileRoutesById {
   '/_authenticated/conseiller/messages': typeof AuthenticatedConseillerMessagesRoute
   '/_authenticated/conseiller/rendez-vous': typeof AuthenticatedConseillerRendezVousRoute
   '/_authenticated/conseiller/validations': typeof AuthenticatedConseillerValidationsRoute
+  '/_authenticated/ecole/candidats': typeof AuthenticatedEcoleCandidatsRoute
+  '/_authenticated/etudiant/candidatures': typeof AuthenticatedEtudiantCandidaturesRoute
   '/_authenticated/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
   '/_authenticated/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
+  '/_authenticated/etudiant/ecoles': typeof AuthenticatedEtudiantEcolesRoute
   '/_authenticated/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
+  '/_authenticated/etudiant/parcours': typeof AuthenticatedEtudiantParcoursRoute
+  '/_authenticated/etudiant/profil': typeof AuthenticatedEtudiantProfilRoute
   '/_authenticated/etudiant/rendez-vous': typeof AuthenticatedEtudiantRendezVousRoute
   '/_authenticated/projets/liste': typeof AuthenticatedProjetsListeRoute
   '/_authenticated/rh/personnel': typeof AuthenticatedRhPersonnelRoute
@@ -360,6 +436,7 @@ export interface FileRoutesById {
   '/_authenticated/commercial/': typeof AuthenticatedCommercialIndexRoute
   '/_authenticated/comptabilite/': typeof AuthenticatedComptabiliteIndexRoute
   '/_authenticated/conseiller/': typeof AuthenticatedConseillerIndexRoute
+  '/_authenticated/ecole/': typeof AuthenticatedEcoleIndexRoute
   '/_authenticated/etudiant/': typeof AuthenticatedEtudiantIndexRoute
   '/_authenticated/projets/': typeof AuthenticatedProjetsIndexRoute
   '/_authenticated/rh/': typeof AuthenticatedRhIndexRoute
@@ -376,10 +453,12 @@ export interface FileRouteTypes {
     | '/commercial'
     | '/comptabilite'
     | '/conseiller'
+    | '/ecole'
     | '/etudiant'
     | '/projets'
     | '/rh'
     | '/admin/dossiers'
+    | '/admin/ecoles'
     | '/admin/messages'
     | '/admin/rendez-vous'
     | '/admin/utilisateurs'
@@ -390,9 +469,14 @@ export interface FileRouteTypes {
     | '/conseiller/messages'
     | '/conseiller/rendez-vous'
     | '/conseiller/validations'
+    | '/ecole/candidats'
+    | '/etudiant/candidatures'
     | '/etudiant/documents'
     | '/etudiant/dossier'
+    | '/etudiant/ecoles'
     | '/etudiant/messages'
+    | '/etudiant/parcours'
+    | '/etudiant/profil'
     | '/etudiant/rendez-vous'
     | '/projets/liste'
     | '/rh/personnel'
@@ -400,6 +484,7 @@ export interface FileRouteTypes {
     | '/commercial/'
     | '/comptabilite/'
     | '/conseiller/'
+    | '/ecole/'
     | '/etudiant/'
     | '/projets/'
     | '/rh/'
@@ -411,6 +496,7 @@ export interface FileRouteTypes {
     | '/unauthorized'
     | '/app'
     | '/admin/dossiers'
+    | '/admin/ecoles'
     | '/admin/messages'
     | '/admin/rendez-vous'
     | '/admin/utilisateurs'
@@ -421,9 +507,14 @@ export interface FileRouteTypes {
     | '/conseiller/messages'
     | '/conseiller/rendez-vous'
     | '/conseiller/validations'
+    | '/ecole/candidats'
+    | '/etudiant/candidatures'
     | '/etudiant/documents'
     | '/etudiant/dossier'
+    | '/etudiant/ecoles'
     | '/etudiant/messages'
+    | '/etudiant/parcours'
+    | '/etudiant/profil'
     | '/etudiant/rendez-vous'
     | '/projets/liste'
     | '/rh/personnel'
@@ -431,6 +522,7 @@ export interface FileRouteTypes {
     | '/commercial'
     | '/comptabilite'
     | '/conseiller'
+    | '/ecole'
     | '/etudiant'
     | '/projets'
     | '/rh'
@@ -446,10 +538,12 @@ export interface FileRouteTypes {
     | '/_authenticated/commercial'
     | '/_authenticated/comptabilite'
     | '/_authenticated/conseiller'
+    | '/_authenticated/ecole'
     | '/_authenticated/etudiant'
     | '/_authenticated/projets'
     | '/_authenticated/rh'
     | '/_authenticated/admin/dossiers'
+    | '/_authenticated/admin/ecoles'
     | '/_authenticated/admin/messages'
     | '/_authenticated/admin/rendez-vous'
     | '/_authenticated/admin/utilisateurs'
@@ -460,9 +554,14 @@ export interface FileRouteTypes {
     | '/_authenticated/conseiller/messages'
     | '/_authenticated/conseiller/rendez-vous'
     | '/_authenticated/conseiller/validations'
+    | '/_authenticated/ecole/candidats'
+    | '/_authenticated/etudiant/candidatures'
     | '/_authenticated/etudiant/documents'
     | '/_authenticated/etudiant/dossier'
+    | '/_authenticated/etudiant/ecoles'
     | '/_authenticated/etudiant/messages'
+    | '/_authenticated/etudiant/parcours'
+    | '/_authenticated/etudiant/profil'
     | '/_authenticated/etudiant/rendez-vous'
     | '/_authenticated/projets/liste'
     | '/_authenticated/rh/personnel'
@@ -470,6 +569,7 @@ export interface FileRouteTypes {
     | '/_authenticated/commercial/'
     | '/_authenticated/comptabilite/'
     | '/_authenticated/conseiller/'
+    | '/_authenticated/ecole/'
     | '/_authenticated/etudiant/'
     | '/_authenticated/projets/'
     | '/_authenticated/rh/'
@@ -541,6 +641,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEtudiantRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/ecole': {
+      id: '/_authenticated/ecole'
+      path: '/ecole'
+      fullPath: '/ecole'
+      preLoaderRoute: typeof AuthenticatedEcoleRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/conseiller': {
       id: '/_authenticated/conseiller'
       path: '/conseiller'
@@ -597,6 +704,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEtudiantIndexRouteImport
       parentRoute: typeof AuthenticatedEtudiantRoute
     }
+    '/_authenticated/ecole/': {
+      id: '/_authenticated/ecole/'
+      path: '/'
+      fullPath: '/ecole/'
+      preLoaderRoute: typeof AuthenticatedEcoleIndexRouteImport
+      parentRoute: typeof AuthenticatedEcoleRoute
+    }
     '/_authenticated/conseiller/': {
       id: '/_authenticated/conseiller/'
       path: '/'
@@ -646,11 +760,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEtudiantRendezVousRouteImport
       parentRoute: typeof AuthenticatedEtudiantRoute
     }
+    '/_authenticated/etudiant/profil': {
+      id: '/_authenticated/etudiant/profil'
+      path: '/profil'
+      fullPath: '/etudiant/profil'
+      preLoaderRoute: typeof AuthenticatedEtudiantProfilRouteImport
+      parentRoute: typeof AuthenticatedEtudiantRoute
+    }
+    '/_authenticated/etudiant/parcours': {
+      id: '/_authenticated/etudiant/parcours'
+      path: '/parcours'
+      fullPath: '/etudiant/parcours'
+      preLoaderRoute: typeof AuthenticatedEtudiantParcoursRouteImport
+      parentRoute: typeof AuthenticatedEtudiantRoute
+    }
     '/_authenticated/etudiant/messages': {
       id: '/_authenticated/etudiant/messages'
       path: '/messages'
       fullPath: '/etudiant/messages'
       preLoaderRoute: typeof AuthenticatedEtudiantMessagesRouteImport
+      parentRoute: typeof AuthenticatedEtudiantRoute
+    }
+    '/_authenticated/etudiant/ecoles': {
+      id: '/_authenticated/etudiant/ecoles'
+      path: '/ecoles'
+      fullPath: '/etudiant/ecoles'
+      preLoaderRoute: typeof AuthenticatedEtudiantEcolesRouteImport
       parentRoute: typeof AuthenticatedEtudiantRoute
     }
     '/_authenticated/etudiant/dossier': {
@@ -666,6 +801,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/etudiant/documents'
       preLoaderRoute: typeof AuthenticatedEtudiantDocumentsRouteImport
       parentRoute: typeof AuthenticatedEtudiantRoute
+    }
+    '/_authenticated/etudiant/candidatures': {
+      id: '/_authenticated/etudiant/candidatures'
+      path: '/candidatures'
+      fullPath: '/etudiant/candidatures'
+      preLoaderRoute: typeof AuthenticatedEtudiantCandidaturesRouteImport
+      parentRoute: typeof AuthenticatedEtudiantRoute
+    }
+    '/_authenticated/ecole/candidats': {
+      id: '/_authenticated/ecole/candidats'
+      path: '/candidats'
+      fullPath: '/ecole/candidats'
+      preLoaderRoute: typeof AuthenticatedEcoleCandidatsRouteImport
+      parentRoute: typeof AuthenticatedEcoleRoute
     }
     '/_authenticated/conseiller/validations': {
       id: '/_authenticated/conseiller/validations'
@@ -737,6 +886,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminMessagesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/ecoles': {
+      id: '/_authenticated/admin/ecoles'
+      path: '/ecoles'
+      fullPath: '/admin/ecoles'
+      preLoaderRoute: typeof AuthenticatedAdminEcolesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/dossiers': {
       id: '/_authenticated/admin/dossiers'
       path: '/dossiers'
@@ -749,6 +905,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminDossiersRoute: typeof AuthenticatedAdminDossiersRoute
+  AuthenticatedAdminEcolesRoute: typeof AuthenticatedAdminEcolesRoute
   AuthenticatedAdminMessagesRoute: typeof AuthenticatedAdminMessagesRoute
   AuthenticatedAdminRendezVousRoute: typeof AuthenticatedAdminRendezVousRoute
   AuthenticatedAdminUtilisateursRoute: typeof AuthenticatedAdminUtilisateursRoute
@@ -758,6 +915,7 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminDossiersRoute: AuthenticatedAdminDossiersRoute,
+  AuthenticatedAdminEcolesRoute: AuthenticatedAdminEcolesRoute,
   AuthenticatedAdminMessagesRoute: AuthenticatedAdminMessagesRoute,
   AuthenticatedAdminRendezVousRoute: AuthenticatedAdminRendezVousRoute,
   AuthenticatedAdminUtilisateursRoute: AuthenticatedAdminUtilisateursRoute,
@@ -827,18 +985,40 @@ const AuthenticatedConseillerRouteWithChildren =
     AuthenticatedConseillerRouteChildren,
   )
 
+interface AuthenticatedEcoleRouteChildren {
+  AuthenticatedEcoleCandidatsRoute: typeof AuthenticatedEcoleCandidatsRoute
+  AuthenticatedEcoleIndexRoute: typeof AuthenticatedEcoleIndexRoute
+}
+
+const AuthenticatedEcoleRouteChildren: AuthenticatedEcoleRouteChildren = {
+  AuthenticatedEcoleCandidatsRoute: AuthenticatedEcoleCandidatsRoute,
+  AuthenticatedEcoleIndexRoute: AuthenticatedEcoleIndexRoute,
+}
+
+const AuthenticatedEcoleRouteWithChildren =
+  AuthenticatedEcoleRoute._addFileChildren(AuthenticatedEcoleRouteChildren)
+
 interface AuthenticatedEtudiantRouteChildren {
+  AuthenticatedEtudiantCandidaturesRoute: typeof AuthenticatedEtudiantCandidaturesRoute
   AuthenticatedEtudiantDocumentsRoute: typeof AuthenticatedEtudiantDocumentsRoute
   AuthenticatedEtudiantDossierRoute: typeof AuthenticatedEtudiantDossierRoute
+  AuthenticatedEtudiantEcolesRoute: typeof AuthenticatedEtudiantEcolesRoute
   AuthenticatedEtudiantMessagesRoute: typeof AuthenticatedEtudiantMessagesRoute
+  AuthenticatedEtudiantParcoursRoute: typeof AuthenticatedEtudiantParcoursRoute
+  AuthenticatedEtudiantProfilRoute: typeof AuthenticatedEtudiantProfilRoute
   AuthenticatedEtudiantRendezVousRoute: typeof AuthenticatedEtudiantRendezVousRoute
   AuthenticatedEtudiantIndexRoute: typeof AuthenticatedEtudiantIndexRoute
 }
 
 const AuthenticatedEtudiantRouteChildren: AuthenticatedEtudiantRouteChildren = {
+  AuthenticatedEtudiantCandidaturesRoute:
+    AuthenticatedEtudiantCandidaturesRoute,
   AuthenticatedEtudiantDocumentsRoute: AuthenticatedEtudiantDocumentsRoute,
   AuthenticatedEtudiantDossierRoute: AuthenticatedEtudiantDossierRoute,
+  AuthenticatedEtudiantEcolesRoute: AuthenticatedEtudiantEcolesRoute,
   AuthenticatedEtudiantMessagesRoute: AuthenticatedEtudiantMessagesRoute,
+  AuthenticatedEtudiantParcoursRoute: AuthenticatedEtudiantParcoursRoute,
+  AuthenticatedEtudiantProfilRoute: AuthenticatedEtudiantProfilRoute,
   AuthenticatedEtudiantRendezVousRoute: AuthenticatedEtudiantRendezVousRoute,
   AuthenticatedEtudiantIndexRoute: AuthenticatedEtudiantIndexRoute,
 }
@@ -881,6 +1061,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedCommercialRoute: typeof AuthenticatedCommercialRouteWithChildren
   AuthenticatedComptabiliteRoute: typeof AuthenticatedComptabiliteRouteWithChildren
   AuthenticatedConseillerRoute: typeof AuthenticatedConseillerRouteWithChildren
+  AuthenticatedEcoleRoute: typeof AuthenticatedEcoleRouteWithChildren
   AuthenticatedEtudiantRoute: typeof AuthenticatedEtudiantRouteWithChildren
   AuthenticatedProjetsRoute: typeof AuthenticatedProjetsRouteWithChildren
   AuthenticatedRhRoute: typeof AuthenticatedRhRouteWithChildren
@@ -892,6 +1073,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCommercialRoute: AuthenticatedCommercialRouteWithChildren,
   AuthenticatedComptabiliteRoute: AuthenticatedComptabiliteRouteWithChildren,
   AuthenticatedConseillerRoute: AuthenticatedConseillerRouteWithChildren,
+  AuthenticatedEcoleRoute: AuthenticatedEcoleRouteWithChildren,
   AuthenticatedEtudiantRoute: AuthenticatedEtudiantRouteWithChildren,
   AuthenticatedProjetsRoute: AuthenticatedProjetsRouteWithChildren,
   AuthenticatedRhRoute: AuthenticatedRhRouteWithChildren,
