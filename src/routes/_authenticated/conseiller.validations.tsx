@@ -75,10 +75,7 @@ export function Validations() {
   const download = async (path: string, name: string) => {
     const { data, error } = await supabase.storage.from("student-documents").createSignedUrl(path, 60);
     if (error || !data) return toast.error("Lien indisponible");
-    const a = document.createElement("a");
-    a.href = data.signedUrl;
-    a.download = name;
-    a.click();
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
   };
 
   /* ── Dossiers ── */

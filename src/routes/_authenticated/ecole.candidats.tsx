@@ -147,10 +147,7 @@ function EcoleCandidats() {
       toast.error("Accès refusé", { description: "Contactez l'administrateur pour activer l'accès aux documents." });
       return;
     }
-    const a = document.createElement("a");
-    a.href = data.signedUrl;
-    a.download = name;
-    a.click();
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
   }
 
   if (!schoolId) {

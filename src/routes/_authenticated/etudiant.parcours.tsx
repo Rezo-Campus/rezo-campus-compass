@@ -5,7 +5,6 @@ import { Loader2, Upload, Download, Trash2, GraduationCap } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -110,15 +109,12 @@ function EtudiantParcours() {
     onError: (e: Error) => toast.error("Erreur", { description: e.message }),
   });
 
-  async function downloadDoc(path: string, name: string) {
+  async function downloadDoc(path: string) {
     const { data, error } = await supabase.storage
       .from("student-documents")
       .createSignedUrl(path, 60);
     if (error) { toast.error("Erreur de téléchargement"); return; }
-    const a = document.createElement("a");
-    a.href = data.signedUrl;
-    a.download = name;
-    a.click();
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
   }
 
   return (
@@ -219,7 +215,7 @@ function EtudiantParcours() {
                         size="icon"
                         variant="ghost"
                         className="size-8"
-                        onClick={() => downloadDoc(d.storage_path, d.name)}
+                        onClick={() => downloadDoc(d.storage_path)}
                         title="Télécharger"
                       >
                         <Download className="size-4" />

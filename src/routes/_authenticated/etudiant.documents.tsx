@@ -102,10 +102,7 @@ function DocumentsEtudiant() {
       .from("student-documents")
       .createSignedUrl(path, 60);
     if (error || !data) return toast.error("Impossible de générer le lien");
-    const a = document.createElement("a");
-    a.href = data.signedUrl;
-    a.download = name;
-    a.click();
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
   };
 
   return (
