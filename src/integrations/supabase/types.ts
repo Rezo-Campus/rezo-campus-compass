@@ -138,6 +138,7 @@ export type Database = {
           id: string
           phone: string | null
           photo_url: string | null
+          school_id: string | null
           updated_at: string
         }
         Insert: {
@@ -148,6 +149,7 @@ export type Database = {
           id: string
           phone?: string | null
           photo_url?: string | null
+          school_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -158,6 +160,7 @@ export type Database = {
           id?: string
           phone?: string | null
           photo_url?: string | null
+          school_id?: string | null
           updated_at?: string
         }
         Relationships: []

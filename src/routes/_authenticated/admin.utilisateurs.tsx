@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, Ban, ShieldCheck, X, Plus } from "lucide-react";
+import { useState } from "react";
+import { Loader2, Ban, ShieldCheck, X, Plus, School } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -48,12 +56,16 @@ function AdminUsers() {
   const { data: auth } = useAuth();
   const currentUserId = auth?.user?.id;
 
+  const [pendingEcole, setPendingEcole] = useState<{ userId: string } | null>(null);
+  const [schoolPickId, setSchoolPickId] = useState("");
+  const [assigningSchool, setAssigningSchool] = useState(false);
+
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["admin-users"],
     queryFn: async () => {
       const { data: profs, error } = await supabase
         .from("profiles")
-        .select("id, email, full_name, phone, created_at, blocked_at")
+        .select("id, email, full_name, phone, created_at, blocked_at, school_id")
         .order("created_at", { ascending: false });
       if (error) throw error;
       const { data: roleRows } = await supabase.from("user_roles").select("user_id, role");
@@ -63,6 +75,15 @@ function AdminUsers() {
           .filter((r) => r.user_id === p.id)
           .map((r) => r.role as Role),
       }));
+    },
+  });
+
+  const { data: schools = [] } = useQuery({
+    queryKey: ["schools-list"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("schools").select("id, name").order("name");
+      if (error) throw error;
+      return data;
     },
   });
 
@@ -87,6 +108,9 @@ function AdminUsers() {
         .eq("user_id", userId)
         .eq("role", role);
       if (error) throw error;
+      if (role === "ecole") {
+        await supabase.from("profiles").update({ school_id: null }).eq("id", userId);
+      }
     },
     onSuccess: () => {
       toast.success("Rôle retiré");
@@ -110,6 +134,48 @@ function AdminUsers() {
     },
     onError: (e: Error) => toast.error("Erreur", { description: e.message }),
   });
+
+  async function confirmEcoleAssignment() {
+    if (!pendingEcole || !schoolPickId) return;
+    setAssigningSchool(true);
+    try {
+      const { error: roleErr } = await supabase
+        .from("user_roles")
+        .upsert(
+          { user_id: pendingEcole.userId, role: "ecole" },
+          { onConflict: "user_id,role", ignoreDuplicates: true }
+        );
+      if (roleErr) throw roleErr;
+      const { error: profileErr } = await supabase
+        .from("profiles")
+        .update({ school_id: schoolPickId })
+        .eq("id", pendingEcole.userId);
+      if (profileErr) throw profileErr;
+      toast.success("Rôle Établissement attribué");
+      qc.invalidateQueries({ queryKey: ["admin-users"] });
+      qc.invalidateQueries({ queryKey: ["auth-session"] });
+      setPendingEcole(null);
+      setSchoolPickId("");
+    } catch (e: unknown) {
+      toast.error("Erreur", { description: (e as Error).message });
+    } finally {
+      setAssigningSchool(false);
+    }
+  }
+
+  async function changeSchool(userId: string, schoolId: string) {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ school_id: schoolId })
+      .eq("id", userId);
+    if (error) {
+      toast.error("Erreur", { description: error.message });
+    } else {
+      toast.success("École modifiée");
+      qc.invalidateQueries({ queryKey: ["admin-users"] });
+      qc.invalidateQueries({ queryKey: ["auth-session"] });
+    }
+  }
 
   const pending = rows.filter((r) => !r.roles.length && !r.blocked_at).length;
   const blocked = rows.filter((r) => r.blocked_at).length;
@@ -148,6 +214,9 @@ function AdminUsers() {
             <TableBody>
               {rows.map((u) => {
                 const available = ALL_ROLES.filter((r) => !u.roles.includes(r));
+                const assignedSchool = u.roles.includes("ecole")
+                  ? schools.find((s) => s.id === u.school_id)
+                  : null;
                 return (
                   <TableRow
                     key={u.id}
@@ -173,19 +242,46 @@ function AdminUsers() {
                           </Badge>
                         )}
                         {u.roles.map((r) => (
-                          <Badge key={r} variant="secondary" className="gap-1 capitalize">
-                            {ROLE_LABELS[r]}
-                            {u.id !== currentUserId && (
-                              <button
-                                onClick={() => removeRole.mutate({ userId: u.id, role: r })}
-                                disabled={removeRole.isPending}
-                                className="ml-0.5 rounded-sm opacity-70 transition hover:opacity-100 hover:text-destructive"
-                                title={`Retirer ${ROLE_LABELS[r]}`}
-                              >
-                                <X className="size-3" />
-                              </button>
+                          <span key={r} className="inline-flex items-center gap-1">
+                            <Badge variant="secondary" className="gap-1 capitalize">
+                              {r === "ecole" && <School className="size-3" />}
+                              {ROLE_LABELS[r]}
+                              {u.id !== currentUserId && (
+                                <button
+                                  onClick={() => removeRole.mutate({ userId: u.id, role: r })}
+                                  disabled={removeRole.isPending}
+                                  className="ml-0.5 rounded-sm opacity-70 transition hover:opacity-100 hover:text-destructive"
+                                  title={`Retirer ${ROLE_LABELS[r]}`}
+                                >
+                                  <X className="size-3" />
+                                </button>
+                              )}
+                            </Badge>
+                            {r === "ecole" && (
+                              assignedSchool ? (
+                                <Select
+                                  value={u.school_id ?? ""}
+                                  onValueChange={(v) => changeSchool(u.id, v)}
+                                >
+                                  <SelectTrigger className="h-6 w-auto gap-1 border-dashed px-2 text-xs text-muted-foreground">
+                                    <SelectValue placeholder="Choisir une école" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {schools.map((s) => (
+                                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              ) : (
+                                <button
+                                  onClick={() => { setPendingEcole({ userId: u.id }); setSchoolPickId(""); }}
+                                  className="rounded bg-amber-100 px-2 py-0.5 text-[10px] text-amber-700 hover:bg-amber-200"
+                                >
+                                  Affecter une école
+                                </button>
+                              )
                             )}
-                          </Badge>
+                          </span>
                         ))}
                       </div>
                     </TableCell>
@@ -193,7 +289,14 @@ function AdminUsers() {
                       {!u.blocked_at && u.id !== currentUserId && available.length > 0 && (
                         <Select
                           value=""
-                          onValueChange={(v) => v && addRole.mutate({ userId: u.id, role: v as Role })}
+                          onValueChange={(v) => {
+                            if (v === "ecole") {
+                              setPendingEcole({ userId: u.id });
+                              setSchoolPickId("");
+                            } else {
+                              addRole.mutate({ userId: u.id, role: v as Role });
+                            }
+                          }}
                         >
                           <SelectTrigger className="w-[160px]">
                             <span className="flex items-center gap-1 text-muted-foreground">
@@ -240,6 +343,42 @@ function AdminUsers() {
           </Table>
         )}
       </Panel>
+
+      {/* Dialog : choisir l'école lors de l'attribution du rôle Établissement */}
+      <Dialog open={!!pendingEcole} onOpenChange={(o) => { if (!o) setPendingEcole(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <School className="size-5" /> Affecter un établissement
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Sélectionnez l'école dont cet utilisateur est le responsable. Il n'aura accès qu'aux candidatures de cet établissement.
+          </p>
+          <Select value={schoolPickId} onValueChange={setSchoolPickId}>
+            <SelectTrigger>
+              <SelectValue placeholder="Choisir une école…" />
+            </SelectTrigger>
+            <SelectContent>
+              {schools.map((s) => (
+                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setPendingEcole(null)}>
+              Annuler
+            </Button>
+            <Button
+              disabled={!schoolPickId || assigningSchool}
+              onClick={confirmEcoleAssignment}
+            >
+              {assigningSchool && <Loader2 className="mr-2 size-4 animate-spin" />}
+              Attribuer le rôle
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

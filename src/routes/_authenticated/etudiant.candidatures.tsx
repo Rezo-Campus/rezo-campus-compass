@@ -1,12 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Loader2, Send, Trash2, AlertCircle, CheckCircle2, School } from "lucide-react";
+import {
+  Loader2, Send, Trash2, AlertCircle, CheckCircle2, School, Clock, ShieldCheck,
+} from "lucide-react";
 import { toast } from "sonner";
-import { PageHeader, Panel } from "@/components/dashboard-bits";
+import { PageHeader } from "@/components/dashboard-bits";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -79,9 +80,7 @@ function EtudiantCandidatures() {
       }));
 
       const initialLetters: Record<string, string> = {};
-      result.forEach((a) => {
-        initialLetters[a.id] = a.motivation_letter ?? "";
-      });
+      result.forEach((a) => { initialLetters[a.id] = a.motivation_letter ?? ""; });
       setLetters((prev) => ({ ...initialLetters, ...prev }));
 
       return result;
@@ -97,6 +96,22 @@ function EtudiantCandidatures() {
       toast.success("Candidature retirée");
       qc.invalidateQueries({ queryKey: ["my-candidatures", uid] });
       qc.invalidateQueries({ queryKey: ["my-applications", uid] });
+    },
+    onError: (e: Error) => toast.error("Erreur", { description: e.message }),
+  });
+
+  const submitDossier = useMutation({
+    mutationFn: async () => {
+      const ids = draftApps.map((a) => a.id);
+      const { error } = await supabase
+        .from("student_applications")
+        .update({ status: "soumis" })
+        .in("id", ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Dossier soumis au conseiller !");
+      qc.invalidateQueries({ queryKey: ["my-candidatures", uid] });
     },
     onError: (e: Error) => toast.error("Erreur", { description: e.message }),
   });
@@ -118,45 +133,75 @@ function EtudiantCandidatures() {
     }
   }
 
-  const totalApps = applications.length;
-  const missingLetters = applications.filter((a) => !a.motivation_letter).length;
+  const draftApps = applications.filter((a) => a.status === "selection");
+  const submittedApps = applications.filter((a) => a.status !== "selection");
+  const missingLetters = draftApps.filter((a) => !a.motivation_letter).length;
+  const canSubmit = draftApps.length > 0;
 
   return (
     <>
       <PageHeader
         eyebrow="Mes candidatures"
         title="Panier de formations"
-        description="Gérez vos candidatures et rédigez vos lettres de motivation."
+        description="Gérez vos candidatures et soumettez votre dossier au conseiller."
       />
 
-      {/* Counter banner */}
-      {totalApps > 0 && (
-        <div className={`mb-6 flex items-center gap-3 rounded-xl border p-4 ${
+      {/* Banner de soumission */}
+      {draftApps.length > 0 && (
+        <div className={`mb-6 rounded-xl border p-4 ${
           missingLetters > 0
             ? "border-amber-300 bg-amber-50"
             : "border-green-300 bg-green-50"
         }`}>
-          {missingLetters > 0 ? (
-            <AlertCircle className="size-5 shrink-0 text-amber-600" />
-          ) : (
-            <CheckCircle2 className="size-5 shrink-0 text-green-600" />
-          )}
-          <div>
+          <div className="flex flex-wrap items-center gap-3">
             {missingLetters > 0 ? (
-              <p className="text-sm font-medium text-amber-800">
-                Il vous reste <strong>{missingLetters} lettre{missingLetters > 1 ? "s" : ""} de motivation</strong> à rédiger sur {totalApps} candidature{totalApps > 1 ? "s" : ""}.
-              </p>
+              <AlertCircle className="size-5 shrink-0 text-amber-600" />
             ) : (
-              <p className="text-sm font-medium text-green-800">
-                Toutes vos lettres de motivation sont rédigées ! Votre dossier est complet.
-              </p>
+              <CheckCircle2 className="size-5 shrink-0 text-green-600" />
             )}
+            <div className="flex-1">
+              {missingLetters > 0 ? (
+                <p className="text-sm font-medium text-amber-800">
+                  Il vous reste <strong>{missingLetters} lettre{missingLetters > 1 ? "s" : ""}</strong> à rédiger avant de soumettre.
+                </p>
+              ) : (
+                <p className="text-sm font-medium text-green-800">
+                  Toutes vos lettres sont rédigées. Votre dossier est prêt à être soumis.
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {draftApps.length} candidature{draftApps.length > 1 ? "s" : ""} en brouillon
+              </p>
+            </div>
+            <Button
+              size="sm"
+              disabled={!canSubmit || missingLetters > 0 || submitDossier.isPending}
+              onClick={() => submitDossier.mutate()}
+              className="shrink-0"
+            >
+              {submitDossier.isPending ? (
+                <Loader2 className="mr-2 size-4 animate-spin" />
+              ) : (
+                <Send className="mr-2 size-4" />
+              )}
+              Soumettre mon dossier
+            </Button>
           </div>
-          {missingLetters > 0 && (
-            <span className="ml-auto rounded-full bg-amber-100 px-3 py-1 text-sm font-bold text-amber-700">
-              {missingLetters} restante{missingLetters > 1 ? "s" : ""}
-            </span>
-          )}
+        </div>
+      )}
+
+      {/* Banner dossier soumis */}
+      {submittedApps.length > 0 && draftApps.length === 0 && (
+        <div className="mb-6 flex items-center gap-3 rounded-xl border border-blue-300 bg-blue-50 p-4">
+          <Clock className="size-5 shrink-0 text-blue-600" />
+          <div>
+            <p className="text-sm font-medium text-blue-800">
+              Votre dossier a été soumis et est en cours d'examen.
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Le conseiller validera vos candidatures avant de les transmettre aux établissements.
+            </p>
+          </div>
         </div>
       )}
 
@@ -181,8 +226,9 @@ function EtudiantCandidatures() {
             const letterDraft = letters[app.id] ?? "";
             const hasLetter = !!app.motivation_letter;
             const isDirty = letterDraft !== (app.motivation_letter ?? "");
+            const isSubmitted = app.status !== "selection";
             return (
-              <Panel key={app.id}>
+              <div key={app.id} className="rounded-xl border border-border bg-card p-4 shadow-sm">
                 <div className="flex items-start gap-4">
                   {app.school?.logo_url ? (
                     <img
@@ -201,6 +247,11 @@ function EtudiantCandidatures() {
                       <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[app.status] ?? "bg-muted text-muted-foreground"}`}>
                         {STATUS_LABELS[app.status] ?? app.status}
                       </span>
+                      {app.status === "valide" && (
+                        <span className="flex items-center gap-1 text-[10px] text-green-700">
+                          <ShieldCheck className="size-3" /> Transmis à l'école
+                        </span>
+                      )}
                     </div>
                     <div className="mt-0.5 text-sm text-muted-foreground">
                       {app.school?.name}
@@ -208,23 +259,25 @@ function EtudiantCandidatures() {
                       {app.program?.domain && ` · ${app.program.domain}`}
                     </div>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
-                    onClick={() => removeApplication.mutate(app.id)}
-                    disabled={removeApplication.isPending}
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
+                  {!isSubmitted && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
+                      onClick={() => removeApplication.mutate(app.id)}
+                      disabled={removeApplication.isPending}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  )}
                 </div>
 
-                {/* Motivation letter */}
+                {/* Lettre de motivation */}
                 <div className="mt-4">
                   <div className="mb-2 flex items-center justify-between">
                     <p className="text-sm font-medium">
                       Lettre de motivation
-                      {!hasLetter && (
+                      {!hasLetter && !isSubmitted && (
                         <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] text-amber-700">
                           À rédiger
                         </span>
@@ -242,8 +295,8 @@ function EtudiantCandidatures() {
                     onChange={(e) =>
                       setLetters((prev) => ({ ...prev, [app.id]: e.target.value }))
                     }
-                    placeholder="Rédigez votre lettre de motivation pour cette formation. Expliquez pourquoi vous souhaitez intégrer ce programme, vos motivations et vos objectifs professionnels..."
-                    className={!hasLetter && !letterDraft ? "border-amber-300 focus-visible:ring-amber-400" : ""}
+                    placeholder="Rédigez votre lettre de motivation pour cette formation..."
+                    className={!hasLetter && !letterDraft && !isSubmitted ? "border-amber-300 focus-visible:ring-amber-400" : ""}
                   />
                   <div className="mt-2 flex justify-end">
                     <Button
@@ -260,7 +313,7 @@ function EtudiantCandidatures() {
                     </Button>
                   </div>
                 </div>
-              </Panel>
+              </div>
             );
           })}
         </div>
