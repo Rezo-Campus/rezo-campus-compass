@@ -7,4 +7,4 @@ Disallow: /conseiller/
 Disallow: /app
 Disallow: /unauthorized
 
-Sitemap: https://rezoboutique.shop/sitemap.xml
+Sitemap: https://rezoconnect.com/sitemap.xml
