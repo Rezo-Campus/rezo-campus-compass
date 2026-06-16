@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 import { Plus, Pencil, Trash2, Loader2, TrendingUp, TrendingDown } from "lucide-react";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { toast } from "sonner";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
 import { Badge } from "@/components/ui/badge";
@@ -59,6 +60,7 @@ function Transactions() {
   const [form, setForm] = useState(emptyForm);
   const [filterType, setFilterType] = useState("tous");
   const [filterBranch, setFilterBranch] = useState("tous");
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const { data: txns = [], isLoading } = useQuery({
     queryKey: ["transactions"],
@@ -261,7 +263,7 @@ function Transactions() {
                   <Button size="sm" variant="ghost" onClick={() => openEdit(t)} title="Modifier">
                     <Pencil className="size-4" />
                   </Button>
-                  <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => del.mutate(t.id)} disabled={del.isPending} title="Supprimer">
+                  <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => setPendingDeleteId(t.id)} title="Supprimer">
                     <Trash2 className="size-4" />
                   </Button>
                 </div>
@@ -270,6 +272,18 @@ function Transactions() {
           </ul>
         )}
       </Panel>
+
+      <ConfirmDialog
+        open={pendingDeleteId !== null}
+        onOpenChange={(o) => { if (!o) setPendingDeleteId(null); }}
+        title="Supprimer cette transaction ?"
+        description="Cette action est irréversible. La transaction sera définitivement supprimée."
+        onConfirm={() => {
+          if (pendingDeleteId) del.mutate(pendingDeleteId);
+          setPendingDeleteId(null);
+        }}
+        loading={del.isPending}
+      />
     </>
   );
 }

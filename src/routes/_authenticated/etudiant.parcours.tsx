@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 export const Route = createFileRoute("/_authenticated/etudiant/parcours")({
   component: EtudiantParcours,
@@ -45,6 +46,7 @@ function EtudiantParcours() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [selectedType, setSelectedType] = useState<"diplome" | "releve_notes">("diplome");
   const [uploading, setUploading] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<{ docId: string; storagePath: string } | null>(null);
 
   const { data: docs = [], isLoading } = useQuery({
     enabled: !!uid,
@@ -224,8 +226,7 @@ function EtudiantParcours() {
                         size="icon"
                         variant="ghost"
                         className="size-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => deleteDoc.mutate({ docId: d.id, storagePath: d.storage_path })}
-                        disabled={deleteDoc.isPending}
+                        onClick={() => setPendingDelete({ docId: d.id, storagePath: d.storage_path })}
                         title="Supprimer"
                       >
                         <Trash2 className="size-4" />
@@ -238,6 +239,18 @@ function EtudiantParcours() {
           </Panel>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        onOpenChange={(o) => { if (!o) setPendingDelete(null); }}
+        title="Supprimer ce document ?"
+        description="Ce document sera définitivement supprimé et ne pourra pas être récupéré."
+        onConfirm={() => {
+          if (pendingDelete) deleteDoc.mutate(pendingDelete);
+          setPendingDelete(null);
+        }}
+        loading={deleteDoc.isPending}
+      />
     </>
   );
 }

@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useRef, type FormEvent } from "react";
 import { Plus, Pencil, Trash2, Loader2, Download } from "lucide-react";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { toast } from "sonner";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
 import { Badge } from "@/components/ui/badge";
@@ -98,6 +99,7 @@ function RhPersonnel() {
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [existingCvPath, setExistingCvPath] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<Personnel | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [cvUploading, setcvUploading] = useState(false);
@@ -484,8 +486,7 @@ function RhPersonnel() {
                         size="sm"
                         variant="ghost"
                         className="text-destructive hover:bg-destructive/10"
-                        onClick={() => del.mutate(p)}
-                        disabled={del.isPending}
+                        onClick={() => setPendingDelete(p)}
                         title="Supprimer"
                       >
                         <Trash2 className="size-4" />
@@ -498,6 +499,18 @@ function RhPersonnel() {
           </Table>
         )}
       </Panel>
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        onOpenChange={(o) => { if (!o) setPendingDelete(null); }}
+        title="Supprimer ce membre ?"
+        description="Cette action est irréversible. Le dossier du personnel sera définitivement supprimé."
+        onConfirm={() => {
+          if (pendingDelete) del.mutate(pendingDelete);
+          setPendingDelete(null);
+        }}
+        loading={del.isPending}
+      />
     </>
   );
 }

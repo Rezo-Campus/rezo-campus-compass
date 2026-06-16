@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Loader2, Send, Pencil, Trash2, Check, X } from "lucide-react";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { toast } from "sonner";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
 import { Button } from "@/components/ui/button";
@@ -82,6 +83,7 @@ export function Thread({ me, peer }: { me: string; peer: string }) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editBody, setEditBody] = useState("");
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const key = useMemo(() => ["thread", me, peer], [me, peer]);
@@ -202,8 +204,7 @@ export function Thread({ me, peer }: { me: string; peer: string }) {
                           <Pencil className="size-3" />
                         </button>
                         <button
-                          onClick={() => deleteMsg.mutate(m.id)}
-                          disabled={deleteMsg.isPending}
+                          onClick={() => setPendingDeleteId(m.id)}
                           className="flex size-6 items-center justify-center rounded-full bg-muted text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
                           title="Supprimer"
                         >
@@ -282,6 +283,18 @@ export function Thread({ me, peer }: { me: string; peer: string }) {
           {send.isPending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
         </Button>
       </form>
+
+      <ConfirmDialog
+        open={pendingDeleteId !== null}
+        onOpenChange={(o) => { if (!o) setPendingDeleteId(null); }}
+        title="Supprimer ce message ?"
+        description="Ce message sera définitivement supprimé pour vous et votre interlocuteur."
+        onConfirm={() => {
+          if (pendingDeleteId) deleteMsg.mutate(pendingDeleteId);
+          setPendingDeleteId(null);
+        }}
+        loading={deleteMsg.isPending}
+      />
     </Panel>
   );
 }

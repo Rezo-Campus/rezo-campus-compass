@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { toast } from "sonner";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
 import { Badge } from "@/components/ui/badge";
@@ -79,6 +80,7 @@ function CommercialActivites() {
   const [form, setForm] = useState(emptyForm);
   const [filterStatus, setFilterStatus] = useState("tous");
   const [filterType, setFilterType] = useState("tous");
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const { data: leads = [], isLoading } = useQuery({
     queryKey: ["commercial-leads"],
@@ -281,13 +283,25 @@ function CommercialActivites() {
                 </div>
                 <div className="flex shrink-0 gap-1">
                   <Button size="sm" variant="ghost" onClick={() => openEdit(l)} title="Modifier"><Pencil className="size-4" /></Button>
-                  <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => del.mutate(l.id)} disabled={del.isPending} title="Supprimer"><Trash2 className="size-4" /></Button>
+                  <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => setPendingDeleteId(l.id)} title="Supprimer"><Trash2 className="size-4" /></Button>
                 </div>
               </li>
             ))}
           </ul>
         )}
       </Panel>
+
+      <ConfirmDialog
+        open={pendingDeleteId !== null}
+        onOpenChange={(o) => { if (!o) setPendingDeleteId(null); }}
+        title="Supprimer cette activité ?"
+        description="Cette action est irréversible. L'activité commerciale sera définitivement supprimée."
+        onConfirm={() => {
+          if (pendingDeleteId) del.mutate(pendingDeleteId);
+          setPendingDeleteId(null);
+        }}
+        loading={del.isPending}
+      />
     </>
   );
 }

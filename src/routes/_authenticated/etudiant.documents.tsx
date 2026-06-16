@@ -16,6 +16,7 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 type DocType = Database["public"]["Enums"]["document_type"];
 type DocStatus = Database["public"]["Enums"]["document_status"];
@@ -40,6 +41,7 @@ function DocumentsEtudiant() {
   const fileInput = useRef<HTMLInputElement>(null);
   const [type, setType] = useState<DocType>("identite");
   const [uploading, setUploading] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; storage_path: string } | null>(null);
 
   const { data: docs = [], isLoading } = useQuery({
     enabled: !!uid,
@@ -169,7 +171,7 @@ function DocumentsEtudiant() {
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={() => del.mutate({ id: d.id, storage_path: d.storage_path })}
+                    onClick={() => setPendingDelete({ id: d.id, storage_path: d.storage_path })}
                   >
                     <Trash2 className="size-4 text-destructive" />
                   </Button>
@@ -179,6 +181,18 @@ function DocumentsEtudiant() {
           </ul>
         )}
       </Panel>
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        onOpenChange={(o) => { if (!o) setPendingDelete(null); }}
+        title="Supprimer ce document ?"
+        description="Ce document sera définitivement supprimé et ne pourra pas être récupéré."
+        onConfirm={() => {
+          if (pendingDelete) del.mutate(pendingDelete);
+          setPendingDelete(null);
+        }}
+        loading={del.isPending}
+      />
     </>
   );
 }

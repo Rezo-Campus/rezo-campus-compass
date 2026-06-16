@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { toast } from "sonner";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ export function RdvConseiller() {
   const isAdmin = auth?.role === "admin";
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const { data: rdvs = [] } = useQuery({
     enabled: !!uid,
@@ -144,8 +146,7 @@ export function RdvConseiller() {
           <Button
             size="sm" variant="ghost"
             className="text-destructive hover:bg-destructive/10"
-            onClick={() => deleteRdv.mutate(r.id)}
-            disabled={deleteRdv.isPending}
+            onClick={() => setPendingDeleteId(r.id)}
             title="Supprimer"
           >
             <Trash2 className="size-4" />
@@ -244,6 +245,18 @@ export function RdvConseiller() {
           )}
         </Panel>
       </div>
+
+      <ConfirmDialog
+        open={pendingDeleteId !== null}
+        onOpenChange={(o) => { if (!o) setPendingDeleteId(null); }}
+        title="Supprimer ce rendez-vous ?"
+        description="Cette action est irréversible. Le rendez-vous sera définitivement supprimé."
+        onConfirm={() => {
+          if (pendingDeleteId) deleteRdv.mutate(pendingDeleteId);
+          setPendingDeleteId(null);
+        }}
+        loading={deleteRdv.isPending}
+      />
     </>
   );
 }

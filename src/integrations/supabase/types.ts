@@ -654,6 +654,99 @@ export type Database = {
         }
         Relationships: []
       }
+      courriers: {
+        Row: {
+          id: string
+          type: string
+          objet: string
+          expediteur: string | null
+          destinataire: string | null
+          date_courrier: string
+          reference: string | null
+          document_path: string | null
+          document_name: string | null
+          notes: string | null
+          created_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          type: string
+          objet: string
+          expediteur?: string | null
+          destinataire?: string | null
+          date_courrier?: string
+          reference?: string | null
+          document_path?: string | null
+          document_name?: string | null
+          notes?: string | null
+          created_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          type?: string
+          objet?: string
+          expediteur?: string | null
+          destinataire?: string | null
+          date_courrier?: string
+          reference?: string | null
+          document_path?: string | null
+          document_name?: string | null
+          notes?: string | null
+          created_by?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      clients: {
+        Row: {
+          id: string
+          type: string
+          prenom: string | null
+          nom: string | null
+          nom_entreprise: string | null
+          email: string | null
+          telephone: string | null
+          adresse_physique: string | null
+          description_besoins: string | null
+          observations: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          type: string
+          prenom?: string | null
+          nom?: string | null
+          nom_entreprise?: string | null
+          email?: string | null
+          telephone?: string | null
+          adresse_physique?: string | null
+          description_besoins?: string | null
+          observations?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          type?: string
+          prenom?: string | null
+          nom?: string | null
+          nom_entreprise?: string | null
+          email?: string | null
+          telephone?: string | null
+          adresse_physique?: string | null
+          description_besoins?: string | null
+          observations?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -676,7 +769,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "etudiant" | "conseiller" | "admin" | "comptable" | "chef_projet" | "commercial" | "rh" | "ecole"
+      app_role: "etudiant" | "conseiller" | "admin" | "comptable" | "chef_projet" | "commercial" | "rh" | "ecole" | "secretaire"
       appointment_status: "programme" | "termine" | "annule"
       document_status: "en_attente" | "valide" | "rejete"
       document_type:

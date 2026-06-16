@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Loader2, Plus, Pencil, Trash2, ChevronDown, ChevronRight, Globe, School, Download } from "lucide-react";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { toast } from "sonner";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
 import { Button } from "@/components/ui/button";
@@ -85,6 +86,8 @@ function AdminEcoles() {
   const [programDialog, setProgramDialog] = useState(false);
   const [editingProgram, setEditingProgram] = useState<Program | null>(null);
   const [activeSchoolId, setActiveSchoolId] = useState<string | null>(null);
+  const [pendingDeleteSchool, setPendingDeleteSchool] = useState<string | null>(null);
+  const [pendingDeleteProgram, setPendingDeleteProgram] = useState<{ id: string; schoolId: string } | null>(null);
   const [programForm, setProgramForm] = useState<typeof EMPTY_PROGRAM>({ ...EMPTY_PROGRAM });
 
   const { data: schools = [], isLoading } = useQuery({
@@ -383,8 +386,7 @@ function AdminEcoles() {
                         size="sm"
                         variant="ghost"
                         className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                        onClick={() => deleteSchool.mutate(s.id)}
-                        disabled={deleteSchool.isPending}
+                        onClick={() => setPendingDeleteSchool(s.id)}
                       >
                         <Trash2 className="size-4" />
                       </Button>
@@ -427,8 +429,7 @@ function AdminEcoles() {
                                   size="sm"
                                   variant="ghost"
                                   className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                  onClick={() => { setActiveSchoolId(p.school_id); deleteProgram.mutate(p.id); }}
-                                  disabled={deleteProgram.isPending}
+                                  onClick={() => setPendingDeleteProgram({ id: p.id, schoolId: p.school_id })}
                                 >
                                   <Trash2 className="size-3.5" />
                                 </Button>
@@ -584,6 +585,33 @@ function AdminEcoles() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={pendingDeleteSchool !== null}
+        onOpenChange={(o) => { if (!o) setPendingDeleteSchool(null); }}
+        title="Supprimer cet établissement ?"
+        description="L'établissement et toutes ses formations seront définitivement supprimés."
+        onConfirm={() => {
+          if (pendingDeleteSchool) deleteSchool.mutate(pendingDeleteSchool);
+          setPendingDeleteSchool(null);
+        }}
+        loading={deleteSchool.isPending}
+      />
+
+      <ConfirmDialog
+        open={pendingDeleteProgram !== null}
+        onOpenChange={(o) => { if (!o) setPendingDeleteProgram(null); }}
+        title="Supprimer cette formation ?"
+        description="Cette formation sera définitivement supprimée de l'établissement."
+        onConfirm={() => {
+          if (pendingDeleteProgram) {
+            setActiveSchoolId(pendingDeleteProgram.schoolId);
+            deleteProgram.mutate(pendingDeleteProgram.id);
+          }
+          setPendingDeleteProgram(null);
+        }}
+        loading={deleteProgram.isPending}
+      />
     </>
   );
 }

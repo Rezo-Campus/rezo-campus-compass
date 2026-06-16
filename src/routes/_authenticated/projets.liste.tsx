@@ -5,6 +5,7 @@ import {
   Plus, Pencil, Trash2, Loader2, ChevronDown, ChevronRight,
   CheckSquare, FileText, Lightbulb, CheckCircle2,
 } from "lucide-react";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { toast } from "sonner";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
 import { Button } from "@/components/ui/button";
@@ -166,6 +167,9 @@ function ProjetsListe() {
   /* Tâches */
   const [taskForms, setTaskForms] = useState<Record<string, typeof emptyTask>>({});
   const [addingTask, setAddingTask] = useState<string | null>(null);
+  const [pendingDeleteProject, setPendingDeleteProject] = useState<string | null>(null);
+  const [pendingDeleteFeature, setPendingDeleteFeature] = useState<{ featureId: string; projectId: string } | null>(null);
+  const [pendingDeleteTask, setPendingDeleteTask] = useState<{ taskId: string; projectId: string } | null>(null);
 
   /* Fonctionnalités */
   const [featureDialogOpen, setFeatureDialogOpen] = useState(false);
@@ -688,8 +692,7 @@ function ProjetsListe() {
                       </Button>
                       <Button size="sm" variant="ghost"
                         className="text-destructive hover:bg-destructive/10"
-                        onClick={() => deleteProject.mutate(p.id)}
-                        disabled={deleteProject.isPending}
+                        onClick={() => setPendingDeleteProject(p.id)}
                         title="Supprimer"
                       >
                         <Trash2 className="size-4" />
@@ -856,7 +859,7 @@ function ProjetsListe() {
                                         <Pencil className="size-3.5" />
                                       </button>
                                       <button
-                                        onClick={() => deleteFeature.mutate({ featureId: f.id, projectId: p.id })}
+                                        onClick={() => setPendingDeleteFeature({ featureId: f.id, projectId: p.id })}
                                         className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                                         title="Supprimer"
                                       >
@@ -903,7 +906,7 @@ function ProjetsListe() {
                                       </span>
                                     )}
                                     <button
-                                      onClick={() => deleteTask.mutate({ taskId: t.id, projectId: p.id })}
+                                      onClick={() => setPendingDeleteTask({ taskId: t.id, projectId: p.id })}
                                       className="text-muted-foreground hover:text-destructive"
                                     >
                                       <Trash2 className="size-3.5" />
@@ -951,6 +954,42 @@ function ProjetsListe() {
           </ul>
         )}
       </Panel>
+
+      <ConfirmDialog
+        open={pendingDeleteProject !== null}
+        onOpenChange={(o) => { if (!o) setPendingDeleteProject(null); }}
+        title="Supprimer ce projet ?"
+        description="Le projet, ses fonctionnalités et ses tâches seront définitivement supprimés."
+        onConfirm={() => {
+          if (pendingDeleteProject) deleteProject.mutate(pendingDeleteProject);
+          setPendingDeleteProject(null);
+        }}
+        loading={deleteProject.isPending}
+      />
+
+      <ConfirmDialog
+        open={pendingDeleteFeature !== null}
+        onOpenChange={(o) => { if (!o) setPendingDeleteFeature(null); }}
+        title="Supprimer cette fonctionnalité ?"
+        description="Cette fonctionnalité sera définitivement supprimée du projet."
+        onConfirm={() => {
+          if (pendingDeleteFeature) deleteFeature.mutate(pendingDeleteFeature);
+          setPendingDeleteFeature(null);
+        }}
+        loading={deleteFeature.isPending}
+      />
+
+      <ConfirmDialog
+        open={pendingDeleteTask !== null}
+        onOpenChange={(o) => { if (!o) setPendingDeleteTask(null); }}
+        title="Supprimer cette tâche ?"
+        description="Cette tâche sera définitivement supprimée."
+        onConfirm={() => {
+          if (pendingDeleteTask) deleteTask.mutate(pendingDeleteTask);
+          setPendingDeleteTask(null);
+        }}
+        loading={deleteTask.isPending}
+      />
     </>
   );
 }

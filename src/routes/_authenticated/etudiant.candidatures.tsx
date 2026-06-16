@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 export const Route = createFileRoute("/_authenticated/etudiant/candidatures")({
   component: EtudiantCandidatures,
@@ -49,6 +50,7 @@ function EtudiantCandidatures() {
   const qc = useQueryClient();
   const [letters, setLetters] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState<Record<string, boolean>>({});
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const { data: applications = [], isLoading } = useQuery({
     enabled: !!uid,
@@ -264,8 +266,7 @@ function EtudiantCandidatures() {
                       size="sm"
                       variant="ghost"
                       className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0"
-                      onClick={() => removeApplication.mutate(app.id)}
-                      disabled={removeApplication.isPending}
+                      onClick={() => setPendingDeleteId(app.id)}
                     >
                       <Trash2 className="size-4" />
                     </Button>
@@ -318,6 +319,19 @@ function EtudiantCandidatures() {
           })}
         </div>
       )}
+
+      <ConfirmDialog
+        open={pendingDeleteId !== null}
+        onOpenChange={(o) => { if (!o) setPendingDeleteId(null); }}
+        title="Retirer cette candidature ?"
+        description="La candidature sera définitivement supprimée de votre dossier."
+        confirmLabel="Retirer"
+        onConfirm={() => {
+          if (pendingDeleteId) removeApplication.mutate(pendingDeleteId);
+          setPendingDeleteId(null);
+        }}
+        loading={removeApplication.isPending}
+      />
     </>
   );
 }
