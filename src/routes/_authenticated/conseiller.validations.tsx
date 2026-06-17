@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Loader2, FileText, Download, CheckCircle2, XCircle, Archive, Clock,
   GraduationCap, FolderCheck,
@@ -43,11 +43,21 @@ export function Validations() {
       if (!sids.length) return [];
       const { data: profs } = await supabase
         .from("profiles")
-        .select("id, full_name, email")
+        .select("id, full_name, email, photo_url")
         .in("id", sids);
       return data.map((d) => ({ ...d, profile: profs?.find((p) => p.id === d.student_id) }));
     },
   });
+
+  const docsByStudent = useMemo(() => {
+    const map = new Map<string, { profile?: typeof docs[number]["profile"]; items: typeof docs }>();
+    for (const d of docs) {
+      const key = d.student_id;
+      if (!map.has(key)) map.set(key, { profile: d.profile, items: [] });
+      map.get(key)!.items.push(d);
+    }
+    return [...map.values()];
+  }, [docs]);
 
   const review = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: "valide" | "rejete" }) => {
@@ -195,46 +205,74 @@ export function Validations() {
               {showArchive ? "Aucun document archivé." : "Aucun document en attente."}
             </div>
           ) : (
-            <ul className="space-y-4">
-              {docs.map((d) => (
-                <li key={d.id} className="rounded-xl border border-border p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="grid size-10 place-items-center rounded-lg bg-muted text-muted-foreground">
-                      <FileText className="size-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="font-medium">{d.name}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {d.profile?.full_name || d.profile?.email} · {new Date(d.uploaded_at).toLocaleDateString("fr-FR")}
-                      </div>
-                      {showArchive && d.notes && (
-                        <div className="mt-1 text-xs text-muted-foreground italic">Note : {d.notes}</div>
-                      )}
-                    </div>
-                    <StatusBadge status={d.status} />
-                    <Button size="sm" variant="ghost" onClick={() => download(d.storage_path, d.name)}>
-                      <Download className="size-4" />
-                    </Button>
-                  </div>
-                  {!showArchive && (
-                    <>
-                      <Textarea
-                        rows={2}
-                        className="mt-3"
-                        placeholder="Note (facultatif, visible par l'étudiant)"
-                        value={notes[d.id] || ""}
-                        onChange={(e) => setNotes((n) => ({ ...n, [d.id]: e.target.value }))}
+            <ul className="space-y-5">
+              {docsByStudent.map((g, i) => (
+                <li key={g.profile?.id ?? i} className="rounded-xl border border-border p-4">
+                  {/* En-tête étudiant */}
+                  <div className="mb-3 flex items-center gap-3 border-b border-border pb-3">
+                    {g.profile?.photo_url ? (
+                      <img
+                        src={g.profile.photo_url}
+                        alt={g.profile.full_name ?? ""}
+                        className="size-9 rounded-full object-cover border border-border shrink-0"
                       />
-                      <div className="mt-3 flex justify-end gap-2">
-                        <Button size="sm" variant="outline" onClick={() => review.mutate({ id: d.id, status: "rejete" })} disabled={review.isPending}>
-                          <XCircle className="mr-1 size-4 text-destructive" /> Rejeter
-                        </Button>
-                        <Button size="sm" onClick={() => review.mutate({ id: d.id, status: "valide" })} disabled={review.isPending}>
-                          <CheckCircle2 className="mr-1 size-4" /> Valider
-                        </Button>
+                    ) : (
+                      <div className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+                        <GraduationCap className="size-4" />
                       </div>
-                    </>
-                  )}
+                    )}
+                    <div>
+                      <div className="font-semibold text-sm">{g.profile?.full_name || g.profile?.email || "—"}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {g.items.length} document{g.items.length > 1 ? "s" : ""}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Documents de l'étudiant */}
+                  <ul className="space-y-3">
+                    {g.items.map((d) => (
+                      <li key={d.id} className="rounded-lg border border-border p-3">
+                        <div className="flex items-start gap-3">
+                          <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground">
+                            <FileText className="size-4" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="font-medium text-sm">{d.name}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {new Date(d.uploaded_at).toLocaleDateString("fr-FR")}
+                            </div>
+                            {showArchive && d.notes && (
+                              <div className="mt-1 text-xs text-muted-foreground italic">Note : {d.notes}</div>
+                            )}
+                          </div>
+                          <StatusBadge status={d.status} />
+                          <Button size="sm" variant="ghost" onClick={() => download(d.storage_path, d.name)}>
+                            <Download className="size-4" />
+                          </Button>
+                        </div>
+                        {!showArchive && (
+                          <>
+                            <Textarea
+                              rows={2}
+                              className="mt-3"
+                              placeholder="Note (facultatif, visible par l'étudiant)"
+                              value={notes[d.id] || ""}
+                              onChange={(e) => setNotes((n) => ({ ...n, [d.id]: e.target.value }))}
+                            />
+                            <div className="mt-3 flex justify-end gap-2">
+                              <Button size="sm" variant="outline" onClick={() => review.mutate({ id: d.id, status: "rejete" })} disabled={review.isPending}>
+                                <XCircle className="mr-1 size-4 text-destructive" /> Rejeter
+                              </Button>
+                              <Button size="sm" onClick={() => review.mutate({ id: d.id, status: "valide" })} disabled={review.isPending}>
+                                <CheckCircle2 className="mr-1 size-4" /> Valider
+                              </Button>
+                            </div>
+                          </>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
                 </li>
               ))}
             </ul>

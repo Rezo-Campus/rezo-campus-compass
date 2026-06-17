@@ -699,6 +699,45 @@ export type Database = {
         }
         Relationships: []
       }
+      client_appointments: {
+        Row: {
+          id: string
+          client_id: string
+          scheduled_at: string
+          duration_min: number
+          location: string | null
+          status: string
+          notes: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          client_id: string
+          scheduled_at: string
+          duration_min?: number
+          location?: string | null
+          status?: string
+          notes?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          client_id?: string
+          scheduled_at?: string
+          duration_min?: number
+          location?: string | null
+          status?: string
+          notes?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       clients: {
         Row: {
           id: string

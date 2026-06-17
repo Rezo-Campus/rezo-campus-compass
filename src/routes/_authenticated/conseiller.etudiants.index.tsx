@@ -65,10 +65,13 @@ export function MesEtudiants() {
         .from("profiles")
         .select("id, full_name, email, phone, photo_url")
         .in("id", ids);
-      return files.map((f) => ({
-        ...f,
-        profile: profs?.find((p) => p.id === f.student_id),
-      }));
+      // Ignore les dossiers orphelins (profil supprimé sans cascade en base)
+      return files
+        .map((f) => ({
+          ...f,
+          profile: profs?.find((p) => p.id === f.student_id),
+        }))
+        .filter((f) => !!f.profile);
     },
   });
 
