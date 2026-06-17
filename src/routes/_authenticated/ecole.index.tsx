@@ -119,7 +119,7 @@ function EcoleDashboard() {
           <Clock className="size-5 shrink-0 text-blue-600" />
           <div>
             <p className="text-sm font-medium text-blue-800">
-              <strong>{pendingCount} dossier{pendingCount > 1 ? "s" : ""}</strong> en attente de validation par le conseiller.
+              <strong>{pendingCount} dossier{pendingCount > 1 ? "s" : ""}</strong> en attente de validation par le conseiller du Rézo Campus Brazzaville.
             </p>
             <p className="text-xs text-muted-foreground mt-0.5">
               Ces candidatures vous seront transmises dès qu'un conseiller aura examiné et validé les dossiers.

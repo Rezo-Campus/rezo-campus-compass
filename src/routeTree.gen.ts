@@ -51,7 +51,7 @@ import { Route as AuthenticatedEtudiantEcolesRouteImport } from './routes/_authe
 import { Route as AuthenticatedEtudiantDossierRouteImport } from './routes/_authenticated/etudiant.dossier'
 import { Route as AuthenticatedEtudiantDocumentsRouteImport } from './routes/_authenticated/etudiant.documents'
 import { Route as AuthenticatedEtudiantCandidaturesRouteImport } from './routes/_authenticated/etudiant.candidatures'
-import { Route as AuthenticatedEcoleRendezVousClientsRouteImport } from './routes/_authenticated/ecole.rendez-vous-clients'
+import { Route as AuthenticatedEcoleFormationsRouteImport } from './routes/_authenticated/ecole.formations'
 import { Route as AuthenticatedEcoleCandidatsRouteImport } from './routes/_authenticated/ecole.candidats'
 import { Route as AuthenticatedConseillerValidationsRouteImport } from './routes/_authenticated/conseiller.validations'
 import { Route as AuthenticatedConseillerRendezVousClientsRouteImport } from './routes/_authenticated/conseiller.rendez-vous-clients'
@@ -308,10 +308,10 @@ const AuthenticatedEtudiantCandidaturesRoute =
     path: '/candidatures',
     getParentRoute: () => AuthenticatedEtudiantRoute,
   } as any)
-const AuthenticatedEcoleRendezVousClientsRoute =
-  AuthenticatedEcoleRendezVousClientsRouteImport.update({
-    id: '/rendez-vous-clients',
-    path: '/rendez-vous-clients',
+const AuthenticatedEcoleFormationsRoute =
+  AuthenticatedEcoleFormationsRouteImport.update({
+    id: '/formations',
+    path: '/formations',
     getParentRoute: () => AuthenticatedEcoleRoute,
   } as any)
 const AuthenticatedEcoleCandidatsRoute =
@@ -473,7 +473,7 @@ export interface FileRoutesByFullPath {
   '/conseiller/rendez-vous-clients': typeof AuthenticatedConseillerRendezVousClientsRoute
   '/conseiller/validations': typeof AuthenticatedConseillerValidationsRoute
   '/ecole/candidats': typeof AuthenticatedEcoleCandidatsRoute
-  '/ecole/rendez-vous-clients': typeof AuthenticatedEcoleRendezVousClientsRoute
+  '/ecole/formations': typeof AuthenticatedEcoleFormationsRoute
   '/etudiant/candidatures': typeof AuthenticatedEtudiantCandidaturesRoute
   '/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
   '/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
@@ -528,7 +528,7 @@ export interface FileRoutesByTo {
   '/conseiller/rendez-vous-clients': typeof AuthenticatedConseillerRendezVousClientsRoute
   '/conseiller/validations': typeof AuthenticatedConseillerValidationsRoute
   '/ecole/candidats': typeof AuthenticatedEcoleCandidatsRoute
-  '/ecole/rendez-vous-clients': typeof AuthenticatedEcoleRendezVousClientsRoute
+  '/ecole/formations': typeof AuthenticatedEcoleFormationsRoute
   '/etudiant/candidatures': typeof AuthenticatedEtudiantCandidaturesRoute
   '/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
   '/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
@@ -594,7 +594,7 @@ export interface FileRoutesById {
   '/_authenticated/conseiller/rendez-vous-clients': typeof AuthenticatedConseillerRendezVousClientsRoute
   '/_authenticated/conseiller/validations': typeof AuthenticatedConseillerValidationsRoute
   '/_authenticated/ecole/candidats': typeof AuthenticatedEcoleCandidatsRoute
-  '/_authenticated/ecole/rendez-vous-clients': typeof AuthenticatedEcoleRendezVousClientsRoute
+  '/_authenticated/ecole/formations': typeof AuthenticatedEcoleFormationsRoute
   '/_authenticated/etudiant/candidatures': typeof AuthenticatedEtudiantCandidaturesRoute
   '/_authenticated/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
   '/_authenticated/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
@@ -661,7 +661,7 @@ export interface FileRouteTypes {
     | '/conseiller/rendez-vous-clients'
     | '/conseiller/validations'
     | '/ecole/candidats'
-    | '/ecole/rendez-vous-clients'
+    | '/ecole/formations'
     | '/etudiant/candidatures'
     | '/etudiant/documents'
     | '/etudiant/dossier'
@@ -716,7 +716,7 @@ export interface FileRouteTypes {
     | '/conseiller/rendez-vous-clients'
     | '/conseiller/validations'
     | '/ecole/candidats'
-    | '/ecole/rendez-vous-clients'
+    | '/ecole/formations'
     | '/etudiant/candidatures'
     | '/etudiant/documents'
     | '/etudiant/dossier'
@@ -781,7 +781,7 @@ export interface FileRouteTypes {
     | '/_authenticated/conseiller/rendez-vous-clients'
     | '/_authenticated/conseiller/validations'
     | '/_authenticated/ecole/candidats'
-    | '/_authenticated/ecole/rendez-vous-clients'
+    | '/_authenticated/ecole/formations'
     | '/_authenticated/etudiant/candidatures'
     | '/_authenticated/etudiant/documents'
     | '/_authenticated/etudiant/dossier'
@@ -1119,11 +1119,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEtudiantCandidaturesRouteImport
       parentRoute: typeof AuthenticatedEtudiantRoute
     }
-    '/_authenticated/ecole/rendez-vous-clients': {
-      id: '/_authenticated/ecole/rendez-vous-clients'
-      path: '/rendez-vous-clients'
-      fullPath: '/ecole/rendez-vous-clients'
-      preLoaderRoute: typeof AuthenticatedEcoleRendezVousClientsRouteImport
+    '/_authenticated/ecole/formations': {
+      id: '/_authenticated/ecole/formations'
+      path: '/formations'
+      fullPath: '/ecole/formations'
+      preLoaderRoute: typeof AuthenticatedEcoleFormationsRouteImport
       parentRoute: typeof AuthenticatedEcoleRoute
     }
     '/_authenticated/ecole/candidats': {
@@ -1390,14 +1390,13 @@ const AuthenticatedConseillerRouteWithChildren =
 
 interface AuthenticatedEcoleRouteChildren {
   AuthenticatedEcoleCandidatsRoute: typeof AuthenticatedEcoleCandidatsRoute
-  AuthenticatedEcoleRendezVousClientsRoute: typeof AuthenticatedEcoleRendezVousClientsRoute
+  AuthenticatedEcoleFormationsRoute: typeof AuthenticatedEcoleFormationsRoute
   AuthenticatedEcoleIndexRoute: typeof AuthenticatedEcoleIndexRoute
 }
 
 const AuthenticatedEcoleRouteChildren: AuthenticatedEcoleRouteChildren = {
   AuthenticatedEcoleCandidatsRoute: AuthenticatedEcoleCandidatsRoute,
-  AuthenticatedEcoleRendezVousClientsRoute:
-    AuthenticatedEcoleRendezVousClientsRoute,
+  AuthenticatedEcoleFormationsRoute: AuthenticatedEcoleFormationsRoute,
   AuthenticatedEcoleIndexRoute: AuthenticatedEcoleIndexRoute,
 }
 
