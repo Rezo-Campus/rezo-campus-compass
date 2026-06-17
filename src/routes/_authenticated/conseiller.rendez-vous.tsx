@@ -53,11 +53,9 @@ export function RdvConseiller() {
 
   const { data: students = [] } = useQuery({
     enabled: !!uid,
-    queryKey: ["my-students-simple", uid, isAdmin],
+    queryKey: ["my-students-simple"],
     queryFn: async () => {
-      let q = supabase.from("student_files").select("student_id");
-      if (!isAdmin) q = q.eq("advisor_id", uid!);
-      const { data: files } = await q;
+      const { data: files } = await supabase.from("student_files").select("student_id");
       const ids = (files ?? []).map((f) => f.student_id);
       if (!ids.length) return [];
       const { data: profs } = await supabase

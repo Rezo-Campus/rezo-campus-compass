@@ -59,6 +59,8 @@ import { Route as AuthenticatedAdminRendezVousRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminMessagesRouteImport } from './routes/_authenticated/admin.messages'
 import { Route as AuthenticatedAdminEcolesRouteImport } from './routes/_authenticated/admin.ecoles'
 import { Route as AuthenticatedAdminDossiersRouteImport } from './routes/_authenticated/admin.dossiers'
+import { Route as AuthenticatedConseillerEtudiantsIndexRouteImport } from './routes/_authenticated/conseiller.etudiants.index'
+import { Route as AuthenticatedConseillerEtudiantsStudentIdRouteImport } from './routes/_authenticated/conseiller.etudiants.$studentId'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
   id: '/unauthorized',
@@ -342,6 +344,18 @@ const AuthenticatedAdminDossiersRoute =
     path: '/dossiers',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedConseillerEtudiantsIndexRoute =
+  AuthenticatedConseillerEtudiantsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedConseillerEtudiantsRoute,
+  } as any)
+const AuthenticatedConseillerEtudiantsStudentIdRoute =
+  AuthenticatedConseillerEtudiantsStudentIdRouteImport.update({
+    id: '/$studentId',
+    path: '/$studentId',
+    getParentRoute: () => AuthenticatedConseillerEtudiantsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -366,7 +380,7 @@ export interface FileRoutesByFullPath {
   '/admin/validations': typeof AuthenticatedAdminValidationsRoute
   '/commercial/activites': typeof AuthenticatedCommercialActivitesRoute
   '/comptabilite/transactions': typeof AuthenticatedComptabiliteTransactionsRoute
-  '/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRoute
+  '/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRouteWithChildren
   '/conseiller/messages': typeof AuthenticatedConseillerMessagesRoute
   '/conseiller/rendez-vous': typeof AuthenticatedConseillerRendezVousRoute
   '/conseiller/validations': typeof AuthenticatedConseillerValidationsRoute
@@ -393,6 +407,8 @@ export interface FileRoutesByFullPath {
   '/projets/': typeof AuthenticatedProjetsIndexRoute
   '/rh/': typeof AuthenticatedRhIndexRoute
   '/secretaire/': typeof AuthenticatedSecretaireIndexRoute
+  '/conseiller/etudiants/$studentId': typeof AuthenticatedConseillerEtudiantsStudentIdRoute
+  '/conseiller/etudiants/': typeof AuthenticatedConseillerEtudiantsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -408,7 +424,6 @@ export interface FileRoutesByTo {
   '/admin/validations': typeof AuthenticatedAdminValidationsRoute
   '/commercial/activites': typeof AuthenticatedCommercialActivitesRoute
   '/comptabilite/transactions': typeof AuthenticatedComptabiliteTransactionsRoute
-  '/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRoute
   '/conseiller/messages': typeof AuthenticatedConseillerMessagesRoute
   '/conseiller/rendez-vous': typeof AuthenticatedConseillerRendezVousRoute
   '/conseiller/validations': typeof AuthenticatedConseillerValidationsRoute
@@ -435,6 +450,8 @@ export interface FileRoutesByTo {
   '/projets': typeof AuthenticatedProjetsIndexRoute
   '/rh': typeof AuthenticatedRhIndexRoute
   '/secretaire': typeof AuthenticatedSecretaireIndexRoute
+  '/conseiller/etudiants/$studentId': typeof AuthenticatedConseillerEtudiantsStudentIdRoute
+  '/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -461,7 +478,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/validations': typeof AuthenticatedAdminValidationsRoute
   '/_authenticated/commercial/activites': typeof AuthenticatedCommercialActivitesRoute
   '/_authenticated/comptabilite/transactions': typeof AuthenticatedComptabiliteTransactionsRoute
-  '/_authenticated/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRoute
+  '/_authenticated/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRouteWithChildren
   '/_authenticated/conseiller/messages': typeof AuthenticatedConseillerMessagesRoute
   '/_authenticated/conseiller/rendez-vous': typeof AuthenticatedConseillerRendezVousRoute
   '/_authenticated/conseiller/validations': typeof AuthenticatedConseillerValidationsRoute
@@ -488,6 +505,8 @@ export interface FileRoutesById {
   '/_authenticated/projets/': typeof AuthenticatedProjetsIndexRoute
   '/_authenticated/rh/': typeof AuthenticatedRhIndexRoute
   '/_authenticated/secretaire/': typeof AuthenticatedSecretaireIndexRoute
+  '/_authenticated/conseiller/etudiants/$studentId': typeof AuthenticatedConseillerEtudiantsStudentIdRoute
+  '/_authenticated/conseiller/etudiants/': typeof AuthenticatedConseillerEtudiantsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -541,6 +560,8 @@ export interface FileRouteTypes {
     | '/projets/'
     | '/rh/'
     | '/secretaire/'
+    | '/conseiller/etudiants/$studentId'
+    | '/conseiller/etudiants/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -556,7 +577,6 @@ export interface FileRouteTypes {
     | '/admin/validations'
     | '/commercial/activites'
     | '/comptabilite/transactions'
-    | '/conseiller/etudiants'
     | '/conseiller/messages'
     | '/conseiller/rendez-vous'
     | '/conseiller/validations'
@@ -583,6 +603,8 @@ export interface FileRouteTypes {
     | '/projets'
     | '/rh'
     | '/secretaire'
+    | '/conseiller/etudiants/$studentId'
+    | '/conseiller/etudiants'
   id:
     | '__root__'
     | '/'
@@ -635,6 +657,8 @@ export interface FileRouteTypes {
     | '/_authenticated/projets/'
     | '/_authenticated/rh/'
     | '/_authenticated/secretaire/'
+    | '/_authenticated/conseiller/etudiants/$studentId'
+    | '/_authenticated/conseiller/etudiants/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -997,6 +1021,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDossiersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/conseiller/etudiants/': {
+      id: '/_authenticated/conseiller/etudiants/'
+      path: '/'
+      fullPath: '/conseiller/etudiants/'
+      preLoaderRoute: typeof AuthenticatedConseillerEtudiantsIndexRouteImport
+      parentRoute: typeof AuthenticatedConseillerEtudiantsRoute
+    }
+    '/_authenticated/conseiller/etudiants/$studentId': {
+      id: '/_authenticated/conseiller/etudiants/$studentId'
+      path: '/$studentId'
+      fullPath: '/conseiller/etudiants/$studentId'
+      preLoaderRoute: typeof AuthenticatedConseillerEtudiantsStudentIdRouteImport
+      parentRoute: typeof AuthenticatedConseillerEtudiantsRoute
+    }
   }
 }
 
@@ -1057,8 +1095,26 @@ const AuthenticatedComptabiliteRouteWithChildren =
     AuthenticatedComptabiliteRouteChildren,
   )
 
+interface AuthenticatedConseillerEtudiantsRouteChildren {
+  AuthenticatedConseillerEtudiantsStudentIdRoute: typeof AuthenticatedConseillerEtudiantsStudentIdRoute
+  AuthenticatedConseillerEtudiantsIndexRoute: typeof AuthenticatedConseillerEtudiantsIndexRoute
+}
+
+const AuthenticatedConseillerEtudiantsRouteChildren: AuthenticatedConseillerEtudiantsRouteChildren =
+  {
+    AuthenticatedConseillerEtudiantsStudentIdRoute:
+      AuthenticatedConseillerEtudiantsStudentIdRoute,
+    AuthenticatedConseillerEtudiantsIndexRoute:
+      AuthenticatedConseillerEtudiantsIndexRoute,
+  }
+
+const AuthenticatedConseillerEtudiantsRouteWithChildren =
+  AuthenticatedConseillerEtudiantsRoute._addFileChildren(
+    AuthenticatedConseillerEtudiantsRouteChildren,
+  )
+
 interface AuthenticatedConseillerRouteChildren {
-  AuthenticatedConseillerEtudiantsRoute: typeof AuthenticatedConseillerEtudiantsRoute
+  AuthenticatedConseillerEtudiantsRoute: typeof AuthenticatedConseillerEtudiantsRouteWithChildren
   AuthenticatedConseillerMessagesRoute: typeof AuthenticatedConseillerMessagesRoute
   AuthenticatedConseillerRendezVousRoute: typeof AuthenticatedConseillerRendezVousRoute
   AuthenticatedConseillerValidationsRoute: typeof AuthenticatedConseillerValidationsRoute
@@ -1068,7 +1124,7 @@ interface AuthenticatedConseillerRouteChildren {
 const AuthenticatedConseillerRouteChildren: AuthenticatedConseillerRouteChildren =
   {
     AuthenticatedConseillerEtudiantsRoute:
-      AuthenticatedConseillerEtudiantsRoute,
+      AuthenticatedConseillerEtudiantsRouteWithChildren,
     AuthenticatedConseillerMessagesRoute: AuthenticatedConseillerMessagesRoute,
     AuthenticatedConseillerRendezVousRoute:
       AuthenticatedConseillerRendezVousRoute,

@@ -20,7 +20,6 @@ export const Route = createFileRoute("/_authenticated/conseiller/validations")({
 export function Validations() {
   const { data: auth } = useAuth();
   const uid = auth?.user?.id;
-  const isAdmin = auth?.role === "admin";
   const qc = useQueryClient();
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [showArchive, setShowArchive] = useState(false);
@@ -29,17 +28,8 @@ export function Validations() {
   /* ── Documents ── */
   const { data: docs = [], isLoading: docsLoading } = useQuery({
     enabled: !!uid && view === "documents",
-    queryKey: ["docs", uid, isAdmin, showArchive],
+    queryKey: ["docs", showArchive],
     queryFn: async () => {
-      let studentIds: string[] | null = null;
-      if (!isAdmin) {
-        const { data: files } = await supabase
-          .from("student_files")
-          .select("student_id")
-          .eq("advisor_id", uid!);
-        studentIds = (files ?? []).map((f) => f.student_id);
-        if (!studentIds.length) return [];
-      }
       let q = supabase
         .from("documents")
         .select("*")
@@ -47,7 +37,6 @@ export function Validations() {
       q = showArchive
         ? q.in("status", ["valide", "rejete"] as const)
         : q.eq("status", "en_attente");
-      if (studentIds) q = q.in("student_id", studentIds);
       const { data, error } = await q;
       if (error) throw error;
       const sids = [...new Set(data.map((d) => d.student_id))];

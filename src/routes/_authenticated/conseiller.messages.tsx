@@ -19,18 +19,15 @@ export function MessagesConseiller() {
     enabled: !!uid,
     queryKey: ["conseiller-contacts", uid, isAdmin],
     queryFn: async () => {
-      // Étudiants assignés + tous les étudiants/staff ayant écrit ou reçu un message
+      // Tous les étudiants + tous ceux ayant écrit ou reçu un message
       const ids = new Set<string>();
 
       if (isAdmin) {
         const { data: all } = await supabase.from("user_roles").select("user_id").neq("user_id", uid!);
         all?.forEach((r) => ids.add(r.user_id));
       } else {
-        const { data: assigned } = await supabase
-          .from("student_files")
-          .select("student_id")
-          .eq("advisor_id", uid!);
-        assigned?.forEach((s) => ids.add(s.student_id));
+        const { data: students } = await supabase.from("student_files").select("student_id");
+        students?.forEach((s) => ids.add(s.student_id));
       }
 
       const { data: msgs } = await supabase

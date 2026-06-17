@@ -18,7 +18,7 @@ function ConseillerDashboard() {
     queryKey: ["conseiller-overview", uid],
     queryFn: async () => {
       const [students, pending, unread, rdvWeek] = await Promise.all([
-        supabase.from("student_files").select("id", { count: "exact", head: true }).eq("advisor_id", uid!),
+        supabase.from("student_files").select("id", { count: "exact", head: true }),
         supabase.from("documents").select("id, student_id", { count: "exact" }).eq("status", "en_attente"),
         supabase.from("messages").select("id", { count: "exact", head: true }).eq("recipient_id", uid!).is("read_at", null),
         supabase
@@ -46,7 +46,7 @@ function ConseillerDashboard() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Étudiants assignés" value={String(data?.students ?? 0)} icon={Users} hint="actifs" />
+        <StatCard label="Total étudiants" value={String(data?.students ?? 0)} icon={Users} hint="tous dossiers" />
         <StatCard label="Documents en attente" value={String(data?.pending ?? 0)} icon={FileCheck2} hint="à valider" />
         <StatCard label="Messages non lus" value={String(data?.unread ?? 0)} icon={MessageSquare} />
         <StatCard label="RDV cette semaine" value={String(data?.rdvWeek ?? 0)} icon={CalendarDays} />
