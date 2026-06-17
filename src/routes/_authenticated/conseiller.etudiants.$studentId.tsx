@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useParams, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   Loader2, ArrowLeft, GraduationCap, Mail, Phone, FileText, Download,
@@ -50,8 +50,10 @@ const APP_STATUS_LABELS: Record<string, string> = {
   refuse: "Refusé",
 };
 
-function ConseillerStudentDetail() {
-  const { studentId } = Route.useParams();
+export function ConseillerStudentDetail() {
+  const { studentId } = useParams({ strict: false }) as { studentId: string };
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const section = pathname.startsWith("/secretaire") ? "secretaire" : "conseiller";
 
   const { data, isLoading } = useQuery({
     queryKey: ["conseiller-student-detail", studentId],
@@ -157,7 +159,7 @@ function ConseillerStudentDetail() {
 
   return (
     <>
-      <Link to="/conseiller/etudiants" className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition">
+      <Link to={`/${section}/etudiants` as "/conseiller/etudiants"} className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition">
         <ArrowLeft className="size-4" /> Retour à tous les dossiers
       </Link>
 
@@ -202,7 +204,7 @@ function ConseillerStudentDetail() {
             <span className="text-xs text-muted-foreground">{file?.progress ?? 0}%</span>
           </div>
         </div>
-        <Link to="/conseiller/messages">
+        <Link to={`/${section}/messages` as "/conseiller/messages"}>
           <Button size="sm" variant="outline" className="gap-1.5">
             <MessageSquare className="size-3.5" /> Message
           </Button>

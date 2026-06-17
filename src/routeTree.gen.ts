@@ -33,7 +33,9 @@ import { Route as AuthenticatedConseillerIndexRouteImport } from './routes/_auth
 import { Route as AuthenticatedComptabiliteIndexRouteImport } from './routes/_authenticated/comptabilite.index'
 import { Route as AuthenticatedCommercialIndexRouteImport } from './routes/_authenticated/commercial.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as AuthenticatedSecretaireValidationsRouteImport } from './routes/_authenticated/secretaire.validations'
 import { Route as AuthenticatedSecretaireRendezVousRouteImport } from './routes/_authenticated/secretaire.rendez-vous'
+import { Route as AuthenticatedSecretaireMessagesRouteImport } from './routes/_authenticated/secretaire.messages'
 import { Route as AuthenticatedSecretaireEtudiantsRouteImport } from './routes/_authenticated/secretaire.etudiants'
 import { Route as AuthenticatedSecretaireCourriersRouteImport } from './routes/_authenticated/secretaire.courriers'
 import { Route as AuthenticatedSecretaireClientsRouteImport } from './routes/_authenticated/secretaire.clients'
@@ -67,7 +69,9 @@ import { Route as AuthenticatedAdminRendezVousRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminMessagesRouteImport } from './routes/_authenticated/admin.messages'
 import { Route as AuthenticatedAdminEcolesRouteImport } from './routes/_authenticated/admin.ecoles'
 import { Route as AuthenticatedAdminDossiersRouteImport } from './routes/_authenticated/admin.dossiers'
+import { Route as AuthenticatedSecretaireEtudiantsIndexRouteImport } from './routes/_authenticated/secretaire.etudiants.index'
 import { Route as AuthenticatedConseillerEtudiantsIndexRouteImport } from './routes/_authenticated/conseiller.etudiants.index'
+import { Route as AuthenticatedSecretaireEtudiantsStudentIdRouteImport } from './routes/_authenticated/secretaire.etudiants.$studentId'
 import { Route as AuthenticatedConseillerEtudiantsStudentIdRouteImport } from './routes/_authenticated/conseiller.etudiants.$studentId'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
@@ -196,10 +200,22 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedSecretaireValidationsRoute =
+  AuthenticatedSecretaireValidationsRouteImport.update({
+    id: '/validations',
+    path: '/validations',
+    getParentRoute: () => AuthenticatedSecretaireRoute,
+  } as any)
 const AuthenticatedSecretaireRendezVousRoute =
   AuthenticatedSecretaireRendezVousRouteImport.update({
     id: '/rendez-vous',
     path: '/rendez-vous',
+    getParentRoute: () => AuthenticatedSecretaireRoute,
+  } as any)
+const AuthenticatedSecretaireMessagesRoute =
+  AuthenticatedSecretaireMessagesRouteImport.update({
+    id: '/messages',
+    path: '/messages',
     getParentRoute: () => AuthenticatedSecretaireRoute,
   } as any)
 const AuthenticatedSecretaireEtudiantsRoute =
@@ -400,11 +416,23 @@ const AuthenticatedAdminDossiersRoute =
     path: '/dossiers',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedSecretaireEtudiantsIndexRoute =
+  AuthenticatedSecretaireEtudiantsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedSecretaireEtudiantsRoute,
+  } as any)
 const AuthenticatedConseillerEtudiantsIndexRoute =
   AuthenticatedConseillerEtudiantsIndexRouteImport.update({
     id: '/',
     path: '/',
     getParentRoute: () => AuthenticatedConseillerEtudiantsRoute,
+  } as any)
+const AuthenticatedSecretaireEtudiantsStudentIdRoute =
+  AuthenticatedSecretaireEtudiantsStudentIdRouteImport.update({
+    id: '/$studentId',
+    path: '/$studentId',
+    getParentRoute: () => AuthenticatedSecretaireEtudiantsRoute,
   } as any)
 const AuthenticatedConseillerEtudiantsStudentIdRoute =
   AuthenticatedConseillerEtudiantsStudentIdRouteImport.update({
@@ -460,8 +488,10 @@ export interface FileRoutesByFullPath {
   '/rh/rendez-vous-clients': typeof AuthenticatedRhRendezVousClientsRoute
   '/secretaire/clients': typeof AuthenticatedSecretaireClientsRoute
   '/secretaire/courriers': typeof AuthenticatedSecretaireCourriersRoute
-  '/secretaire/etudiants': typeof AuthenticatedSecretaireEtudiantsRoute
+  '/secretaire/etudiants': typeof AuthenticatedSecretaireEtudiantsRouteWithChildren
+  '/secretaire/messages': typeof AuthenticatedSecretaireMessagesRoute
   '/secretaire/rendez-vous': typeof AuthenticatedSecretaireRendezVousRoute
+  '/secretaire/validations': typeof AuthenticatedSecretaireValidationsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/commercial/': typeof AuthenticatedCommercialIndexRoute
   '/comptabilite/': typeof AuthenticatedComptabiliteIndexRoute
@@ -472,7 +502,9 @@ export interface FileRoutesByFullPath {
   '/rh/': typeof AuthenticatedRhIndexRoute
   '/secretaire/': typeof AuthenticatedSecretaireIndexRoute
   '/conseiller/etudiants/$studentId': typeof AuthenticatedConseillerEtudiantsStudentIdRoute
+  '/secretaire/etudiants/$studentId': typeof AuthenticatedSecretaireEtudiantsStudentIdRoute
   '/conseiller/etudiants/': typeof AuthenticatedConseillerEtudiantsIndexRoute
+  '/secretaire/etudiants/': typeof AuthenticatedSecretaireEtudiantsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -511,8 +543,9 @@ export interface FileRoutesByTo {
   '/rh/rendez-vous-clients': typeof AuthenticatedRhRendezVousClientsRoute
   '/secretaire/clients': typeof AuthenticatedSecretaireClientsRoute
   '/secretaire/courriers': typeof AuthenticatedSecretaireCourriersRoute
-  '/secretaire/etudiants': typeof AuthenticatedSecretaireEtudiantsRoute
+  '/secretaire/messages': typeof AuthenticatedSecretaireMessagesRoute
   '/secretaire/rendez-vous': typeof AuthenticatedSecretaireRendezVousRoute
+  '/secretaire/validations': typeof AuthenticatedSecretaireValidationsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/commercial': typeof AuthenticatedCommercialIndexRoute
   '/comptabilite': typeof AuthenticatedComptabiliteIndexRoute
@@ -523,7 +556,9 @@ export interface FileRoutesByTo {
   '/rh': typeof AuthenticatedRhIndexRoute
   '/secretaire': typeof AuthenticatedSecretaireIndexRoute
   '/conseiller/etudiants/$studentId': typeof AuthenticatedConseillerEtudiantsStudentIdRoute
+  '/secretaire/etudiants/$studentId': typeof AuthenticatedSecretaireEtudiantsStudentIdRoute
   '/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsIndexRoute
+  '/secretaire/etudiants': typeof AuthenticatedSecretaireEtudiantsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -574,8 +609,10 @@ export interface FileRoutesById {
   '/_authenticated/rh/rendez-vous-clients': typeof AuthenticatedRhRendezVousClientsRoute
   '/_authenticated/secretaire/clients': typeof AuthenticatedSecretaireClientsRoute
   '/_authenticated/secretaire/courriers': typeof AuthenticatedSecretaireCourriersRoute
-  '/_authenticated/secretaire/etudiants': typeof AuthenticatedSecretaireEtudiantsRoute
+  '/_authenticated/secretaire/etudiants': typeof AuthenticatedSecretaireEtudiantsRouteWithChildren
+  '/_authenticated/secretaire/messages': typeof AuthenticatedSecretaireMessagesRoute
   '/_authenticated/secretaire/rendez-vous': typeof AuthenticatedSecretaireRendezVousRoute
+  '/_authenticated/secretaire/validations': typeof AuthenticatedSecretaireValidationsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/commercial/': typeof AuthenticatedCommercialIndexRoute
   '/_authenticated/comptabilite/': typeof AuthenticatedComptabiliteIndexRoute
@@ -586,7 +623,9 @@ export interface FileRoutesById {
   '/_authenticated/rh/': typeof AuthenticatedRhIndexRoute
   '/_authenticated/secretaire/': typeof AuthenticatedSecretaireIndexRoute
   '/_authenticated/conseiller/etudiants/$studentId': typeof AuthenticatedConseillerEtudiantsStudentIdRoute
+  '/_authenticated/secretaire/etudiants/$studentId': typeof AuthenticatedSecretaireEtudiantsStudentIdRoute
   '/_authenticated/conseiller/etudiants/': typeof AuthenticatedConseillerEtudiantsIndexRoute
+  '/_authenticated/secretaire/etudiants/': typeof AuthenticatedSecretaireEtudiantsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -638,7 +677,9 @@ export interface FileRouteTypes {
     | '/secretaire/clients'
     | '/secretaire/courriers'
     | '/secretaire/etudiants'
+    | '/secretaire/messages'
     | '/secretaire/rendez-vous'
+    | '/secretaire/validations'
     | '/admin/'
     | '/commercial/'
     | '/comptabilite/'
@@ -649,7 +690,9 @@ export interface FileRouteTypes {
     | '/rh/'
     | '/secretaire/'
     | '/conseiller/etudiants/$studentId'
+    | '/secretaire/etudiants/$studentId'
     | '/conseiller/etudiants/'
+    | '/secretaire/etudiants/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -688,8 +731,9 @@ export interface FileRouteTypes {
     | '/rh/rendez-vous-clients'
     | '/secretaire/clients'
     | '/secretaire/courriers'
-    | '/secretaire/etudiants'
+    | '/secretaire/messages'
     | '/secretaire/rendez-vous'
+    | '/secretaire/validations'
     | '/admin'
     | '/commercial'
     | '/comptabilite'
@@ -700,7 +744,9 @@ export interface FileRouteTypes {
     | '/rh'
     | '/secretaire'
     | '/conseiller/etudiants/$studentId'
+    | '/secretaire/etudiants/$studentId'
     | '/conseiller/etudiants'
+    | '/secretaire/etudiants'
   id:
     | '__root__'
     | '/'
@@ -751,7 +797,9 @@ export interface FileRouteTypes {
     | '/_authenticated/secretaire/clients'
     | '/_authenticated/secretaire/courriers'
     | '/_authenticated/secretaire/etudiants'
+    | '/_authenticated/secretaire/messages'
     | '/_authenticated/secretaire/rendez-vous'
+    | '/_authenticated/secretaire/validations'
     | '/_authenticated/admin/'
     | '/_authenticated/commercial/'
     | '/_authenticated/comptabilite/'
@@ -762,7 +810,9 @@ export interface FileRouteTypes {
     | '/_authenticated/rh/'
     | '/_authenticated/secretaire/'
     | '/_authenticated/conseiller/etudiants/$studentId'
+    | '/_authenticated/secretaire/etudiants/$studentId'
     | '/_authenticated/conseiller/etudiants/'
+    | '/_authenticated/secretaire/etudiants/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -943,11 +993,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/secretaire/validations': {
+      id: '/_authenticated/secretaire/validations'
+      path: '/validations'
+      fullPath: '/secretaire/validations'
+      preLoaderRoute: typeof AuthenticatedSecretaireValidationsRouteImport
+      parentRoute: typeof AuthenticatedSecretaireRoute
+    }
     '/_authenticated/secretaire/rendez-vous': {
       id: '/_authenticated/secretaire/rendez-vous'
       path: '/rendez-vous'
       fullPath: '/secretaire/rendez-vous'
       preLoaderRoute: typeof AuthenticatedSecretaireRendezVousRouteImport
+      parentRoute: typeof AuthenticatedSecretaireRoute
+    }
+    '/_authenticated/secretaire/messages': {
+      id: '/_authenticated/secretaire/messages'
+      path: '/messages'
+      fullPath: '/secretaire/messages'
+      preLoaderRoute: typeof AuthenticatedSecretaireMessagesRouteImport
       parentRoute: typeof AuthenticatedSecretaireRoute
     }
     '/_authenticated/secretaire/etudiants': {
@@ -1181,12 +1245,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDossiersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/secretaire/etudiants/': {
+      id: '/_authenticated/secretaire/etudiants/'
+      path: '/'
+      fullPath: '/secretaire/etudiants/'
+      preLoaderRoute: typeof AuthenticatedSecretaireEtudiantsIndexRouteImport
+      parentRoute: typeof AuthenticatedSecretaireEtudiantsRoute
+    }
     '/_authenticated/conseiller/etudiants/': {
       id: '/_authenticated/conseiller/etudiants/'
       path: '/'
       fullPath: '/conseiller/etudiants/'
       preLoaderRoute: typeof AuthenticatedConseillerEtudiantsIndexRouteImport
       parentRoute: typeof AuthenticatedConseillerEtudiantsRoute
+    }
+    '/_authenticated/secretaire/etudiants/$studentId': {
+      id: '/_authenticated/secretaire/etudiants/$studentId'
+      path: '/$studentId'
+      fullPath: '/secretaire/etudiants/$studentId'
+      preLoaderRoute: typeof AuthenticatedSecretaireEtudiantsStudentIdRouteImport
+      parentRoute: typeof AuthenticatedSecretaireEtudiantsRoute
     }
     '/_authenticated/conseiller/etudiants/$studentId': {
       id: '/_authenticated/conseiller/etudiants/$studentId'
@@ -1388,11 +1466,31 @@ const AuthenticatedRhRouteWithChildren = AuthenticatedRhRoute._addFileChildren(
   AuthenticatedRhRouteChildren,
 )
 
+interface AuthenticatedSecretaireEtudiantsRouteChildren {
+  AuthenticatedSecretaireEtudiantsStudentIdRoute: typeof AuthenticatedSecretaireEtudiantsStudentIdRoute
+  AuthenticatedSecretaireEtudiantsIndexRoute: typeof AuthenticatedSecretaireEtudiantsIndexRoute
+}
+
+const AuthenticatedSecretaireEtudiantsRouteChildren: AuthenticatedSecretaireEtudiantsRouteChildren =
+  {
+    AuthenticatedSecretaireEtudiantsStudentIdRoute:
+      AuthenticatedSecretaireEtudiantsStudentIdRoute,
+    AuthenticatedSecretaireEtudiantsIndexRoute:
+      AuthenticatedSecretaireEtudiantsIndexRoute,
+  }
+
+const AuthenticatedSecretaireEtudiantsRouteWithChildren =
+  AuthenticatedSecretaireEtudiantsRoute._addFileChildren(
+    AuthenticatedSecretaireEtudiantsRouteChildren,
+  )
+
 interface AuthenticatedSecretaireRouteChildren {
   AuthenticatedSecretaireClientsRoute: typeof AuthenticatedSecretaireClientsRoute
   AuthenticatedSecretaireCourriersRoute: typeof AuthenticatedSecretaireCourriersRoute
-  AuthenticatedSecretaireEtudiantsRoute: typeof AuthenticatedSecretaireEtudiantsRoute
+  AuthenticatedSecretaireEtudiantsRoute: typeof AuthenticatedSecretaireEtudiantsRouteWithChildren
+  AuthenticatedSecretaireMessagesRoute: typeof AuthenticatedSecretaireMessagesRoute
   AuthenticatedSecretaireRendezVousRoute: typeof AuthenticatedSecretaireRendezVousRoute
+  AuthenticatedSecretaireValidationsRoute: typeof AuthenticatedSecretaireValidationsRoute
   AuthenticatedSecretaireIndexRoute: typeof AuthenticatedSecretaireIndexRoute
 }
 
@@ -1402,9 +1500,12 @@ const AuthenticatedSecretaireRouteChildren: AuthenticatedSecretaireRouteChildren
     AuthenticatedSecretaireCourriersRoute:
       AuthenticatedSecretaireCourriersRoute,
     AuthenticatedSecretaireEtudiantsRoute:
-      AuthenticatedSecretaireEtudiantsRoute,
+      AuthenticatedSecretaireEtudiantsRouteWithChildren,
+    AuthenticatedSecretaireMessagesRoute: AuthenticatedSecretaireMessagesRoute,
     AuthenticatedSecretaireRendezVousRoute:
       AuthenticatedSecretaireRendezVousRoute,
+    AuthenticatedSecretaireValidationsRoute:
+      AuthenticatedSecretaireValidationsRoute,
     AuthenticatedSecretaireIndexRoute: AuthenticatedSecretaireIndexRoute,
   }
 
