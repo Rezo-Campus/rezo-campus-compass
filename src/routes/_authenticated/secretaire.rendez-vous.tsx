@@ -170,17 +170,19 @@ export function ClientAppointments() {
         {r.client?.type === "entreprise" ? <Building2 className="size-4" /> : <User className="size-4" />}
       </div>
       <div className="flex-1 min-w-0">
-        <div className="font-medium text-sm">{clientLabel(r.client)}</div>
-        <div className="text-xs text-muted-foreground">
-          {new Date(r.scheduled_at).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" })}
-          {" · "}{r.duration_min} min
-          {r.location && ` · ${r.location}`}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-medium text-sm">{clientLabel(r.client)}</span>
+          <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[r.status] ?? "bg-muted"}`}>
+            {STATUS_LABELS[r.status] ?? r.status}
+          </span>
+        </div>
+        <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+          <span>{new Date(r.scheduled_at).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" })}</span>
+          <span>{r.duration_min} min</span>
+          {r.location && <span>{r.location}</span>}
         </div>
         {r.notes && <div className="mt-1 text-xs text-muted-foreground italic">{r.notes}</div>}
       </div>
-      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[r.status] ?? "bg-muted"}`}>
-        {STATUS_LABELS[r.status] ?? r.status}
-      </span>
       {canManage && r.status === "programme" && (
         <div className="flex shrink-0 gap-1">
           <Button size="sm" variant="ghost" onClick={() => openEdit(r)} title="Modifier">

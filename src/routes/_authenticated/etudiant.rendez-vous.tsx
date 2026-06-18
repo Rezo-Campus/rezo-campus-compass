@@ -61,17 +61,21 @@ function RdvEtudiant() {
         {upcoming.length === 0 ? <Empty /> : (
           <ul className="space-y-3">
             {upcoming.map((r) => (
-              <li key={r.id} className="flex items-start gap-3 rounded-xl border border-border p-3">
-                <RdvRow r={r} />
-                <Button
-                  size="sm" variant="ghost"
-                  className="ml-auto shrink-0 text-destructive hover:bg-destructive/10"
-                  onClick={() => cancel.mutate(r.id)}
-                  disabled={cancel.isPending}
-                  title="Annuler ce rendez-vous"
-                >
-                  <XCircle className="mr-1 size-4" /> Annuler
-                </Button>
+              <li key={r.id} className="rounded-xl border border-border p-3">
+                <div className="flex items-start gap-3">
+                  <RdvRow r={r} />
+                </div>
+                <div className="mt-2 flex justify-end">
+                  <Button
+                    size="sm" variant="ghost"
+                    className="text-destructive hover:bg-destructive/10"
+                    onClick={() => cancel.mutate(r.id)}
+                    disabled={cancel.isPending}
+                    title="Annuler ce rendez-vous"
+                  >
+                    <XCircle className="mr-1 size-4" /> Annuler
+                  </Button>
+                </div>
               </li>
             ))}
           </ul>
@@ -120,8 +124,13 @@ export function RdvRow({ r }: { r: Rdv }) {
         <CalendarDays className="size-5" />
       </div>
       <div className="min-w-0 flex-1">
-        <div className="font-medium">
-          {d.toLocaleDateString("fr-FR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" })}
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-medium">
+            {d.toLocaleDateString("fr-FR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" })}
+          </span>
+          <Badge variant={r.status === "programme" ? "default" : r.status === "annule" ? "destructive" : "secondary"}>
+            {r.status === "programme" ? "Programmé" : r.status === "termine" ? "Terminé" : "Annulé"}
+          </Badge>
         </div>
         <div className="mt-0.5 flex flex-wrap gap-3 text-xs text-muted-foreground">
           <span className="inline-flex items-center gap-1">
@@ -134,9 +143,6 @@ export function RdvRow({ r }: { r: Rdv }) {
         </div>
         {r.notes && <p className="mt-1 text-sm text-muted-foreground">{r.notes}</p>}
       </div>
-      <Badge variant={r.status === "programme" ? "default" : r.status === "annule" ? "destructive" : "secondary"}>
-        {r.status === "programme" ? "Programmé" : r.status === "termine" ? "Terminé" : "Annulé"}
-      </Badge>
     </>
   );
 }

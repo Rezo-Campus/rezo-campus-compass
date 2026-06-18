@@ -134,10 +134,12 @@ export function RdvConseiller() {
   const past = rdvs.filter((r) => !upcoming.includes(r));
 
   const RdvCard = ({ r }: { r: typeof rdvs[0] }) => (
-    <li className="flex items-start gap-3 rounded-xl border border-border p-3">
-      <RdvRow r={r} />
+    <li className="rounded-xl border border-border p-3">
+      <div className="flex items-start gap-3">
+        <RdvRow r={r} />
+      </div>
       {r.status === "programme" && (
-        <div className="ml-auto flex shrink-0 gap-1">
+        <div className="mt-2 flex justify-end gap-1">
           <Button size="sm" variant="ghost" onClick={() => openEdit(r)} title="Modifier">
             <Pencil className="size-4" />
           </Button>
