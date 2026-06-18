@@ -13,14 +13,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -125,55 +117,43 @@ export function MesEtudiants() {
               Aucun étudiant inscrit pour l'instant.
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Étudiant</TableHead>
-                  <TableHead>Projet</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Progression</TableHead>
-                  <TableHead>Actions</TableHead>
-                  <TableHead className="text-right">Conseiller assigné</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows.map((r) => {
-                  const missing = getMissingFields(r);
-                  const hasMissing = missing.length > 0;
-                  return (
-                    <TableRow
-                      key={r.id}
-                      className={hasMissing ? "bg-red-50/60 hover:bg-red-50" : ""}
+            <ul className="space-y-3">
+              {rows.map((r) => {
+                const missing = getMissingFields(r);
+                const hasMissing = missing.length > 0;
+                return (
+                  <li
+                    key={r.id}
+                    className={`rounded-xl border p-4 ${hasMissing ? "border-red-200 bg-red-50/40" : "border-border"}`}
+                  >
+                    <Link
+                      to="/conseiller/etudiants/$studentId"
+                      params={{ studentId: r.student_id }}
+                      className="flex items-start gap-3 hover:underline"
                     >
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Link
-                            to="/conseiller/etudiants/$studentId"
-                            params={{ studentId: r.student_id }}
-                            className="flex items-center gap-2 hover:underline"
-                          >
-                            {r.profile?.photo_url ? (
-                              <img
-                                src={r.profile.photo_url}
-                                alt={r.profile.full_name ?? ""}
-                                className="size-8 rounded-full object-cover border border-border shrink-0"
-                              />
-                            ) : (
-                              <div className={`grid size-8 shrink-0 place-items-center rounded-full ${hasMissing ? "bg-red-100 text-red-600" : "bg-primary/10 text-primary"}`}>
-                                <GraduationCap className="size-4" />
-                              </div>
-                            )}
-                            <div>
-                              <div className={`font-medium ${hasMissing ? "text-red-700" : ""}`}>
-                                {r.profile?.full_name || r.profile?.email}
-                              </div>
-                              <div className="text-xs text-muted-foreground">{r.profile?.email}</div>
-                            </div>
-                          </Link>
+                      {r.profile?.photo_url ? (
+                        <img
+                          src={r.profile.photo_url}
+                          alt={r.profile.full_name ?? ""}
+                          className="size-10 shrink-0 rounded-full object-cover border border-border"
+                        />
+                      ) : (
+                        <div className={`grid size-10 shrink-0 place-items-center rounded-full ${hasMissing ? "bg-red-100 text-red-600" : "bg-primary/10 text-primary"}`}>
+                          <GraduationCap className="size-5" />
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className={`font-medium ${hasMissing ? "text-red-700" : ""}`}>
+                            {r.profile?.full_name || r.profile?.email}
+                          </span>
+                          <Badge variant="secondary" className="capitalize text-[10px]">
+                            {r.status.replace("_", " ")}
+                          </Badge>
                           {hasMissing && (
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <span className="ml-1 cursor-help">
+                                <span className="cursor-help">
                                   <AlertTriangle className="size-4 text-red-500" />
                                 </span>
                               </TooltipTrigger>
@@ -188,72 +168,69 @@ export function MesEtudiants() {
                             </Tooltip>
                           )}
                         </div>
-                      </TableCell>
-                      <TableCell className="text-sm">
-                        {r.target_program ? (
-                          <span>{r.target_program}</span>
-                        ) : (
-                          <span className="rounded bg-red-100 px-1.5 py-0.5 text-xs text-red-600">Non renseigné</span>
-                        )}
-                        {r.target_country && (
-                          <div className="text-xs text-muted-foreground">{r.target_country} · {r.target_level}</div>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary" className="capitalize">{r.status.replace("_", " ")}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <div className="h-1.5 w-24 overflow-hidden rounded-full bg-muted">
-                            <div className="h-full rounded-full bg-primary" style={{ width: `${r.progress}%` }} />
-                          </div>
-                          <span className="text-xs text-muted-foreground">{r.progress}%</span>
+                        <div className="truncate text-xs text-muted-foreground">{r.profile?.email}</div>
+                        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
+                          {r.target_program ? (
+                            <span className="text-muted-foreground">{r.target_program}</span>
+                          ) : (
+                            <span className="rounded bg-red-100 px-1.5 py-0.5 text-red-600">Projet non renseigné</span>
+                          )}
+                          {r.target_country && (
+                            <span className="text-muted-foreground">{r.target_country} · {r.target_level}</span>
+                          )}
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <Link to="/conseiller/messages">
-                          <Button size="sm" variant="outline" className="gap-1.5 text-xs">
-                            <MessageSquare className="size-3" />
-                            Message
-                          </Button>
-                        </Link>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {isAdmin ? (
-                          <Select
-                            value={r.advisor_id ?? "none"}
-                            onValueChange={(v) =>
-                              assign.mutate({ studentId: r.student_id, advisorId: v === "none" ? null : v })
-                            }
-                            disabled={assign.isPending}
-                          >
-                            <SelectTrigger className="ml-auto w-[180px]">
-                              <SelectValue placeholder="Non assigné" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none">Non assigné</SelectItem>
-                              {conseillers.map((c) => (
-                                <SelectItem key={c.id} value={c.id}>
-                                  {c.full_name || c.email}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">
-                            {r.advisor_id === uid
-                              ? "Vous"
-                              : conseillers.find((c) => c.id === r.advisor_id)?.full_name
-                                ?? conseillers.find((c) => c.id === r.advisor_id)?.email
-                                ?? "Non assigné"}
-                          </span>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                      </div>
+                    </Link>
+
+                    <div className="mt-3 flex items-center gap-2">
+                      <div className="h-1.5 max-w-[220px] flex-1 overflow-hidden rounded-full bg-muted">
+                        <div className="h-full rounded-full bg-primary" style={{ width: `${r.progress}%` }} />
+                      </div>
+                      <span className="shrink-0 text-xs text-muted-foreground">{r.progress}%</span>
+                    </div>
+
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                      <Link to="/conseiller/messages">
+                        <Button size="sm" variant="outline" className="gap-1.5 text-xs">
+                          <MessageSquare className="size-3" />
+                          Message
+                        </Button>
+                      </Link>
+                      {isAdmin ? (
+                        <Select
+                          value={r.advisor_id ?? "none"}
+                          onValueChange={(v) =>
+                            assign.mutate({ studentId: r.student_id, advisorId: v === "none" ? null : v })
+                          }
+                          disabled={assign.isPending}
+                        >
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Non assigné" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">Non assigné</SelectItem>
+                            {conseillers.map((c) => (
+                              <SelectItem key={c.id} value={c.id}>
+                                {c.full_name || c.email}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">
+                          Conseiller :{" "}
+                          {r.advisor_id === uid
+                            ? "Vous"
+                            : conseillers.find((c) => c.id === r.advisor_id)?.full_name
+                              ?? conseillers.find((c) => c.id === r.advisor_id)?.email
+                              ?? "Non assigné"}
+                        </span>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
           )}
         </Panel>
       </>

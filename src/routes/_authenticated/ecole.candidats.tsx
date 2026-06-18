@@ -214,15 +214,15 @@ function EcoleCandidats() {
                           </span>
                         )}
                       </div>
-                      <div className="mt-1 text-sm text-muted-foreground">
+                      <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-muted-foreground">
                         <span className="font-medium text-foreground">{a.program?.name ?? "—"}</span>
-                        {a.program?.level && ` · ${a.program.level}`}
-                        {a.program?.domain && ` · ${a.program.domain}`}
+                        {a.program?.level && <span>{a.program.level}</span>}
+                        {a.program?.domain && <span>{a.program.domain}</span>}
                       </div>
                     </div>
 
                     {/* Statut + action */}
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[a.status] ?? "bg-muted text-muted-foreground"}`}>
                         {STATUS_OPTIONS.find((s) => s.value === a.status)?.label ?? a.status}
                       </span>
@@ -270,18 +270,22 @@ function EcoleCandidats() {
                             ) : (
                               <ul className="space-y-1.5">
                                 {docs.map((d) => (
-                                  <li key={d.id} className="flex items-center gap-3 rounded-lg border border-border bg-background px-3 py-2">
-                                    <FileText className="size-4 shrink-0 text-muted-foreground" />
+                                  <li key={d.id} className="flex items-start gap-3 rounded-lg border border-border bg-background px-3 py-2">
+                                    <FileText className="size-4 shrink-0 text-muted-foreground mt-0.5" />
                                     <div className="flex-1 min-w-0">
                                       <div className="text-sm font-medium truncate">{d.name}</div>
-                                      <div className="text-xs text-muted-foreground">
-                                        {DOC_TYPE_LABELS[d.type] ?? d.type}
-                                        {" · "}{new Date(d.uploaded_at).toLocaleDateString("fr-FR")}
+                                      <div className="mt-1 flex flex-wrap items-center gap-2">
+                                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${DOC_STATUS_COLORS[d.status] ?? "bg-muted"}`}>
+                                          {DOC_STATUS_LABELS[d.status] ?? d.status}
+                                        </span>
+                                        <span className="text-xs text-muted-foreground">
+                                          {DOC_TYPE_LABELS[d.type] ?? d.type}
+                                        </span>
+                                        <span className="text-xs text-muted-foreground">
+                                          {new Date(d.uploaded_at).toLocaleDateString("fr-FR")}
+                                        </span>
                                       </div>
                                     </div>
-                                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium shrink-0 ${DOC_STATUS_COLORS[d.status] ?? "bg-muted"}`}>
-                                      {DOC_STATUS_LABELS[d.status] ?? d.status}
-                                    </span>
                                     <Button
                                       size="sm"
                                       variant="ghost"

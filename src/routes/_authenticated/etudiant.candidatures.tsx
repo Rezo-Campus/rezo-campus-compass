@@ -255,10 +255,10 @@ function EtudiantCandidatures() {
                         </span>
                       )}
                     </div>
-                    <div className="mt-0.5 text-sm text-muted-foreground">
-                      {app.school?.name}
-                      {app.program?.level && ` · ${app.program.level}`}
-                      {app.program?.domain && ` · ${app.program.domain}`}
+                    <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-muted-foreground">
+                      {app.school?.name && <span>{app.school.name}</span>}
+                      {app.program?.level && <span>{app.program.level}</span>}
+                      {app.program?.domain && <span>{app.program.domain}</span>}
                     </div>
                   </div>
                   {!isSubmitted && (

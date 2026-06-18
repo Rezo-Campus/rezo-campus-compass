@@ -239,15 +239,17 @@ export function Validations() {
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="font-medium text-sm">{d.name}</div>
-                            <div className="text-xs text-muted-foreground">
-                              {new Date(d.uploaded_at).toLocaleDateString("fr-FR")}
+                            <div className="mt-1 flex flex-wrap items-center gap-2">
+                              <StatusBadge status={d.status} />
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(d.uploaded_at).toLocaleDateString("fr-FR")}
+                              </span>
                             </div>
                             {showArchive && d.notes && (
                               <div className="mt-1 text-xs text-muted-foreground italic">Note : {d.notes}</div>
                             )}
                           </div>
-                          <StatusBadge status={d.status} />
-                          <Button size="sm" variant="ghost" onClick={() => download(d.storage_path, d.name)}>
+                          <Button size="sm" variant="ghost" className="shrink-0" onClick={() => download(d.storage_path, d.name)}>
                             <Download className="size-4" />
                           </Button>
                         </div>
@@ -299,16 +301,16 @@ export function Validations() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="font-semibold">{d.student?.full_name || "—"}</div>
-                      <div className="text-xs text-muted-foreground">{d.student?.email}</div>
-                      <ul className="mt-2 space-y-1">
+                      <div className="truncate text-xs text-muted-foreground">{d.student?.email}</div>
+                      <ul className="mt-2 space-y-1.5">
                         {d.apps.map((a) => (
-                          <li key={a.id} className="flex items-center gap-2 text-sm">
+                          <li key={a.id} className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
                             <span className="size-1.5 rounded-full bg-primary/40 shrink-0" />
                             <span className="font-medium">{a.program?.name ?? "—"}</span>
                             {a.program?.level && <span className="text-xs text-muted-foreground">{a.program.level}</span>}
-                            <span className="text-xs text-muted-foreground">· {a.school?.name}</span>
+                            <span className="text-xs text-muted-foreground">{a.school?.name}</span>
                             {showArchive && (
-                              <span className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                              <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
                                 a.status === "valide" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                               }`}>
                                 {a.status === "valide" ? "Validé" : "Refusé"}
@@ -318,27 +320,27 @@ export function Validations() {
                         ))}
                       </ul>
                     </div>
-                    {!showArchive && (
-                      <div className="flex shrink-0 gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-destructive hover:bg-destructive/10"
-                          disabled={reviewDossier.isPending}
-                          onClick={() => reviewDossier.mutate({ studentId: d.student!.id, status: "refuse" })}
-                        >
-                          <XCircle className="mr-1 size-4" /> Refuser
-                        </Button>
-                        <Button
-                          size="sm"
-                          disabled={reviewDossier.isPending}
-                          onClick={() => reviewDossier.mutate({ studentId: d.student!.id, status: "valide" })}
-                        >
-                          <CheckCircle2 className="mr-1 size-4" /> Valider
-                        </Button>
-                      </div>
-                    )}
                   </div>
+                  {!showArchive && (
+                    <div className="mt-3 flex flex-wrap justify-end gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-destructive hover:bg-destructive/10"
+                        disabled={reviewDossier.isPending}
+                        onClick={() => reviewDossier.mutate({ studentId: d.student!.id, status: "refuse" })}
+                      >
+                        <XCircle className="mr-1 size-4" /> Refuser
+                      </Button>
+                      <Button
+                        size="sm"
+                        disabled={reviewDossier.isPending}
+                        onClick={() => reviewDossier.mutate({ studentId: d.student!.id, status: "valide" })}
+                      >
+                        <CheckCircle2 className="mr-1 size-4" /> Valider
+                      </Button>
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>

@@ -192,27 +192,29 @@ function EtudiantParcours() {
             ) : (
               <ul className="space-y-2">
                 {docs.map((d) => (
-                  <li key={d.id} className="flex items-center gap-3 rounded-xl border border-border p-3">
-                    <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
-                      <GraduationCap className="size-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate text-sm font-medium">{d.name}</div>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-xs text-muted-foreground">
-                          {DOC_TYPES.find((t) => t.value === d.type)?.label}
-                        </span>
-                        {d.size_bytes && (
-                          <span className="text-xs text-muted-foreground">
-                            · {(d.size_bytes / 1024).toFixed(0)} Ko
+                  <li key={d.id} className="rounded-xl border border-border p-3">
+                    <div className="flex items-start gap-3">
+                      <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary">
+                        <GraduationCap className="size-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-sm font-medium">{d.name}</div>
+                        <div className="mt-1 flex flex-wrap items-center gap-2">
+                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[d.status] ?? "bg-muted text-muted-foreground"}`}>
+                            {STATUS_LABELS[d.status] ?? d.status}
                           </span>
-                        )}
+                          <span className="text-xs text-muted-foreground">
+                            {DOC_TYPES.find((t) => t.value === d.type)?.label}
+                          </span>
+                          {d.size_bytes && (
+                            <span className="text-xs text-muted-foreground">
+                              {(d.size_bytes / 1024).toFixed(0)} Ko
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
-                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[d.status] ?? "bg-muted text-muted-foreground"}`}>
-                      {STATUS_LABELS[d.status] ?? d.status}
-                    </span>
-                    <div className="flex items-center gap-1 shrink-0">
+                    <div className="mt-2 flex justify-end gap-1">
                       <Button
                         size="icon"
                         variant="ghost"

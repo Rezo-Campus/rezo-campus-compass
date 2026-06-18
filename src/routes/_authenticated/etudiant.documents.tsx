@@ -150,32 +150,37 @@ function DocumentsEtudiant() {
             Aucun document pour l'instant.
           </div>
         ) : (
-          <ul className="divide-y divide-border">
+          <ul className="space-y-2">
             {docs.map((d) => (
-              <li key={d.id} className="flex items-center gap-3 py-3">
-                <div className="grid size-10 place-items-center rounded-lg bg-muted text-muted-foreground">
-                  <FileText className="size-4" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="truncate font-medium">{d.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {TYPE_LABEL[d.type]} · {new Date(d.uploaded_at).toLocaleDateString("fr-FR")}
+              <li key={d.id} className="rounded-xl border border-border p-3">
+                <div className="flex items-start gap-3">
+                  <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground">
+                    <FileText className="size-4" />
                   </div>
-                  {d.notes && <div className="mt-1 text-xs italic text-muted-foreground">« {d.notes} »</div>}
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate font-medium">{d.name}</div>
+                    <div className="mt-1 flex flex-wrap items-center gap-2">
+                      <StatusBadge status={d.status} />
+                      <span className="text-xs text-muted-foreground">{TYPE_LABEL[d.type]}</span>
+                      <span className="text-xs text-muted-foreground">{new Date(d.uploaded_at).toLocaleDateString("fr-FR")}</span>
+                    </div>
+                    {d.notes && <div className="mt-1 text-xs italic text-muted-foreground">« {d.notes} »</div>}
+                  </div>
                 </div>
-                <StatusBadge status={d.status} />
-                <Button size="sm" variant="ghost" onClick={() => download(d.storage_path, d.name)}>
-                  <Download className="size-4" />
-                </Button>
-                {d.status === "en_attente" && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setPendingDelete({ id: d.id, storage_path: d.storage_path })}
-                  >
-                    <Trash2 className="size-4 text-destructive" />
+                <div className="mt-2 flex justify-end gap-1">
+                  <Button size="sm" variant="ghost" onClick={() => download(d.storage_path, d.name)}>
+                    <Download className="size-4" />
                   </Button>
-                )}
+                  {d.status === "en_attente" && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setPendingDelete({ id: d.id, storage_path: d.storage_path })}
+                    >
+                      <Trash2 className="size-4 text-destructive" />
+                    </Button>
+                  )}
+                </div>
               </li>
             ))}
           </ul>
