@@ -72,6 +72,7 @@ import { Route as AuthenticatedAdminDossiersRouteImport } from './routes/_authen
 import { Route as AuthenticatedSecretaireEtudiantsIndexRouteImport } from './routes/_authenticated/secretaire.etudiants.index'
 import { Route as AuthenticatedConseillerEtudiantsIndexRouteImport } from './routes/_authenticated/conseiller.etudiants.index'
 import { Route as AuthenticatedSecretaireEtudiantsStudentIdRouteImport } from './routes/_authenticated/secretaire.etudiants.$studentId'
+import { Route as AuthenticatedProjetsCahierDesChargesProjectIdRouteImport } from './routes/_authenticated/projets.cahier-des-charges.$projectId'
 import { Route as AuthenticatedConseillerEtudiantsStudentIdRouteImport } from './routes/_authenticated/conseiller.etudiants.$studentId'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
@@ -434,6 +435,12 @@ const AuthenticatedSecretaireEtudiantsStudentIdRoute =
     path: '/$studentId',
     getParentRoute: () => AuthenticatedSecretaireEtudiantsRoute,
   } as any)
+const AuthenticatedProjetsCahierDesChargesProjectIdRoute =
+  AuthenticatedProjetsCahierDesChargesProjectIdRouteImport.update({
+    id: '/cahier-des-charges/$projectId',
+    path: '/cahier-des-charges/$projectId',
+    getParentRoute: () => AuthenticatedProjetsRoute,
+  } as any)
 const AuthenticatedConseillerEtudiantsStudentIdRoute =
   AuthenticatedConseillerEtudiantsStudentIdRouteImport.update({
     id: '/$studentId',
@@ -502,6 +509,7 @@ export interface FileRoutesByFullPath {
   '/rh/': typeof AuthenticatedRhIndexRoute
   '/secretaire/': typeof AuthenticatedSecretaireIndexRoute
   '/conseiller/etudiants/$studentId': typeof AuthenticatedConseillerEtudiantsStudentIdRoute
+  '/projets/cahier-des-charges/$projectId': typeof AuthenticatedProjetsCahierDesChargesProjectIdRoute
   '/secretaire/etudiants/$studentId': typeof AuthenticatedSecretaireEtudiantsStudentIdRoute
   '/conseiller/etudiants/': typeof AuthenticatedConseillerEtudiantsIndexRoute
   '/secretaire/etudiants/': typeof AuthenticatedSecretaireEtudiantsIndexRoute
@@ -556,6 +564,7 @@ export interface FileRoutesByTo {
   '/rh': typeof AuthenticatedRhIndexRoute
   '/secretaire': typeof AuthenticatedSecretaireIndexRoute
   '/conseiller/etudiants/$studentId': typeof AuthenticatedConseillerEtudiantsStudentIdRoute
+  '/projets/cahier-des-charges/$projectId': typeof AuthenticatedProjetsCahierDesChargesProjectIdRoute
   '/secretaire/etudiants/$studentId': typeof AuthenticatedSecretaireEtudiantsStudentIdRoute
   '/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsIndexRoute
   '/secretaire/etudiants': typeof AuthenticatedSecretaireEtudiantsIndexRoute
@@ -623,6 +632,7 @@ export interface FileRoutesById {
   '/_authenticated/rh/': typeof AuthenticatedRhIndexRoute
   '/_authenticated/secretaire/': typeof AuthenticatedSecretaireIndexRoute
   '/_authenticated/conseiller/etudiants/$studentId': typeof AuthenticatedConseillerEtudiantsStudentIdRoute
+  '/_authenticated/projets/cahier-des-charges/$projectId': typeof AuthenticatedProjetsCahierDesChargesProjectIdRoute
   '/_authenticated/secretaire/etudiants/$studentId': typeof AuthenticatedSecretaireEtudiantsStudentIdRoute
   '/_authenticated/conseiller/etudiants/': typeof AuthenticatedConseillerEtudiantsIndexRoute
   '/_authenticated/secretaire/etudiants/': typeof AuthenticatedSecretaireEtudiantsIndexRoute
@@ -690,6 +700,7 @@ export interface FileRouteTypes {
     | '/rh/'
     | '/secretaire/'
     | '/conseiller/etudiants/$studentId'
+    | '/projets/cahier-des-charges/$projectId'
     | '/secretaire/etudiants/$studentId'
     | '/conseiller/etudiants/'
     | '/secretaire/etudiants/'
@@ -744,6 +755,7 @@ export interface FileRouteTypes {
     | '/rh'
     | '/secretaire'
     | '/conseiller/etudiants/$studentId'
+    | '/projets/cahier-des-charges/$projectId'
     | '/secretaire/etudiants/$studentId'
     | '/conseiller/etudiants'
     | '/secretaire/etudiants'
@@ -810,6 +822,7 @@ export interface FileRouteTypes {
     | '/_authenticated/rh/'
     | '/_authenticated/secretaire/'
     | '/_authenticated/conseiller/etudiants/$studentId'
+    | '/_authenticated/projets/cahier-des-charges/$projectId'
     | '/_authenticated/secretaire/etudiants/$studentId'
     | '/_authenticated/conseiller/etudiants/'
     | '/_authenticated/secretaire/etudiants/'
@@ -1266,6 +1279,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSecretaireEtudiantsStudentIdRouteImport
       parentRoute: typeof AuthenticatedSecretaireEtudiantsRoute
     }
+    '/_authenticated/projets/cahier-des-charges/$projectId': {
+      id: '/_authenticated/projets/cahier-des-charges/$projectId'
+      path: '/cahier-des-charges/$projectId'
+      fullPath: '/projets/cahier-des-charges/$projectId'
+      preLoaderRoute: typeof AuthenticatedProjetsCahierDesChargesProjectIdRouteImport
+      parentRoute: typeof AuthenticatedProjetsRoute
+    }
     '/_authenticated/conseiller/etudiants/$studentId': {
       id: '/_authenticated/conseiller/etudiants/$studentId'
       path: '/$studentId'
@@ -1437,6 +1457,7 @@ interface AuthenticatedProjetsRouteChildren {
   AuthenticatedProjetsListeRoute: typeof AuthenticatedProjetsListeRoute
   AuthenticatedProjetsRendezVousClientsRoute: typeof AuthenticatedProjetsRendezVousClientsRoute
   AuthenticatedProjetsIndexRoute: typeof AuthenticatedProjetsIndexRoute
+  AuthenticatedProjetsCahierDesChargesProjectIdRoute: typeof AuthenticatedProjetsCahierDesChargesProjectIdRoute
 }
 
 const AuthenticatedProjetsRouteChildren: AuthenticatedProjetsRouteChildren = {
@@ -1444,6 +1465,8 @@ const AuthenticatedProjetsRouteChildren: AuthenticatedProjetsRouteChildren = {
   AuthenticatedProjetsRendezVousClientsRoute:
     AuthenticatedProjetsRendezVousClientsRoute,
   AuthenticatedProjetsIndexRoute: AuthenticatedProjetsIndexRoute,
+  AuthenticatedProjetsCahierDesChargesProjectIdRoute:
+    AuthenticatedProjetsCahierDesChargesProjectIdRoute,
 }
 
 const AuthenticatedProjetsRouteWithChildren =

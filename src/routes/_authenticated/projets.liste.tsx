@@ -1,9 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState, type FormEvent } from "react";
+import { useState, useRef, type FormEvent } from "react";
 import {
   Plus, Pencil, Trash2, Loader2, ChevronDown, ChevronRight,
-  CheckSquare, FileText, Lightbulb, CheckCircle2,
+  CheckSquare, FileText, Lightbulb, CheckCircle2, Image, Printer,
 } from "lucide-react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { toast } from "sonner";
@@ -112,7 +112,7 @@ type Project = {
   start_date: string | null; end_date: string | null; budget: number | null;
   objectives: string | null; target_audience: string | null;
   tech_constraints: string | null; r_and_d_notes: string | null;
-  validated_spec: boolean;
+  validated_spec: boolean; partner_logo_url: string | null;
   created_by: string | null; created_at: string; updated_at: string;
 };
 type Task = {
@@ -153,6 +153,9 @@ function ProjetsListe() {
   const [openProject, setOpenProject] = useState(false);
   const [editingProject, setEditingProject] = useState<string | null>(null);
   const [projectForm, setProjectForm] = useState(emptyProject);
+  const [editingProjectLogo, setEditingProjectLogo] = useState<string | null>(null);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
 
   /* Expansion + onglets */
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -252,6 +255,33 @@ function ProjetsListe() {
     },
     onError: (e: Error) => toast.error("Erreur", { description: e.message }),
   });
+
+  async function uploadPartnerLogo(projectId: string, file: File): Promise<string | null> {
+    setUploadingLogo(true);
+    try {
+      const ext = file.name.split(".").pop() ?? "png";
+      const path = `${projectId}/logo.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("partner-logos")
+        .upload(path, file, { upsert: true });
+      if (upErr) throw upErr;
+      const { data: urlData } = supabase.storage.from("partner-logos").getPublicUrl(path);
+      const logoUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+      const { error: dbErr } = await supabase
+        .from("projects")
+        .update({ partner_logo_url: logoUrl })
+        .eq("id", projectId);
+      if (dbErr) throw dbErr;
+      toast.success("Logo du partenaire mis à jour");
+      qc.invalidateQueries({ queryKey: ["projects"] });
+      return logoUrl;
+    } catch (e: unknown) {
+      toast.error("Erreur lors de l'upload", { description: (e as Error).message });
+      return null;
+    } finally {
+      setUploadingLogo(false);
+    }
+  }
 
   const deleteProject = useMutation({
     mutationFn: async (id: string) => {
@@ -378,6 +408,7 @@ function ProjetsListe() {
       validated_spec: p.validated_spec ?? false,
     });
     setEditingProject(p.id);
+    setEditingProjectLogo(p.partner_logo_url ?? null);
     setOpenProject(true);
   };
 
@@ -426,7 +457,7 @@ function ProjetsListe() {
         <div className="ml-auto">
           {/* Dialog Projet */}
           <Dialog open={openProject} onOpenChange={(v) => {
-            if (!v) { setOpenProject(false); setEditingProject(null); setProjectForm(emptyProject); }
+            if (!v) { setOpenProject(false); setEditingProject(null); setEditingProjectLogo(null); setProjectForm(emptyProject); }
             else setOpenProject(true);
           }}>
             <DialogTrigger asChild>
@@ -451,6 +482,45 @@ function ProjetsListe() {
                     <Label>Client / Commanditaire</Label>
                     <Input value={projectForm.client} onChange={(e) => setProjectForm((f) => ({ ...f, client: e.target.value }))} />
                   </div>
+                  {editingProject && (
+                    <div className="space-y-1.5">
+                      <Label>Logo du partenaire (pour le cahier des charges)</Label>
+                      <div className="flex items-center gap-3">
+                        {editingProjectLogo ? (
+                          <img src={editingProjectLogo} alt="Logo partenaire" className="size-12 rounded-lg border border-border object-contain bg-white p-1" />
+                        ) : (
+                          <div className="grid size-12 shrink-0 place-items-center rounded-lg border border-dashed border-border text-muted-foreground">
+                            <Image className="size-5" />
+                          </div>
+                        )}
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          disabled={uploadingLogo}
+                          onClick={() => logoInputRef.current?.click()}
+                        >
+                          {uploadingLogo ? <Loader2 className="mr-1.5 size-3.5 animate-spin" /> : <Image className="mr-1.5 size-3.5" />}
+                          {editingProjectLogo ? "Changer le logo" : "Téléverser un logo"}
+                        </Button>
+                        <input
+                          ref={logoInputRef}
+                          type="file"
+                          accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f && editingProject) {
+                              uploadPartnerLogo(editingProject, f).then((url) => {
+                                if (url) setEditingProjectLogo(url);
+                              });
+                            }
+                            e.target.value = "";
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
                       <Label>Branche</Label>
@@ -687,6 +757,11 @@ function ProjetsListe() {
                       </div>
                     </div>
                     <div className="flex shrink-0 gap-1">
+                      <Link to="/projets/cahier-des-charges/$projectId" params={{ projectId: p.id }}>
+                        <Button size="sm" variant="ghost" title="Cahier des charges">
+                          <Printer className="size-4" />
+                        </Button>
+                      </Link>
                       <Button size="sm" variant="ghost" onClick={() => openEditProject(p)} title="Modifier">
                         <Pencil className="size-4" />
                       </Button>

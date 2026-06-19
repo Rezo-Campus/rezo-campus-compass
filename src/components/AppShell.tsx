@@ -66,7 +66,7 @@ export function AppShell({
   return (
     <div className="flex min-h-screen bg-background">
       {/* Sidebar */}
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex">
+      <aside className="hidden w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex print:hidden">
         <div className="flex h-16 items-center px-5">
           <Link to="/app">
             <BrandMark size="sm" variant="dark" />
@@ -123,8 +123,8 @@ export function AppShell({
       </aside>
 
       {/* Main */}
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6">
+      <div className="flex min-w-0 flex-1 flex-col print:flex-none">
+        <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6 print:hidden">
           <div className="md:hidden">
             <BrandMark size="sm" />
           </div>
@@ -147,7 +147,7 @@ export function AppShell({
         </header>
 
         {/* Mobile nav */}
-        <nav className="flex gap-1 overflow-x-auto border-b border-border bg-card px-3 py-2 md:hidden">
+        <nav className="flex gap-1 overflow-x-auto border-b border-border bg-card px-3 py-2 md:hidden print:hidden">
           {nav.map((item) => {
             const active = pathname === item.to;
             return (
@@ -190,7 +190,7 @@ export function AppShell({
           </button>
         </nav>
 
-        <main className="flex-1 p-6 lg:p-10">{children}</main>
+        <main className="flex-1 p-6 lg:p-10 print:p-0">{children}</main>
       </div>
     </div>
   );

@@ -491,6 +491,7 @@ export type Database = {
           tech_constraints: string | null
           r_and_d_notes: string | null
           validated_spec: boolean
+          partner_logo_url: string | null
           created_by: string | null
           created_at: string
           updated_at: string
@@ -511,6 +512,7 @@ export type Database = {
           tech_constraints?: string | null
           r_and_d_notes?: string | null
           validated_spec?: boolean
+          partner_logo_url?: string | null
           created_by?: string | null
           created_at?: string
           updated_at?: string
@@ -531,6 +533,7 @@ export type Database = {
           tech_constraints?: string | null
           r_and_d_notes?: string | null
           validated_spec?: boolean
+          partner_logo_url?: string | null
           created_by?: string | null
           created_at?: string
           updated_at?: string
