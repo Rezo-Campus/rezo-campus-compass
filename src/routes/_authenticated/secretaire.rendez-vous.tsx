@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Loader2, Plus, Pencil, Trash2, User, Building2 } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, User, Building2, ClipboardList } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
 import { Button } from "@/components/ui/button";
@@ -67,6 +67,17 @@ export function ClientAppointments() {
 
   const emptyForm = { client_id: "", scheduled_at: "", duration_min: 30, location: "", notes: "" };
   const [form, setForm] = useState(emptyForm);
+
+  const [suiviOpen, setSuiviOpen] = useState(false);
+  const [suiviTargetId, setSuiviTargetId] = useState<string | null>(null);
+  const emptySuivi = {
+    a_eu_lieu: null as boolean | null,
+    sujet_discute: "",
+    resolutions: "",
+    perspectives: "",
+    motif_echec: "",
+  };
+  const [suiviForm, setSuiviForm] = useState(emptySuivi);
 
   const { data: rdvs = [], isLoading } = useQuery({
     queryKey: ["client-appointments"],
@@ -161,41 +172,119 @@ export function ClientAppointments() {
     onError: (e: Error) => toast.error("Erreur", { description: e.message }),
   });
 
+  const openSuivi = (r: typeof rdvs[0]) => {
+    setSuiviTargetId(r.id);
+    setSuiviForm({
+      a_eu_lieu: r.a_eu_lieu,
+      sujet_discute: r.sujet_discute ?? "",
+      resolutions: r.resolutions ?? "",
+      perspectives: r.perspectives ?? "",
+      motif_echec: r.motif_echec ?? "",
+    });
+    setSuiviOpen(true);
+  };
+
+  const saveSuivi = useMutation({
+    mutationFn: async () => {
+      if (!suiviTargetId) return;
+      if (suiviForm.a_eu_lieu === null) throw new Error("Indiquez si le rendez-vous a eu lieu.");
+      const payload = suiviForm.a_eu_lieu
+        ? {
+            a_eu_lieu: true,
+            sujet_discute: suiviForm.sujet_discute || null,
+            resolutions: suiviForm.resolutions || null,
+            perspectives: suiviForm.perspectives || null,
+            motif_echec: null,
+            status: "termine",
+          }
+        : {
+            a_eu_lieu: false,
+            sujet_discute: null,
+            resolutions: null,
+            perspectives: null,
+            motif_echec: suiviForm.motif_echec || null,
+            status: "annule",
+          };
+      const { error } = await supabase.from("client_appointments").update(payload).eq("id", suiviTargetId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Suivi enregistré");
+      setSuiviOpen(false);
+      setSuiviTargetId(null);
+      qc.invalidateQueries({ queryKey: ["client-appointments"] });
+    },
+    onError: (e: Error) => toast.error("Erreur", { description: e.message }),
+  });
+
   const upcoming = rdvs.filter((r) => new Date(r.scheduled_at) >= new Date() && r.status === "programme");
   const past = rdvs.filter((r) => !upcoming.includes(r));
 
   const RdvCard = ({ r }: { r: typeof rdvs[0] }) => (
-    <li className="flex items-start gap-3 rounded-xl border border-border p-3">
-      <div className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
-        {r.client?.type === "entreprise" ? <Building2 className="size-4" /> : <User className="size-4" />}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="font-medium text-sm">{clientLabel(r.client)}</span>
-          <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[r.status] ?? "bg-muted"}`}>
-            {STATUS_LABELS[r.status] ?? r.status}
-          </span>
+    <li className="rounded-xl border border-border p-3">
+      <div className="flex items-start gap-3">
+        <div className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+          {r.client?.type === "entreprise" ? <Building2 className="size-4" /> : <User className="size-4" />}
         </div>
-        <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
-          <span>{new Date(r.scheduled_at).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" })}</span>
-          <span>{r.duration_min} min</span>
-          {r.location && <span>{r.location}</span>}
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-medium text-sm">{clientLabel(r.client)}</span>
+            <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[r.status] ?? "bg-muted"}`}>
+              {STATUS_LABELS[r.status] ?? r.status}
+            </span>
+          </div>
+          <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
+            <span>{new Date(r.scheduled_at).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" })}</span>
+            <span>{r.duration_min} min</span>
+            {r.location && <span>{r.location}</span>}
+          </div>
+          {r.notes && <div className="mt-1 text-xs text-muted-foreground italic">{r.notes}</div>}
+
+          {r.a_eu_lieu !== null && (
+            <div className={`mt-2 rounded-lg border p-2 text-xs ${
+              r.a_eu_lieu ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"
+            }`}>
+              <div className={`font-medium ${r.a_eu_lieu ? "text-green-700" : "text-red-700"}`}>
+                {r.a_eu_lieu ? "✓ Rendez-vous tenu" : "✗ Rendez-vous non tenu"}
+              </div>
+              {r.a_eu_lieu ? (
+                <div className="mt-1 space-y-0.5 text-muted-foreground">
+                  {r.sujet_discute && <p><span className="font-medium">Sujet discuté :</span> {r.sujet_discute}</p>}
+                  {r.resolutions && <p><span className="font-medium">Résolutions établies :</span> {r.resolutions}</p>}
+                  {r.perspectives && <p><span className="font-medium">Perspectives prises :</span> {r.perspectives}</p>}
+                </div>
+              ) : (
+                r.motif_echec && (
+                  <p className="mt-1 text-muted-foreground">
+                    <span className="font-medium">Motif :</span> {r.motif_echec}
+                  </p>
+                )
+              )}
+            </div>
+          )}
         </div>
-        {r.notes && <div className="mt-1 text-xs text-muted-foreground italic">{r.notes}</div>}
       </div>
-      {canManage && r.status === "programme" && (
-        <div className="flex shrink-0 gap-1">
-          <Button size="sm" variant="ghost" onClick={() => openEdit(r)} title="Modifier">
-            <Pencil className="size-4" />
+      {canManage && (
+        <div className="mt-2 flex flex-wrap justify-end gap-1">
+          <Button size="sm" variant="outline" onClick={() => openSuivi(r)}>
+            <ClipboardList className="mr-1.5 size-3.5" />
+            {r.a_eu_lieu !== null ? "Modifier le suivi" : "Ajouter un suivi"}
           </Button>
-          <Button
-            size="sm" variant="ghost"
-            className="text-destructive hover:bg-destructive/10"
-            onClick={() => setPendingDeleteId(r.id)}
-            title="Supprimer"
-          >
-            <Trash2 className="size-4" />
-          </Button>
+          {r.status === "programme" && (
+            <>
+              <Button size="sm" variant="ghost" onClick={() => openEdit(r)} title="Modifier">
+                <Pencil className="size-4" />
+              </Button>
+              <Button
+                size="sm" variant="ghost"
+                className="text-destructive hover:bg-destructive/10"
+                onClick={() => setPendingDeleteId(r.id)}
+                title="Supprimer"
+              >
+                <Trash2 className="size-4" />
+              </Button>
+            </>
+          )}
         </div>
       )}
     </li>
@@ -302,6 +391,94 @@ export function ClientAppointments() {
           </div>
         </>
       )}
+
+      {/* Dialog suivi */}
+      <Dialog open={suiviOpen} onOpenChange={(v) => { if (!v) { setSuiviOpen(false); setSuiviTargetId(null); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Suivi du rendez-vous</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label>Le rendez-vous a-t-il eu lieu ?</Label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSuiviForm((f) => ({ ...f, a_eu_lieu: true }))}
+                  className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition ${
+                    suiviForm.a_eu_lieu === true
+                      ? "border-green-500 bg-green-50 text-green-700"
+                      : "border-border text-muted-foreground hover:bg-muted/50"
+                  }`}
+                >
+                  Oui, il a eu lieu
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSuiviForm((f) => ({ ...f, a_eu_lieu: false }))}
+                  className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition ${
+                    suiviForm.a_eu_lieu === false
+                      ? "border-red-500 bg-red-50 text-red-700"
+                      : "border-border text-muted-foreground hover:bg-muted/50"
+                  }`}
+                >
+                  Non, il n'a pas eu lieu
+                </button>
+              </div>
+            </div>
+
+            {suiviForm.a_eu_lieu === true && (
+              <>
+                <div className="space-y-1.5">
+                  <Label>Sujet discuté</Label>
+                  <Textarea
+                    rows={2}
+                    value={suiviForm.sujet_discute}
+                    onChange={(e) => setSuiviForm((f) => ({ ...f, sujet_discute: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Résolutions établies</Label>
+                  <Textarea
+                    rows={2}
+                    value={suiviForm.resolutions}
+                    onChange={(e) => setSuiviForm((f) => ({ ...f, resolutions: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Perspectives prises</Label>
+                  <Textarea
+                    rows={2}
+                    value={suiviForm.perspectives}
+                    onChange={(e) => setSuiviForm((f) => ({ ...f, perspectives: e.target.value }))}
+                  />
+                </div>
+              </>
+            )}
+
+            {suiviForm.a_eu_lieu === false && (
+              <div className="space-y-1.5">
+                <Label>Motif de l'échec</Label>
+                <Textarea
+                  rows={3}
+                  value={suiviForm.motif_echec}
+                  onChange={(e) => setSuiviForm((f) => ({ ...f, motif_echec: e.target.value }))}
+                  placeholder="Qu'est-ce qui a fait échouer ce rendez-vous ?"
+                />
+              </div>
+            )}
+
+            <Button
+              className="w-full"
+              onClick={() => saveSuivi.mutate()}
+              disabled={saveSuivi.isPending || suiviForm.a_eu_lieu === null}
+            >
+              {saveSuivi.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+              Enregistrer le suivi
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <ConfirmDialog
         open={pendingDeleteId !== null}

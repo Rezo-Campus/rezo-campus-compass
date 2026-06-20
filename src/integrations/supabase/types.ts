@@ -711,6 +711,11 @@ export type Database = {
           location: string | null
           status: string
           notes: string | null
+          a_eu_lieu: boolean | null
+          sujet_discute: string | null
+          resolutions: string | null
+          perspectives: string | null
+          motif_echec: string | null
           created_by: string | null
           created_at: string
           updated_at: string
@@ -723,6 +728,11 @@ export type Database = {
           location?: string | null
           status?: string
           notes?: string | null
+          a_eu_lieu?: boolean | null
+          sujet_discute?: string | null
+          resolutions?: string | null
+          perspectives?: string | null
+          motif_echec?: string | null
           created_by?: string | null
           created_at?: string
           updated_at?: string
@@ -735,6 +745,11 @@ export type Database = {
           location?: string | null
           status?: string
           notes?: string | null
+          a_eu_lieu?: boolean | null
+          sujet_discute?: string | null
+          resolutions?: string | null
+          perspectives?: string | null
+          motif_echec?: string | null
           created_by?: string | null
           created_at?: string
           updated_at?: string
