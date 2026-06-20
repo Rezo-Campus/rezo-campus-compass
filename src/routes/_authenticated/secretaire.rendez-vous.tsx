@@ -264,29 +264,27 @@ export function ClientAppointments() {
           )}
         </div>
       </div>
-      {canManage && (
-        <div className="mt-2 flex flex-wrap justify-end gap-1">
-          <Button size="sm" variant="outline" onClick={() => openSuivi(r)}>
-            <ClipboardList className="mr-1.5 size-3.5" />
-            {r.a_eu_lieu !== null ? "Modifier le suivi" : "Ajouter un suivi"}
-          </Button>
-          {r.status === "programme" && (
-            <>
-              <Button size="sm" variant="ghost" onClick={() => openEdit(r)} title="Modifier">
-                <Pencil className="size-4" />
-              </Button>
-              <Button
-                size="sm" variant="ghost"
-                className="text-destructive hover:bg-destructive/10"
-                onClick={() => setPendingDeleteId(r.id)}
-                title="Supprimer"
-              >
-                <Trash2 className="size-4" />
-              </Button>
-            </>
-          )}
-        </div>
-      )}
+      <div className="mt-2 flex flex-wrap justify-end gap-1">
+        <Button size="sm" variant="outline" onClick={() => openSuivi(r)}>
+          <ClipboardList className="mr-1.5 size-3.5" />
+          {r.a_eu_lieu !== null ? "Modifier le suivi" : "Ajouter un suivi"}
+        </Button>
+        {canManage && r.status === "programme" && (
+          <>
+            <Button size="sm" variant="ghost" onClick={() => openEdit(r)} title="Modifier">
+              <Pencil className="size-4" />
+            </Button>
+            <Button
+              size="sm" variant="ghost"
+              className="text-destructive hover:bg-destructive/10"
+              onClick={() => setPendingDeleteId(r.id)}
+              title="Supprimer"
+            >
+              <Trash2 className="size-4" />
+            </Button>
+          </>
+        )}
+      </div>
     </li>
   );
 
