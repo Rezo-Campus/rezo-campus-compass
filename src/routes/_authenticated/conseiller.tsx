@@ -6,6 +6,7 @@ import {
   MessageSquare,
   CalendarDays,
   CalendarClock,
+  CalendarRange,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { RoleGuard } from "@/components/RoleGuard";
@@ -16,6 +17,7 @@ const NAV = [
   { label: "Validations", to: "/conseiller/validations", icon: FileCheck2 },
   { label: "Messagerie", to: "/conseiller/messages", icon: MessageSquare },
   { label: "Rendez-vous", to: "/conseiller/rendez-vous", icon: CalendarDays },
+  { label: "Réunions", to: "/conseiller/reunions", icon: CalendarRange },
   { label: "RDV Clients", to: "/conseiller/rendez-vous-clients", icon: CalendarClock },
 ];
 

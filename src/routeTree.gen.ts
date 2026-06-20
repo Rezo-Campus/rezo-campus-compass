@@ -34,13 +34,16 @@ import { Route as AuthenticatedComptabiliteIndexRouteImport } from './routes/_au
 import { Route as AuthenticatedCommercialIndexRouteImport } from './routes/_authenticated/commercial.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedSecretaireValidationsRouteImport } from './routes/_authenticated/secretaire.validations'
+import { Route as AuthenticatedSecretaireReunionsRouteImport } from './routes/_authenticated/secretaire.reunions'
 import { Route as AuthenticatedSecretaireRendezVousRouteImport } from './routes/_authenticated/secretaire.rendez-vous'
 import { Route as AuthenticatedSecretaireMessagesRouteImport } from './routes/_authenticated/secretaire.messages'
 import { Route as AuthenticatedSecretaireEtudiantsRouteImport } from './routes/_authenticated/secretaire.etudiants'
 import { Route as AuthenticatedSecretaireCourriersRouteImport } from './routes/_authenticated/secretaire.courriers'
 import { Route as AuthenticatedSecretaireClientsRouteImport } from './routes/_authenticated/secretaire.clients'
+import { Route as AuthenticatedRhReunionsRouteImport } from './routes/_authenticated/rh.reunions'
 import { Route as AuthenticatedRhRendezVousClientsRouteImport } from './routes/_authenticated/rh.rendez-vous-clients'
 import { Route as AuthenticatedRhPersonnelRouteImport } from './routes/_authenticated/rh.personnel'
+import { Route as AuthenticatedProjetsReunionsRouteImport } from './routes/_authenticated/projets.reunions'
 import { Route as AuthenticatedProjetsRendezVousClientsRouteImport } from './routes/_authenticated/projets.rendez-vous-clients'
 import { Route as AuthenticatedProjetsListeRouteImport } from './routes/_authenticated/projets.liste'
 import { Route as AuthenticatedEtudiantRendezVousRouteImport } from './routes/_authenticated/etudiant.rendez-vous'
@@ -54,16 +57,20 @@ import { Route as AuthenticatedEtudiantCandidaturesRouteImport } from './routes/
 import { Route as AuthenticatedEcoleFormationsRouteImport } from './routes/_authenticated/ecole.formations'
 import { Route as AuthenticatedEcoleCandidatsRouteImport } from './routes/_authenticated/ecole.candidats'
 import { Route as AuthenticatedConseillerValidationsRouteImport } from './routes/_authenticated/conseiller.validations'
+import { Route as AuthenticatedConseillerReunionsRouteImport } from './routes/_authenticated/conseiller.reunions'
 import { Route as AuthenticatedConseillerRendezVousClientsRouteImport } from './routes/_authenticated/conseiller.rendez-vous-clients'
 import { Route as AuthenticatedConseillerRendezVousRouteImport } from './routes/_authenticated/conseiller.rendez-vous'
 import { Route as AuthenticatedConseillerMessagesRouteImport } from './routes/_authenticated/conseiller.messages'
 import { Route as AuthenticatedConseillerEtudiantsRouteImport } from './routes/_authenticated/conseiller.etudiants'
 import { Route as AuthenticatedComptabiliteTransactionsRouteImport } from './routes/_authenticated/comptabilite.transactions'
+import { Route as AuthenticatedComptabiliteReunionsRouteImport } from './routes/_authenticated/comptabilite.reunions'
 import { Route as AuthenticatedComptabiliteRendezVousClientsRouteImport } from './routes/_authenticated/comptabilite.rendez-vous-clients'
+import { Route as AuthenticatedCommercialReunionsRouteImport } from './routes/_authenticated/commercial.reunions'
 import { Route as AuthenticatedCommercialRendezVousClientsRouteImport } from './routes/_authenticated/commercial.rendez-vous-clients'
 import { Route as AuthenticatedCommercialActivitesRouteImport } from './routes/_authenticated/commercial.activites'
 import { Route as AuthenticatedAdminValidationsRouteImport } from './routes/_authenticated/admin.validations'
 import { Route as AuthenticatedAdminUtilisateursRouteImport } from './routes/_authenticated/admin.utilisateurs'
+import { Route as AuthenticatedAdminReunionsRouteImport } from './routes/_authenticated/admin.reunions'
 import { Route as AuthenticatedAdminRendezVousClientsRouteImport } from './routes/_authenticated/admin.rendez-vous-clients'
 import { Route as AuthenticatedAdminRendezVousRouteImport } from './routes/_authenticated/admin.rendez-vous'
 import { Route as AuthenticatedAdminMessagesRouteImport } from './routes/_authenticated/admin.messages'
@@ -207,6 +214,12 @@ const AuthenticatedSecretaireValidationsRoute =
     path: '/validations',
     getParentRoute: () => AuthenticatedSecretaireRoute,
   } as any)
+const AuthenticatedSecretaireReunionsRoute =
+  AuthenticatedSecretaireReunionsRouteImport.update({
+    id: '/reunions',
+    path: '/reunions',
+    getParentRoute: () => AuthenticatedSecretaireRoute,
+  } as any)
 const AuthenticatedSecretaireRendezVousRoute =
   AuthenticatedSecretaireRendezVousRouteImport.update({
     id: '/rendez-vous',
@@ -237,6 +250,11 @@ const AuthenticatedSecretaireClientsRoute =
     path: '/clients',
     getParentRoute: () => AuthenticatedSecretaireRoute,
   } as any)
+const AuthenticatedRhReunionsRoute = AuthenticatedRhReunionsRouteImport.update({
+  id: '/reunions',
+  path: '/reunions',
+  getParentRoute: () => AuthenticatedRhRoute,
+} as any)
 const AuthenticatedRhRendezVousClientsRoute =
   AuthenticatedRhRendezVousClientsRouteImport.update({
     id: '/rendez-vous-clients',
@@ -248,6 +266,12 @@ const AuthenticatedRhPersonnelRoute =
     id: '/personnel',
     path: '/personnel',
     getParentRoute: () => AuthenticatedRhRoute,
+  } as any)
+const AuthenticatedProjetsReunionsRoute =
+  AuthenticatedProjetsReunionsRouteImport.update({
+    id: '/reunions',
+    path: '/reunions',
+    getParentRoute: () => AuthenticatedProjetsRoute,
   } as any)
 const AuthenticatedProjetsRendezVousClientsRoute =
   AuthenticatedProjetsRendezVousClientsRouteImport.update({
@@ -327,6 +351,12 @@ const AuthenticatedConseillerValidationsRoute =
     path: '/validations',
     getParentRoute: () => AuthenticatedConseillerRoute,
   } as any)
+const AuthenticatedConseillerReunionsRoute =
+  AuthenticatedConseillerReunionsRouteImport.update({
+    id: '/reunions',
+    path: '/reunions',
+    getParentRoute: () => AuthenticatedConseillerRoute,
+  } as any)
 const AuthenticatedConseillerRendezVousClientsRoute =
   AuthenticatedConseillerRendezVousClientsRouteImport.update({
     id: '/rendez-vous-clients',
@@ -357,11 +387,23 @@ const AuthenticatedComptabiliteTransactionsRoute =
     path: '/transactions',
     getParentRoute: () => AuthenticatedComptabiliteRoute,
   } as any)
+const AuthenticatedComptabiliteReunionsRoute =
+  AuthenticatedComptabiliteReunionsRouteImport.update({
+    id: '/reunions',
+    path: '/reunions',
+    getParentRoute: () => AuthenticatedComptabiliteRoute,
+  } as any)
 const AuthenticatedComptabiliteRendezVousClientsRoute =
   AuthenticatedComptabiliteRendezVousClientsRouteImport.update({
     id: '/rendez-vous-clients',
     path: '/rendez-vous-clients',
     getParentRoute: () => AuthenticatedComptabiliteRoute,
+  } as any)
+const AuthenticatedCommercialReunionsRoute =
+  AuthenticatedCommercialReunionsRouteImport.update({
+    id: '/reunions',
+    path: '/reunions',
+    getParentRoute: () => AuthenticatedCommercialRoute,
   } as any)
 const AuthenticatedCommercialRendezVousClientsRoute =
   AuthenticatedCommercialRendezVousClientsRouteImport.update({
@@ -385,6 +427,12 @@ const AuthenticatedAdminUtilisateursRoute =
   AuthenticatedAdminUtilisateursRouteImport.update({
     id: '/utilisateurs',
     path: '/utilisateurs',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminReunionsRoute =
+  AuthenticatedAdminReunionsRouteImport.update({
+    id: '/reunions',
+    path: '/reunions',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminRendezVousClientsRoute =
@@ -468,16 +516,20 @@ export interface FileRoutesByFullPath {
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
   '/admin/rendez-vous': typeof AuthenticatedAdminRendezVousRoute
   '/admin/rendez-vous-clients': typeof AuthenticatedAdminRendezVousClientsRoute
+  '/admin/reunions': typeof AuthenticatedAdminReunionsRoute
   '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/admin/validations': typeof AuthenticatedAdminValidationsRoute
   '/commercial/activites': typeof AuthenticatedCommercialActivitesRoute
   '/commercial/rendez-vous-clients': typeof AuthenticatedCommercialRendezVousClientsRoute
+  '/commercial/reunions': typeof AuthenticatedCommercialReunionsRoute
   '/comptabilite/rendez-vous-clients': typeof AuthenticatedComptabiliteRendezVousClientsRoute
+  '/comptabilite/reunions': typeof AuthenticatedComptabiliteReunionsRoute
   '/comptabilite/transactions': typeof AuthenticatedComptabiliteTransactionsRoute
   '/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRouteWithChildren
   '/conseiller/messages': typeof AuthenticatedConseillerMessagesRoute
   '/conseiller/rendez-vous': typeof AuthenticatedConseillerRendezVousRoute
   '/conseiller/rendez-vous-clients': typeof AuthenticatedConseillerRendezVousClientsRoute
+  '/conseiller/reunions': typeof AuthenticatedConseillerReunionsRoute
   '/conseiller/validations': typeof AuthenticatedConseillerValidationsRoute
   '/ecole/candidats': typeof AuthenticatedEcoleCandidatsRoute
   '/ecole/formations': typeof AuthenticatedEcoleFormationsRoute
@@ -491,13 +543,16 @@ export interface FileRoutesByFullPath {
   '/etudiant/rendez-vous': typeof AuthenticatedEtudiantRendezVousRoute
   '/projets/liste': typeof AuthenticatedProjetsListeRoute
   '/projets/rendez-vous-clients': typeof AuthenticatedProjetsRendezVousClientsRoute
+  '/projets/reunions': typeof AuthenticatedProjetsReunionsRoute
   '/rh/personnel': typeof AuthenticatedRhPersonnelRoute
   '/rh/rendez-vous-clients': typeof AuthenticatedRhRendezVousClientsRoute
+  '/rh/reunions': typeof AuthenticatedRhReunionsRoute
   '/secretaire/clients': typeof AuthenticatedSecretaireClientsRoute
   '/secretaire/courriers': typeof AuthenticatedSecretaireCourriersRoute
   '/secretaire/etudiants': typeof AuthenticatedSecretaireEtudiantsRouteWithChildren
   '/secretaire/messages': typeof AuthenticatedSecretaireMessagesRoute
   '/secretaire/rendez-vous': typeof AuthenticatedSecretaireRendezVousRoute
+  '/secretaire/reunions': typeof AuthenticatedSecretaireReunionsRoute
   '/secretaire/validations': typeof AuthenticatedSecretaireValidationsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/commercial/': typeof AuthenticatedCommercialIndexRoute
@@ -525,15 +580,19 @@ export interface FileRoutesByTo {
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
   '/admin/rendez-vous': typeof AuthenticatedAdminRendezVousRoute
   '/admin/rendez-vous-clients': typeof AuthenticatedAdminRendezVousClientsRoute
+  '/admin/reunions': typeof AuthenticatedAdminReunionsRoute
   '/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/admin/validations': typeof AuthenticatedAdminValidationsRoute
   '/commercial/activites': typeof AuthenticatedCommercialActivitesRoute
   '/commercial/rendez-vous-clients': typeof AuthenticatedCommercialRendezVousClientsRoute
+  '/commercial/reunions': typeof AuthenticatedCommercialReunionsRoute
   '/comptabilite/rendez-vous-clients': typeof AuthenticatedComptabiliteRendezVousClientsRoute
+  '/comptabilite/reunions': typeof AuthenticatedComptabiliteReunionsRoute
   '/comptabilite/transactions': typeof AuthenticatedComptabiliteTransactionsRoute
   '/conseiller/messages': typeof AuthenticatedConseillerMessagesRoute
   '/conseiller/rendez-vous': typeof AuthenticatedConseillerRendezVousRoute
   '/conseiller/rendez-vous-clients': typeof AuthenticatedConseillerRendezVousClientsRoute
+  '/conseiller/reunions': typeof AuthenticatedConseillerReunionsRoute
   '/conseiller/validations': typeof AuthenticatedConseillerValidationsRoute
   '/ecole/candidats': typeof AuthenticatedEcoleCandidatsRoute
   '/ecole/formations': typeof AuthenticatedEcoleFormationsRoute
@@ -547,12 +606,15 @@ export interface FileRoutesByTo {
   '/etudiant/rendez-vous': typeof AuthenticatedEtudiantRendezVousRoute
   '/projets/liste': typeof AuthenticatedProjetsListeRoute
   '/projets/rendez-vous-clients': typeof AuthenticatedProjetsRendezVousClientsRoute
+  '/projets/reunions': typeof AuthenticatedProjetsReunionsRoute
   '/rh/personnel': typeof AuthenticatedRhPersonnelRoute
   '/rh/rendez-vous-clients': typeof AuthenticatedRhRendezVousClientsRoute
+  '/rh/reunions': typeof AuthenticatedRhReunionsRoute
   '/secretaire/clients': typeof AuthenticatedSecretaireClientsRoute
   '/secretaire/courriers': typeof AuthenticatedSecretaireCourriersRoute
   '/secretaire/messages': typeof AuthenticatedSecretaireMessagesRoute
   '/secretaire/rendez-vous': typeof AuthenticatedSecretaireRendezVousRoute
+  '/secretaire/reunions': typeof AuthenticatedSecretaireReunionsRoute
   '/secretaire/validations': typeof AuthenticatedSecretaireValidationsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/commercial': typeof AuthenticatedCommercialIndexRoute
@@ -591,16 +653,20 @@ export interface FileRoutesById {
   '/_authenticated/admin/messages': typeof AuthenticatedAdminMessagesRoute
   '/_authenticated/admin/rendez-vous': typeof AuthenticatedAdminRendezVousRoute
   '/_authenticated/admin/rendez-vous-clients': typeof AuthenticatedAdminRendezVousClientsRoute
+  '/_authenticated/admin/reunions': typeof AuthenticatedAdminReunionsRoute
   '/_authenticated/admin/utilisateurs': typeof AuthenticatedAdminUtilisateursRoute
   '/_authenticated/admin/validations': typeof AuthenticatedAdminValidationsRoute
   '/_authenticated/commercial/activites': typeof AuthenticatedCommercialActivitesRoute
   '/_authenticated/commercial/rendez-vous-clients': typeof AuthenticatedCommercialRendezVousClientsRoute
+  '/_authenticated/commercial/reunions': typeof AuthenticatedCommercialReunionsRoute
   '/_authenticated/comptabilite/rendez-vous-clients': typeof AuthenticatedComptabiliteRendezVousClientsRoute
+  '/_authenticated/comptabilite/reunions': typeof AuthenticatedComptabiliteReunionsRoute
   '/_authenticated/comptabilite/transactions': typeof AuthenticatedComptabiliteTransactionsRoute
   '/_authenticated/conseiller/etudiants': typeof AuthenticatedConseillerEtudiantsRouteWithChildren
   '/_authenticated/conseiller/messages': typeof AuthenticatedConseillerMessagesRoute
   '/_authenticated/conseiller/rendez-vous': typeof AuthenticatedConseillerRendezVousRoute
   '/_authenticated/conseiller/rendez-vous-clients': typeof AuthenticatedConseillerRendezVousClientsRoute
+  '/_authenticated/conseiller/reunions': typeof AuthenticatedConseillerReunionsRoute
   '/_authenticated/conseiller/validations': typeof AuthenticatedConseillerValidationsRoute
   '/_authenticated/ecole/candidats': typeof AuthenticatedEcoleCandidatsRoute
   '/_authenticated/ecole/formations': typeof AuthenticatedEcoleFormationsRoute
@@ -614,13 +680,16 @@ export interface FileRoutesById {
   '/_authenticated/etudiant/rendez-vous': typeof AuthenticatedEtudiantRendezVousRoute
   '/_authenticated/projets/liste': typeof AuthenticatedProjetsListeRoute
   '/_authenticated/projets/rendez-vous-clients': typeof AuthenticatedProjetsRendezVousClientsRoute
+  '/_authenticated/projets/reunions': typeof AuthenticatedProjetsReunionsRoute
   '/_authenticated/rh/personnel': typeof AuthenticatedRhPersonnelRoute
   '/_authenticated/rh/rendez-vous-clients': typeof AuthenticatedRhRendezVousClientsRoute
+  '/_authenticated/rh/reunions': typeof AuthenticatedRhReunionsRoute
   '/_authenticated/secretaire/clients': typeof AuthenticatedSecretaireClientsRoute
   '/_authenticated/secretaire/courriers': typeof AuthenticatedSecretaireCourriersRoute
   '/_authenticated/secretaire/etudiants': typeof AuthenticatedSecretaireEtudiantsRouteWithChildren
   '/_authenticated/secretaire/messages': typeof AuthenticatedSecretaireMessagesRoute
   '/_authenticated/secretaire/rendez-vous': typeof AuthenticatedSecretaireRendezVousRoute
+  '/_authenticated/secretaire/reunions': typeof AuthenticatedSecretaireReunionsRoute
   '/_authenticated/secretaire/validations': typeof AuthenticatedSecretaireValidationsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/commercial/': typeof AuthenticatedCommercialIndexRoute
@@ -659,16 +728,20 @@ export interface FileRouteTypes {
     | '/admin/messages'
     | '/admin/rendez-vous'
     | '/admin/rendez-vous-clients'
+    | '/admin/reunions'
     | '/admin/utilisateurs'
     | '/admin/validations'
     | '/commercial/activites'
     | '/commercial/rendez-vous-clients'
+    | '/commercial/reunions'
     | '/comptabilite/rendez-vous-clients'
+    | '/comptabilite/reunions'
     | '/comptabilite/transactions'
     | '/conseiller/etudiants'
     | '/conseiller/messages'
     | '/conseiller/rendez-vous'
     | '/conseiller/rendez-vous-clients'
+    | '/conseiller/reunions'
     | '/conseiller/validations'
     | '/ecole/candidats'
     | '/ecole/formations'
@@ -682,13 +755,16 @@ export interface FileRouteTypes {
     | '/etudiant/rendez-vous'
     | '/projets/liste'
     | '/projets/rendez-vous-clients'
+    | '/projets/reunions'
     | '/rh/personnel'
     | '/rh/rendez-vous-clients'
+    | '/rh/reunions'
     | '/secretaire/clients'
     | '/secretaire/courriers'
     | '/secretaire/etudiants'
     | '/secretaire/messages'
     | '/secretaire/rendez-vous'
+    | '/secretaire/reunions'
     | '/secretaire/validations'
     | '/admin/'
     | '/commercial/'
@@ -716,15 +792,19 @@ export interface FileRouteTypes {
     | '/admin/messages'
     | '/admin/rendez-vous'
     | '/admin/rendez-vous-clients'
+    | '/admin/reunions'
     | '/admin/utilisateurs'
     | '/admin/validations'
     | '/commercial/activites'
     | '/commercial/rendez-vous-clients'
+    | '/commercial/reunions'
     | '/comptabilite/rendez-vous-clients'
+    | '/comptabilite/reunions'
     | '/comptabilite/transactions'
     | '/conseiller/messages'
     | '/conseiller/rendez-vous'
     | '/conseiller/rendez-vous-clients'
+    | '/conseiller/reunions'
     | '/conseiller/validations'
     | '/ecole/candidats'
     | '/ecole/formations'
@@ -738,12 +818,15 @@ export interface FileRouteTypes {
     | '/etudiant/rendez-vous'
     | '/projets/liste'
     | '/projets/rendez-vous-clients'
+    | '/projets/reunions'
     | '/rh/personnel'
     | '/rh/rendez-vous-clients'
+    | '/rh/reunions'
     | '/secretaire/clients'
     | '/secretaire/courriers'
     | '/secretaire/messages'
     | '/secretaire/rendez-vous'
+    | '/secretaire/reunions'
     | '/secretaire/validations'
     | '/admin'
     | '/commercial'
@@ -781,16 +864,20 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/messages'
     | '/_authenticated/admin/rendez-vous'
     | '/_authenticated/admin/rendez-vous-clients'
+    | '/_authenticated/admin/reunions'
     | '/_authenticated/admin/utilisateurs'
     | '/_authenticated/admin/validations'
     | '/_authenticated/commercial/activites'
     | '/_authenticated/commercial/rendez-vous-clients'
+    | '/_authenticated/commercial/reunions'
     | '/_authenticated/comptabilite/rendez-vous-clients'
+    | '/_authenticated/comptabilite/reunions'
     | '/_authenticated/comptabilite/transactions'
     | '/_authenticated/conseiller/etudiants'
     | '/_authenticated/conseiller/messages'
     | '/_authenticated/conseiller/rendez-vous'
     | '/_authenticated/conseiller/rendez-vous-clients'
+    | '/_authenticated/conseiller/reunions'
     | '/_authenticated/conseiller/validations'
     | '/_authenticated/ecole/candidats'
     | '/_authenticated/ecole/formations'
@@ -804,13 +891,16 @@ export interface FileRouteTypes {
     | '/_authenticated/etudiant/rendez-vous'
     | '/_authenticated/projets/liste'
     | '/_authenticated/projets/rendez-vous-clients'
+    | '/_authenticated/projets/reunions'
     | '/_authenticated/rh/personnel'
     | '/_authenticated/rh/rendez-vous-clients'
+    | '/_authenticated/rh/reunions'
     | '/_authenticated/secretaire/clients'
     | '/_authenticated/secretaire/courriers'
     | '/_authenticated/secretaire/etudiants'
     | '/_authenticated/secretaire/messages'
     | '/_authenticated/secretaire/rendez-vous'
+    | '/_authenticated/secretaire/reunions'
     | '/_authenticated/secretaire/validations'
     | '/_authenticated/admin/'
     | '/_authenticated/commercial/'
@@ -1013,6 +1103,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSecretaireValidationsRouteImport
       parentRoute: typeof AuthenticatedSecretaireRoute
     }
+    '/_authenticated/secretaire/reunions': {
+      id: '/_authenticated/secretaire/reunions'
+      path: '/reunions'
+      fullPath: '/secretaire/reunions'
+      preLoaderRoute: typeof AuthenticatedSecretaireReunionsRouteImport
+      parentRoute: typeof AuthenticatedSecretaireRoute
+    }
     '/_authenticated/secretaire/rendez-vous': {
       id: '/_authenticated/secretaire/rendez-vous'
       path: '/rendez-vous'
@@ -1048,6 +1145,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSecretaireClientsRouteImport
       parentRoute: typeof AuthenticatedSecretaireRoute
     }
+    '/_authenticated/rh/reunions': {
+      id: '/_authenticated/rh/reunions'
+      path: '/reunions'
+      fullPath: '/rh/reunions'
+      preLoaderRoute: typeof AuthenticatedRhReunionsRouteImport
+      parentRoute: typeof AuthenticatedRhRoute
+    }
     '/_authenticated/rh/rendez-vous-clients': {
       id: '/_authenticated/rh/rendez-vous-clients'
       path: '/rendez-vous-clients'
@@ -1061,6 +1165,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/rh/personnel'
       preLoaderRoute: typeof AuthenticatedRhPersonnelRouteImport
       parentRoute: typeof AuthenticatedRhRoute
+    }
+    '/_authenticated/projets/reunions': {
+      id: '/_authenticated/projets/reunions'
+      path: '/reunions'
+      fullPath: '/projets/reunions'
+      preLoaderRoute: typeof AuthenticatedProjetsReunionsRouteImport
+      parentRoute: typeof AuthenticatedProjetsRoute
     }
     '/_authenticated/projets/rendez-vous-clients': {
       id: '/_authenticated/projets/rendez-vous-clients'
@@ -1153,6 +1264,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConseillerValidationsRouteImport
       parentRoute: typeof AuthenticatedConseillerRoute
     }
+    '/_authenticated/conseiller/reunions': {
+      id: '/_authenticated/conseiller/reunions'
+      path: '/reunions'
+      fullPath: '/conseiller/reunions'
+      preLoaderRoute: typeof AuthenticatedConseillerReunionsRouteImport
+      parentRoute: typeof AuthenticatedConseillerRoute
+    }
     '/_authenticated/conseiller/rendez-vous-clients': {
       id: '/_authenticated/conseiller/rendez-vous-clients'
       path: '/rendez-vous-clients'
@@ -1188,12 +1306,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedComptabiliteTransactionsRouteImport
       parentRoute: typeof AuthenticatedComptabiliteRoute
     }
+    '/_authenticated/comptabilite/reunions': {
+      id: '/_authenticated/comptabilite/reunions'
+      path: '/reunions'
+      fullPath: '/comptabilite/reunions'
+      preLoaderRoute: typeof AuthenticatedComptabiliteReunionsRouteImport
+      parentRoute: typeof AuthenticatedComptabiliteRoute
+    }
     '/_authenticated/comptabilite/rendez-vous-clients': {
       id: '/_authenticated/comptabilite/rendez-vous-clients'
       path: '/rendez-vous-clients'
       fullPath: '/comptabilite/rendez-vous-clients'
       preLoaderRoute: typeof AuthenticatedComptabiliteRendezVousClientsRouteImport
       parentRoute: typeof AuthenticatedComptabiliteRoute
+    }
+    '/_authenticated/commercial/reunions': {
+      id: '/_authenticated/commercial/reunions'
+      path: '/reunions'
+      fullPath: '/commercial/reunions'
+      preLoaderRoute: typeof AuthenticatedCommercialReunionsRouteImport
+      parentRoute: typeof AuthenticatedCommercialRoute
     }
     '/_authenticated/commercial/rendez-vous-clients': {
       id: '/_authenticated/commercial/rendez-vous-clients'
@@ -1221,6 +1353,13 @@ declare module '@tanstack/react-router' {
       path: '/utilisateurs'
       fullPath: '/admin/utilisateurs'
       preLoaderRoute: typeof AuthenticatedAdminUtilisateursRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/reunions': {
+      id: '/_authenticated/admin/reunions'
+      path: '/reunions'
+      fullPath: '/admin/reunions'
+      preLoaderRoute: typeof AuthenticatedAdminReunionsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/rendez-vous-clients': {
@@ -1302,6 +1441,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminMessagesRoute: typeof AuthenticatedAdminMessagesRoute
   AuthenticatedAdminRendezVousRoute: typeof AuthenticatedAdminRendezVousRoute
   AuthenticatedAdminRendezVousClientsRoute: typeof AuthenticatedAdminRendezVousClientsRoute
+  AuthenticatedAdminReunionsRoute: typeof AuthenticatedAdminReunionsRoute
   AuthenticatedAdminUtilisateursRoute: typeof AuthenticatedAdminUtilisateursRoute
   AuthenticatedAdminValidationsRoute: typeof AuthenticatedAdminValidationsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -1314,6 +1454,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminRendezVousRoute: AuthenticatedAdminRendezVousRoute,
   AuthenticatedAdminRendezVousClientsRoute:
     AuthenticatedAdminRendezVousClientsRoute,
+  AuthenticatedAdminReunionsRoute: AuthenticatedAdminReunionsRoute,
   AuthenticatedAdminUtilisateursRoute: AuthenticatedAdminUtilisateursRoute,
   AuthenticatedAdminValidationsRoute: AuthenticatedAdminValidationsRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
@@ -1325,6 +1466,7 @@ const AuthenticatedAdminRouteWithChildren =
 interface AuthenticatedCommercialRouteChildren {
   AuthenticatedCommercialActivitesRoute: typeof AuthenticatedCommercialActivitesRoute
   AuthenticatedCommercialRendezVousClientsRoute: typeof AuthenticatedCommercialRendezVousClientsRoute
+  AuthenticatedCommercialReunionsRoute: typeof AuthenticatedCommercialReunionsRoute
   AuthenticatedCommercialIndexRoute: typeof AuthenticatedCommercialIndexRoute
 }
 
@@ -1334,6 +1476,7 @@ const AuthenticatedCommercialRouteChildren: AuthenticatedCommercialRouteChildren
       AuthenticatedCommercialActivitesRoute,
     AuthenticatedCommercialRendezVousClientsRoute:
       AuthenticatedCommercialRendezVousClientsRoute,
+    AuthenticatedCommercialReunionsRoute: AuthenticatedCommercialReunionsRoute,
     AuthenticatedCommercialIndexRoute: AuthenticatedCommercialIndexRoute,
   }
 
@@ -1344,6 +1487,7 @@ const AuthenticatedCommercialRouteWithChildren =
 
 interface AuthenticatedComptabiliteRouteChildren {
   AuthenticatedComptabiliteRendezVousClientsRoute: typeof AuthenticatedComptabiliteRendezVousClientsRoute
+  AuthenticatedComptabiliteReunionsRoute: typeof AuthenticatedComptabiliteReunionsRoute
   AuthenticatedComptabiliteTransactionsRoute: typeof AuthenticatedComptabiliteTransactionsRoute
   AuthenticatedComptabiliteIndexRoute: typeof AuthenticatedComptabiliteIndexRoute
 }
@@ -1352,6 +1496,8 @@ const AuthenticatedComptabiliteRouteChildren: AuthenticatedComptabiliteRouteChil
   {
     AuthenticatedComptabiliteRendezVousClientsRoute:
       AuthenticatedComptabiliteRendezVousClientsRoute,
+    AuthenticatedComptabiliteReunionsRoute:
+      AuthenticatedComptabiliteReunionsRoute,
     AuthenticatedComptabiliteTransactionsRoute:
       AuthenticatedComptabiliteTransactionsRoute,
     AuthenticatedComptabiliteIndexRoute: AuthenticatedComptabiliteIndexRoute,
@@ -1385,6 +1531,7 @@ interface AuthenticatedConseillerRouteChildren {
   AuthenticatedConseillerMessagesRoute: typeof AuthenticatedConseillerMessagesRoute
   AuthenticatedConseillerRendezVousRoute: typeof AuthenticatedConseillerRendezVousRoute
   AuthenticatedConseillerRendezVousClientsRoute: typeof AuthenticatedConseillerRendezVousClientsRoute
+  AuthenticatedConseillerReunionsRoute: typeof AuthenticatedConseillerReunionsRoute
   AuthenticatedConseillerValidationsRoute: typeof AuthenticatedConseillerValidationsRoute
   AuthenticatedConseillerIndexRoute: typeof AuthenticatedConseillerIndexRoute
 }
@@ -1398,6 +1545,7 @@ const AuthenticatedConseillerRouteChildren: AuthenticatedConseillerRouteChildren
       AuthenticatedConseillerRendezVousRoute,
     AuthenticatedConseillerRendezVousClientsRoute:
       AuthenticatedConseillerRendezVousClientsRoute,
+    AuthenticatedConseillerReunionsRoute: AuthenticatedConseillerReunionsRoute,
     AuthenticatedConseillerValidationsRoute:
       AuthenticatedConseillerValidationsRoute,
     AuthenticatedConseillerIndexRoute: AuthenticatedConseillerIndexRoute,
@@ -1456,6 +1604,7 @@ const AuthenticatedEtudiantRouteWithChildren =
 interface AuthenticatedProjetsRouteChildren {
   AuthenticatedProjetsListeRoute: typeof AuthenticatedProjetsListeRoute
   AuthenticatedProjetsRendezVousClientsRoute: typeof AuthenticatedProjetsRendezVousClientsRoute
+  AuthenticatedProjetsReunionsRoute: typeof AuthenticatedProjetsReunionsRoute
   AuthenticatedProjetsIndexRoute: typeof AuthenticatedProjetsIndexRoute
   AuthenticatedProjetsCahierDesChargesProjectIdRoute: typeof AuthenticatedProjetsCahierDesChargesProjectIdRoute
 }
@@ -1464,6 +1613,7 @@ const AuthenticatedProjetsRouteChildren: AuthenticatedProjetsRouteChildren = {
   AuthenticatedProjetsListeRoute: AuthenticatedProjetsListeRoute,
   AuthenticatedProjetsRendezVousClientsRoute:
     AuthenticatedProjetsRendezVousClientsRoute,
+  AuthenticatedProjetsReunionsRoute: AuthenticatedProjetsReunionsRoute,
   AuthenticatedProjetsIndexRoute: AuthenticatedProjetsIndexRoute,
   AuthenticatedProjetsCahierDesChargesProjectIdRoute:
     AuthenticatedProjetsCahierDesChargesProjectIdRoute,
@@ -1475,12 +1625,14 @@ const AuthenticatedProjetsRouteWithChildren =
 interface AuthenticatedRhRouteChildren {
   AuthenticatedRhPersonnelRoute: typeof AuthenticatedRhPersonnelRoute
   AuthenticatedRhRendezVousClientsRoute: typeof AuthenticatedRhRendezVousClientsRoute
+  AuthenticatedRhReunionsRoute: typeof AuthenticatedRhReunionsRoute
   AuthenticatedRhIndexRoute: typeof AuthenticatedRhIndexRoute
 }
 
 const AuthenticatedRhRouteChildren: AuthenticatedRhRouteChildren = {
   AuthenticatedRhPersonnelRoute: AuthenticatedRhPersonnelRoute,
   AuthenticatedRhRendezVousClientsRoute: AuthenticatedRhRendezVousClientsRoute,
+  AuthenticatedRhReunionsRoute: AuthenticatedRhReunionsRoute,
   AuthenticatedRhIndexRoute: AuthenticatedRhIndexRoute,
 }
 
@@ -1512,6 +1664,7 @@ interface AuthenticatedSecretaireRouteChildren {
   AuthenticatedSecretaireEtudiantsRoute: typeof AuthenticatedSecretaireEtudiantsRouteWithChildren
   AuthenticatedSecretaireMessagesRoute: typeof AuthenticatedSecretaireMessagesRoute
   AuthenticatedSecretaireRendezVousRoute: typeof AuthenticatedSecretaireRendezVousRoute
+  AuthenticatedSecretaireReunionsRoute: typeof AuthenticatedSecretaireReunionsRoute
   AuthenticatedSecretaireValidationsRoute: typeof AuthenticatedSecretaireValidationsRoute
   AuthenticatedSecretaireIndexRoute: typeof AuthenticatedSecretaireIndexRoute
 }
@@ -1526,6 +1679,7 @@ const AuthenticatedSecretaireRouteChildren: AuthenticatedSecretaireRouteChildren
     AuthenticatedSecretaireMessagesRoute: AuthenticatedSecretaireMessagesRoute,
     AuthenticatedSecretaireRendezVousRoute:
       AuthenticatedSecretaireRendezVousRoute,
+    AuthenticatedSecretaireReunionsRoute: AuthenticatedSecretaireReunionsRoute,
     AuthenticatedSecretaireValidationsRoute:
       AuthenticatedSecretaireValidationsRoute,
     AuthenticatedSecretaireIndexRoute: AuthenticatedSecretaireIndexRoute,

@@ -702,6 +702,48 @@ export type Database = {
         }
         Relationships: []
       }
+      meetings: {
+        Row: {
+          id: string
+          title: string
+          agenda: string | null
+          scheduled_at: string
+          duration_min: number
+          location: string | null
+          status: string
+          notes: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          agenda?: string | null
+          scheduled_at: string
+          duration_min?: number
+          location?: string | null
+          status?: string
+          notes?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          agenda?: string | null
+          scheduled_at?: string
+          duration_min?: number
+          location?: string | null
+          status?: string
+          notes?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_appointments: {
         Row: {
           id: string
