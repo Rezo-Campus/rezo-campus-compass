@@ -61,7 +61,7 @@ function CahierDesCharges() {
   const contraintesList = (p.tech_constraints ?? "").split("\n").map((l) => l.trim()).filter(Boolean);
 
   return (
-    <div style={{ fontFamily: '"Comic Sans MS", "Comic Sans", cursive, sans-serif' }}>
+    <div style={{ fontFamily: '"Times New Roman", Times, serif' }}>
       {/* Barre d'action (masquée à l'impression) */}
       <div className="mb-6 flex items-center justify-between print:hidden">
         <Link
@@ -220,12 +220,12 @@ function CahierDesCharges() {
           <div className="mt-10 grid grid-cols-2 gap-10 text-sm">
             <div>
               <p className="font-semibold">Pour {p.client || "le partenaire"}</p>
-              <p className="text-gray-500">Direction des Affaires Extérieures</p>
+              <p className="text-gray-500">La Direction</p>
               <div className="mt-16 border-t border-gray-400 pt-1 text-xs text-gray-500">Date et signature</div>
             </div>
             <div>
               <p className="font-semibold">Pour Rézo Campus Consulting</p>
-              <p className="text-gray-500">Direction Générale</p>
+              <p className="text-gray-500">Direction des Affaires Extérieures</p>
               <div className="mt-16 border-t border-gray-400 pt-1 text-xs text-gray-500">Date et signature</div>
             </div>
           </div>
