@@ -64,7 +64,7 @@ export function AppShell({
   );
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-background print:block print:min-h-0">
       {/* Sidebar */}
       <aside className="hidden w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex print:hidden">
         <div className="flex h-16 items-center px-5">
@@ -123,7 +123,7 @@ export function AppShell({
       </aside>
 
       {/* Main */}
-      <div className="flex min-w-0 flex-1 flex-col print:flex-none">
+      <div className="flex min-w-0 flex-1 flex-col print:w-full print:flex-none">
         <header className="flex h-16 items-center justify-between border-b border-border bg-card px-6 print:hidden">
           <div className="md:hidden">
             <BrandMark size="sm" />

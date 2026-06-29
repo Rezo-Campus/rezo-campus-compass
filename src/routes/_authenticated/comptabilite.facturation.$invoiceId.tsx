@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useParams, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, ArrowLeft, Printer, Mail, Phone, MapPin } from "lucide-react";
+import type { CSSProperties } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 
@@ -65,6 +66,12 @@ export function FactureDetail() {
 
   return (
     <div>
+      <style>{`
+        @media print {
+          @page { size: A4 portrait; margin: 12mm; }
+        }
+      `}</style>
+
       {/* Barre d'action (masquée à l'impression) */}
       <div className="mb-6 flex items-center justify-between print:hidden">
         <Link
@@ -78,7 +85,10 @@ export function FactureDetail() {
         </Button>
       </div>
 
-      <div className="mx-auto max-w-[210mm] bg-white p-12 text-black shadow-sm print:max-w-none print:shadow-none">
+      <div
+        className="mx-auto max-w-[210mm] bg-white p-12 text-black shadow-sm print:m-0 print:w-full print:max-w-full print:p-0 print:shadow-none"
+        style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact", colorAdjust: "exact" } as CSSProperties}
+      >
         {/* En-tête */}
         <div className="flex items-start justify-between border-b-2 border-primary pb-6">
           <div>
@@ -110,7 +120,12 @@ export function FactureDetail() {
         </div>
 
         {/* Lignes */}
-        <table className="mt-8 w-full border-collapse text-sm">
+        <table className="mt-8 w-full border-collapse text-sm" style={{ tableLayout: "fixed" }}>
+          <colgroup>
+            <col style={{ width: "30%" }} />
+            <col style={{ width: "45%" }} />
+            <col style={{ width: "25%" }} />
+          </colgroup>
           <thead>
             <tr className="border-b-2 border-gray-300 text-left text-gray-700">
               <th className="py-2">Service</th>
@@ -121,9 +136,9 @@ export function FactureDetail() {
           <tbody>
             {lines.map((l) => (
               <tr key={l.id} className="border-b border-gray-200">
-                <td className="py-2 font-medium">{l.service}</td>
-                <td className="py-2 text-gray-600">{l.description || "—"}</td>
-                <td className="py-2 text-right">{Number(l.montant).toLocaleString("fr-FR")}</td>
+                <td className="py-2 pr-2 font-medium break-words">{l.service}</td>
+                <td className="py-2 pr-2 text-gray-600 break-words">{l.description || "—"}</td>
+                <td className="py-2 text-right whitespace-nowrap">{Number(l.montant).toLocaleString("fr-FR")}</td>
               </tr>
             ))}
           </tbody>
@@ -150,6 +165,14 @@ export function FactureDetail() {
             <p className="mt-1 whitespace-pre-wrap text-sm text-gray-700">{invoice.notes}</p>
           </div>
         )}
+
+        {/* Signature */}
+        <div className="mt-12 flex justify-end">
+          <div className="w-64 text-center text-sm">
+            <p className="font-semibold text-gray-900">Direction Financière et des Ressources Humaines</p>
+            <div className="mt-16 border-t border-gray-400 pt-1 text-xs text-gray-500">Date et signature</div>
+          </div>
+        </div>
 
         <div className="mt-10 border-t border-gray-200 pt-4 text-center text-xs text-gray-500">
           Rézo Campus SARL — Local sis avenue de l'OUA, bloc 88-91, quartier Moukoundzi Ngouaka, Arr. 1 Makélékélé — Brazzaville, République du Congo.
