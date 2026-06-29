@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { LayoutDashboard, Users, FolderOpen, FileCheck2, MessageSquare, CalendarDays, School, CalendarClock, CalendarRange } from "lucide-react";
+import { LayoutDashboard, Users, FolderOpen, FileCheck2, MessageSquare, CalendarDays, School, CalendarClock, CalendarRange, Receipt } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { RoleGuard } from "@/components/RoleGuard";
 
@@ -13,6 +13,7 @@ const NAV = [
   { label: "Rendez-vous", to: "/admin/rendez-vous", icon: CalendarDays },
   { label: "Réunions", to: "/admin/reunions", icon: CalendarRange },
   { label: "RDV Clients", to: "/admin/rendez-vous-clients", icon: CalendarClock },
+  { label: "Facturation", to: "/admin/facturation", icon: Receipt },
 ];
 
 export const Route = createFileRoute("/_authenticated/admin")({

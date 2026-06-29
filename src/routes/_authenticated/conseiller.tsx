@@ -7,6 +7,7 @@ import {
   CalendarDays,
   CalendarClock,
   CalendarRange,
+  Receipt,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { RoleGuard } from "@/components/RoleGuard";
@@ -19,6 +20,7 @@ const NAV = [
   { label: "Rendez-vous", to: "/conseiller/rendez-vous", icon: CalendarDays },
   { label: "Réunions", to: "/conseiller/reunions", icon: CalendarRange },
   { label: "RDV Clients", to: "/conseiller/rendez-vous-clients", icon: CalendarClock },
+  { label: "Facturation", to: "/conseiller/facturation", icon: Receipt },
 ];
 
 export const Route = createFileRoute("/_authenticated/conseiller")({

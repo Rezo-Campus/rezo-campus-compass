@@ -702,6 +702,75 @@ export type Database = {
         }
         Relationships: []
       }
+      invoices: {
+        Row: {
+          id: string
+          numero: string
+          client_id: string | null
+          date_facture: string
+          status: string
+          conditions: string | null
+          notes: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          numero: string
+          client_id?: string | null
+          date_facture?: string
+          status?: string
+          conditions?: string | null
+          notes?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          numero?: string
+          client_id?: string | null
+          date_facture?: string
+          status?: string
+          conditions?: string | null
+          notes?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      invoice_lines: {
+        Row: {
+          id: string
+          invoice_id: string
+          service: string
+          description: string | null
+          montant: number
+          position: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          invoice_id: string
+          service: string
+          description?: string | null
+          montant: number
+          position?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          invoice_id?: string
+          service?: string
+          description?: string | null
+          montant?: number
+          position?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
       meetings: {
         Row: {
           id: string
