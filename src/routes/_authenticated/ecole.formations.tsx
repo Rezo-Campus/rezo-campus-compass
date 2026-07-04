@@ -43,8 +43,8 @@ type Program = {
   requirements: string | null;
 };
 
-const DOMAINS = ["Sciences", "Ingénierie & Technologie", "Commerce & Gestion", "Droit", "Santé", "Arts & Design", "Sciences Humaines", "Éducation", "Autre"];
-const LEVELS = ["Technicien", "Technicien Spécialisé", "BTS (Bac+2)", "BUT (Bac+3)", "Licence (Bac+3)", "Master (Bac+5)", "MBA", "Mastère spécialisé", "Doctorat (Bac+8)"];
+const DOMAINS = ["Sciences", "Ingénierie & Technologie", "Commerce & Gestion", "Droit", "Santé", "Arts & Design", "Sciences Humaines", "Éducation","Informatique", "Lettres", "Autre"];
+const LEVELS = ["Classe prépa", "Technicien", "Technicien Spécialisé", "Licence (Bac+3)", "Master (Bac+5)", "Doctorat (Bac+8)", "BTS (Bac+2)", "MBA", "Mastère spécialisé"];
 const LANGUAGES = ["Français", "Anglais", "Bilingue (Fr/En)", "Espagnol", "Autre"];
 
 const EMPTY_PROGRAM = {
