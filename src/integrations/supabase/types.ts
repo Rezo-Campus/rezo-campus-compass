@@ -273,6 +273,10 @@ export type Database = {
           status: string
           motivation_letter: string | null
           counselor_notes: string | null
+          notes_to_school: string | null
+          ecole_validated_at: string | null
+          ecole_cachet_url: string | null
+          frais_inscription_recus: boolean
           created_at: string
           updated_at: string
         }
@@ -284,6 +288,10 @@ export type Database = {
           status?: string
           motivation_letter?: string | null
           counselor_notes?: string | null
+          notes_to_school?: string | null
+          ecole_validated_at?: string | null
+          ecole_cachet_url?: string | null
+          frais_inscription_recus?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -295,8 +303,78 @@ export type Database = {
           status?: string
           motivation_letter?: string | null
           counselor_notes?: string | null
+          notes_to_school?: string | null
+          ecole_validated_at?: string | null
+          ecole_cachet_url?: string | null
+          frais_inscription_recus?: boolean
           created_at?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          body: string | null
+          read: boolean
+          data: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title: string
+          body?: string | null
+          read?: boolean
+          data?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string
+          body?: string | null
+          read?: boolean
+          data?: Json | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      official_documents: {
+        Row: {
+          id: string
+          student_id: string
+          application_id: string | null
+          uploaded_by: string | null
+          source: string
+          type: string
+          name: string
+          storage_path: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          student_id: string
+          application_id?: string | null
+          uploaded_by?: string | null
+          source: string
+          type: string
+          name: string
+          storage_path: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          student_id?: string
+          application_id?: string | null
+          uploaded_by?: string | null
+          source?: string
+          type?: string
+          name?: string
+          storage_path?: string
+          created_at?: string
         }
         Relationships: []
       }

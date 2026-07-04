@@ -1,13 +1,29 @@
 import { createFileRoute, Link, useParams, useRouterState } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRef, useState } from "react";
 import {
   Loader2, ArrowLeft, GraduationCap, Mail, Phone, FileText, Download,
-  CheckCircle2, Circle, School, Send, MessageSquare, User,
+  CheckCircle2, Circle, School, Send, MessageSquare, User, StickyNote,
+  Upload, Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { useAuth } from "@/hooks/use-auth";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+
+const ADMIN_DOC_TYPES: { value: string; label: string }[] = [
+  { value: "prise_en_charge", label: "Prise en charge" },
+  { value: "aevm", label: "AEVM" },
+  { value: "attestation_hebergement", label: "Attestation d'hébergement" },
+  { value: "bulletin_salaire", label: "Bulletin de salaire" },
+  { value: "carte_sejour", label: "Carte de séjour" },
+  { value: "autre", label: "Autre document" },
+];
 
 export const Route = createFileRoute("/_authenticated/conseiller/etudiants/$studentId")({
   component: ConseillerStudentDetail,
@@ -54,6 +70,14 @@ export function ConseillerStudentDetail() {
   const { studentId } = useParams({ strict: false }) as { studentId: string };
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const section = pathname.startsWith("/secretaire") ? "secretaire" : "conseiller";
+  const { data: authData } = useAuth();
+  const uid = authData?.user?.id ?? "";
+  const qc = useQueryClient();
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [noteText, setNoteText] = useState<string>("");
+  const [selectedAdminDocType, setSelectedAdminDocType] = useState("prise_en_charge");
+  const [uploadingAdminDoc, setUploadingAdminDoc] = useState(false);
+  const adminDocInputRef = useRef<HTMLInputElement>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["conseiller-student-detail", studentId],
@@ -99,6 +123,92 @@ export function ConseillerStudentDetail() {
       .createSignedUrl(path, 3600);
     if (error || !data) { toast.error("Lien indisponible"); return; }
     window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  }
+
+  const saveNote = useMutation({
+    mutationFn: async ({ id, note }: { id: string; note: string }) => {
+      const { error } = await supabase
+        .from("student_applications")
+        .update({ notes_to_school: note || null })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Note enregistrée");
+      qc.invalidateQueries({ queryKey: ["conseiller-student-detail", studentId] });
+      setEditingNoteId(null);
+    },
+    onError: (e: Error) => toast.error("Erreur", { description: e.message }),
+  });
+
+  const { data: adminDocs = [] } = useQuery({
+    enabled: !!studentId,
+    queryKey: ["admin-docs", studentId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("official_documents")
+        .select("*")
+        .eq("student_id", studentId)
+        .eq("source", "admin")
+        .order("created_at", { ascending: false });
+      return data ?? [];
+    },
+  });
+
+  const deleteAdminDoc = useMutation({
+    mutationFn: async ({ id, path }: { id: string; path: string }) => {
+      await supabase.storage.from("student-documents").remove([path]);
+      const { error } = await supabase.from("official_documents").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Document supprimé");
+      qc.invalidateQueries({ queryKey: ["admin-docs", studentId] });
+    },
+  });
+
+  async function uploadAdminDoc(file: File, uid: string) {
+    setUploadingAdminDoc(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `admin-docs/${studentId}/${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage.from("student-documents").upload(path, file);
+      if (upErr) throw upErr;
+
+      const typeLabel = ADMIN_DOC_TYPES.find((t) => t.value === selectedAdminDocType)?.label ?? selectedAdminDocType;
+      const { error } = await supabase.from("official_documents").insert({
+        student_id: studentId,
+        uploaded_by: uid,
+        source: "admin",
+        type: selectedAdminDocType,
+        name: `${typeLabel} — ${file.name}`,
+        storage_path: path,
+      });
+      if (error) throw error;
+
+      // Notifier l'étudiant
+      await supabase.from("notifications").insert({
+        user_id: studentId,
+        title: "Nouveau document disponible",
+        body: `${typeLabel} a été ajouté à votre dossier par Rézo Campus. Vous pouvez le télécharger depuis votre espace.`,
+        data: { type: "admin_doc" },
+      });
+
+      toast.success("Document ajouté et étudiant notifié");
+      qc.invalidateQueries({ queryKey: ["admin-docs", studentId] });
+    } catch (e: unknown) {
+      toast.error("Erreur lors de l'upload", { description: (e as Error).message });
+    } finally {
+      setUploadingAdminDoc(false);
+    }
+  }
+
+  async function downloadAdminDoc(path: string) {
+    const { data: urlData, error } = await supabase.storage
+      .from("student-documents")
+      .createSignedUrl(path, 3600);
+    if (error || !urlData) { toast.error("Lien indisponible"); return; }
+    window.open(urlData.signedUrl, "_blank", "noopener,noreferrer");
   }
 
   if (isLoading) {
@@ -288,6 +398,60 @@ export function ConseillerStudentDetail() {
                         {a.motivation_letter}
                       </p>
                     )}
+
+                    {/* Note à transmettre à l'établissement */}
+                    <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
+                      <div className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-amber-700">
+                        <StickyNote className="size-3.5" /> Note pour l'établissement
+                      </div>
+                      {editingNoteId === a.id ? (
+                        <div className="space-y-2">
+                          <Textarea
+                            value={noteText}
+                            onChange={(e) => setNoteText(e.target.value)}
+                            placeholder="Ex. : Veuillez ne pas considérer le document X — le passeport est en cours de renouvellement — les frais ont été réglés..."
+                            className="text-xs min-h-[80px]"
+                          />
+                          <div className="flex justify-end gap-2">
+                            <Button size="sm" variant="ghost" onClick={() => setEditingNoteId(null)}>
+                              Annuler
+                            </Button>
+                            <Button
+                              size="sm"
+                              disabled={saveNote.isPending}
+                              onClick={() => saveNote.mutate({ id: a.id, note: noteText })}
+                            >
+                              {saveNote.isPending && <Loader2 className="mr-1.5 size-3 animate-spin" />}
+                              Enregistrer
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          {(a as { notes_to_school?: string | null }).notes_to_school ? (
+                            <p className="mb-2 text-xs text-amber-900 whitespace-pre-wrap">
+                              {(a as { notes_to_school?: string | null }).notes_to_school}
+                            </p>
+                          ) : (
+                            <p className="mb-2 text-xs text-amber-600/60 italic">
+                              Aucune note — visible par l'établissement dans son espace.
+                            </p>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs border-amber-300 text-amber-700 hover:bg-amber-100"
+                            onClick={() => {
+                              setNoteText((a as { notes_to_school?: string | null }).notes_to_school ?? "");
+                              setEditingNoteId(a.id);
+                            }}
+                          >
+                            <StickyNote className="mr-1 size-3" />
+                            {(a as { notes_to_school?: string | null }).notes_to_school ? "Modifier la note" : "Ajouter une note"}
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -318,6 +482,74 @@ export function ConseillerStudentDetail() {
                     </span>
                     <Button size="sm" variant="ghost" className="shrink-0" onClick={() => downloadDoc(d.storage_path)}>
                       <Download className="size-3.5" />
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Panel>
+
+          {/* Documents officiels admin → étudiant */}
+          <Panel title="Documents officiels à transmettre" description="Prise en charge, AEVM, hébergement, salaire, carte de séjour…">
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+              <Select value={selectedAdminDocType} onValueChange={setSelectedAdminDocType}>
+                <SelectTrigger className="w-[220px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {ADMIN_DOC_TYPES.map((t) => (
+                    <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <input
+                ref={adminDocInputRef}
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) uploadAdminDoc(file, uid);
+                  e.target.value = "";
+                }}
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => adminDocInputRef.current?.click()}
+                disabled={uploadingAdminDoc}
+              >
+                {uploadingAdminDoc ? (
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                ) : (
+                  <Upload className="mr-2 size-4" />
+                )}
+                Téléverser
+              </Button>
+            </div>
+            {adminDocs.length === 0 ? (
+              <p className="text-xs text-muted-foreground italic">Aucun document transmis pour l'instant.</p>
+            ) : (
+              <ul className="space-y-1.5">
+                {adminDocs.map((d) => (
+                  <li key={d.id} className="flex items-center gap-3 rounded-lg border border-border px-3 py-2">
+                    <FileText className="size-4 shrink-0 text-muted-foreground" />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium truncate">{d.name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {new Date(d.created_at).toLocaleDateString("fr-FR")}
+                      </div>
+                    </div>
+                    <Button size="sm" variant="ghost" onClick={() => downloadAdminDoc(d.storage_path)}>
+                      <Download className="size-3.5" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-destructive hover:text-destructive"
+                      onClick={() => deleteAdminDoc.mutate({ id: d.id, path: d.storage_path })}
+                    >
+                      <Trash2 className="size-3.5" />
                     </Button>
                   </li>
                 ))}

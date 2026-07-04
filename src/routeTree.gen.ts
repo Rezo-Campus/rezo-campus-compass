@@ -55,8 +55,10 @@ import { Route as AuthenticatedEtudiantParcoursRouteImport } from './routes/_aut
 import { Route as AuthenticatedEtudiantMessagesRouteImport } from './routes/_authenticated/etudiant.messages'
 import { Route as AuthenticatedEtudiantEcolesRouteImport } from './routes/_authenticated/etudiant.ecoles'
 import { Route as AuthenticatedEtudiantDossierRouteImport } from './routes/_authenticated/etudiant.dossier'
+import { Route as AuthenticatedEtudiantDocumentsOfficielsRouteImport } from './routes/_authenticated/etudiant.documents-officiels'
 import { Route as AuthenticatedEtudiantDocumentsRouteImport } from './routes/_authenticated/etudiant.documents'
 import { Route as AuthenticatedEtudiantCandidaturesRouteImport } from './routes/_authenticated/etudiant.candidatures'
+import { Route as AuthenticatedEcoleMessagesRouteImport } from './routes/_authenticated/ecole.messages'
 import { Route as AuthenticatedEcoleFormationsRouteImport } from './routes/_authenticated/ecole.formations'
 import { Route as AuthenticatedEcoleCandidatsRouteImport } from './routes/_authenticated/ecole.candidats'
 import { Route as AuthenticatedConseillerValidationsRouteImport } from './routes/_authenticated/conseiller.validations'
@@ -97,6 +99,8 @@ import { Route as AuthenticatedSecretaireEtudiantsStudentIdRouteImport } from '.
 import { Route as AuthenticatedRhFacturationInvoiceIdRouteImport } from './routes/_authenticated/rh.facturation.$invoiceId'
 import { Route as AuthenticatedProjetsFacturationInvoiceIdRouteImport } from './routes/_authenticated/projets.facturation.$invoiceId'
 import { Route as AuthenticatedProjetsCahierDesChargesProjectIdRouteImport } from './routes/_authenticated/projets.cahier-des-charges.$projectId'
+import { Route as AuthenticatedEtudiantAttestationApplicationIdRouteImport } from './routes/_authenticated/etudiant.attestation.$applicationId'
+import { Route as AuthenticatedEcoleAttestationApplicationIdRouteImport } from './routes/_authenticated/ecole.attestation.$applicationId'
 import { Route as AuthenticatedConseillerFacturationInvoiceIdRouteImport } from './routes/_authenticated/conseiller.facturation.$invoiceId'
 import { Route as AuthenticatedConseillerEtudiantsStudentIdRouteImport } from './routes/_authenticated/conseiller.etudiants.$studentId'
 import { Route as AuthenticatedComptabiliteFacturationInvoiceIdRouteImport } from './routes/_authenticated/comptabilite.facturation.$invoiceId'
@@ -360,6 +364,12 @@ const AuthenticatedEtudiantDossierRoute =
     path: '/dossier',
     getParentRoute: () => AuthenticatedEtudiantRoute,
   } as any)
+const AuthenticatedEtudiantDocumentsOfficielsRoute =
+  AuthenticatedEtudiantDocumentsOfficielsRouteImport.update({
+    id: '/documents-officiels',
+    path: '/documents-officiels',
+    getParentRoute: () => AuthenticatedEtudiantRoute,
+  } as any)
 const AuthenticatedEtudiantDocumentsRoute =
   AuthenticatedEtudiantDocumentsRouteImport.update({
     id: '/documents',
@@ -371,6 +381,12 @@ const AuthenticatedEtudiantCandidaturesRoute =
     id: '/candidatures',
     path: '/candidatures',
     getParentRoute: () => AuthenticatedEtudiantRoute,
+  } as any)
+const AuthenticatedEcoleMessagesRoute =
+  AuthenticatedEcoleMessagesRouteImport.update({
+    id: '/messages',
+    path: '/messages',
+    getParentRoute: () => AuthenticatedEcoleRoute,
   } as any)
 const AuthenticatedEcoleFormationsRoute =
   AuthenticatedEcoleFormationsRouteImport.update({
@@ -612,6 +628,18 @@ const AuthenticatedProjetsCahierDesChargesProjectIdRoute =
     path: '/cahier-des-charges/$projectId',
     getParentRoute: () => AuthenticatedProjetsRoute,
   } as any)
+const AuthenticatedEtudiantAttestationApplicationIdRoute =
+  AuthenticatedEtudiantAttestationApplicationIdRouteImport.update({
+    id: '/attestation/$applicationId',
+    path: '/attestation/$applicationId',
+    getParentRoute: () => AuthenticatedEtudiantRoute,
+  } as any)
+const AuthenticatedEcoleAttestationApplicationIdRoute =
+  AuthenticatedEcoleAttestationApplicationIdRouteImport.update({
+    id: '/attestation/$applicationId',
+    path: '/attestation/$applicationId',
+    getParentRoute: () => AuthenticatedEcoleRoute,
+  } as any)
 const AuthenticatedConseillerFacturationInvoiceIdRoute =
   AuthenticatedConseillerFacturationInvoiceIdRouteImport.update({
     id: '/$invoiceId',
@@ -684,8 +712,10 @@ export interface FileRoutesByFullPath {
   '/conseiller/validations': typeof AuthenticatedConseillerValidationsRoute
   '/ecole/candidats': typeof AuthenticatedEcoleCandidatsRoute
   '/ecole/formations': typeof AuthenticatedEcoleFormationsRoute
+  '/ecole/messages': typeof AuthenticatedEcoleMessagesRoute
   '/etudiant/candidatures': typeof AuthenticatedEtudiantCandidaturesRoute
   '/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
+  '/etudiant/documents-officiels': typeof AuthenticatedEtudiantDocumentsOfficielsRoute
   '/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
   '/etudiant/ecoles': typeof AuthenticatedEtudiantEcolesRoute
   '/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
@@ -722,6 +752,8 @@ export interface FileRoutesByFullPath {
   '/comptabilite/facturation/$invoiceId': typeof AuthenticatedComptabiliteFacturationInvoiceIdRoute
   '/conseiller/etudiants/$studentId': typeof AuthenticatedConseillerEtudiantsStudentIdRoute
   '/conseiller/facturation/$invoiceId': typeof AuthenticatedConseillerFacturationInvoiceIdRoute
+  '/ecole/attestation/$applicationId': typeof AuthenticatedEcoleAttestationApplicationIdRoute
+  '/etudiant/attestation/$applicationId': typeof AuthenticatedEtudiantAttestationApplicationIdRoute
   '/projets/cahier-des-charges/$projectId': typeof AuthenticatedProjetsCahierDesChargesProjectIdRoute
   '/projets/facturation/$invoiceId': typeof AuthenticatedProjetsFacturationInvoiceIdRoute
   '/rh/facturation/$invoiceId': typeof AuthenticatedRhFacturationInvoiceIdRoute
@@ -764,8 +796,10 @@ export interface FileRoutesByTo {
   '/conseiller/validations': typeof AuthenticatedConseillerValidationsRoute
   '/ecole/candidats': typeof AuthenticatedEcoleCandidatsRoute
   '/ecole/formations': typeof AuthenticatedEcoleFormationsRoute
+  '/ecole/messages': typeof AuthenticatedEcoleMessagesRoute
   '/etudiant/candidatures': typeof AuthenticatedEtudiantCandidaturesRoute
   '/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
+  '/etudiant/documents-officiels': typeof AuthenticatedEtudiantDocumentsOfficielsRoute
   '/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
   '/etudiant/ecoles': typeof AuthenticatedEtudiantEcolesRoute
   '/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
@@ -798,6 +832,8 @@ export interface FileRoutesByTo {
   '/comptabilite/facturation/$invoiceId': typeof AuthenticatedComptabiliteFacturationInvoiceIdRoute
   '/conseiller/etudiants/$studentId': typeof AuthenticatedConseillerEtudiantsStudentIdRoute
   '/conseiller/facturation/$invoiceId': typeof AuthenticatedConseillerFacturationInvoiceIdRoute
+  '/ecole/attestation/$applicationId': typeof AuthenticatedEcoleAttestationApplicationIdRoute
+  '/etudiant/attestation/$applicationId': typeof AuthenticatedEtudiantAttestationApplicationIdRoute
   '/projets/cahier-des-charges/$projectId': typeof AuthenticatedProjetsCahierDesChargesProjectIdRoute
   '/projets/facturation/$invoiceId': typeof AuthenticatedProjetsFacturationInvoiceIdRoute
   '/rh/facturation/$invoiceId': typeof AuthenticatedRhFacturationInvoiceIdRoute
@@ -856,8 +892,10 @@ export interface FileRoutesById {
   '/_authenticated/conseiller/validations': typeof AuthenticatedConseillerValidationsRoute
   '/_authenticated/ecole/candidats': typeof AuthenticatedEcoleCandidatsRoute
   '/_authenticated/ecole/formations': typeof AuthenticatedEcoleFormationsRoute
+  '/_authenticated/ecole/messages': typeof AuthenticatedEcoleMessagesRoute
   '/_authenticated/etudiant/candidatures': typeof AuthenticatedEtudiantCandidaturesRoute
   '/_authenticated/etudiant/documents': typeof AuthenticatedEtudiantDocumentsRoute
+  '/_authenticated/etudiant/documents-officiels': typeof AuthenticatedEtudiantDocumentsOfficielsRoute
   '/_authenticated/etudiant/dossier': typeof AuthenticatedEtudiantDossierRoute
   '/_authenticated/etudiant/ecoles': typeof AuthenticatedEtudiantEcolesRoute
   '/_authenticated/etudiant/messages': typeof AuthenticatedEtudiantMessagesRoute
@@ -894,6 +932,8 @@ export interface FileRoutesById {
   '/_authenticated/comptabilite/facturation/$invoiceId': typeof AuthenticatedComptabiliteFacturationInvoiceIdRoute
   '/_authenticated/conseiller/etudiants/$studentId': typeof AuthenticatedConseillerEtudiantsStudentIdRoute
   '/_authenticated/conseiller/facturation/$invoiceId': typeof AuthenticatedConseillerFacturationInvoiceIdRoute
+  '/_authenticated/ecole/attestation/$applicationId': typeof AuthenticatedEcoleAttestationApplicationIdRoute
+  '/_authenticated/etudiant/attestation/$applicationId': typeof AuthenticatedEtudiantAttestationApplicationIdRoute
   '/_authenticated/projets/cahier-des-charges/$projectId': typeof AuthenticatedProjetsCahierDesChargesProjectIdRoute
   '/_authenticated/projets/facturation/$invoiceId': typeof AuthenticatedProjetsFacturationInvoiceIdRoute
   '/_authenticated/rh/facturation/$invoiceId': typeof AuthenticatedRhFacturationInvoiceIdRoute
@@ -952,8 +992,10 @@ export interface FileRouteTypes {
     | '/conseiller/validations'
     | '/ecole/candidats'
     | '/ecole/formations'
+    | '/ecole/messages'
     | '/etudiant/candidatures'
     | '/etudiant/documents'
+    | '/etudiant/documents-officiels'
     | '/etudiant/dossier'
     | '/etudiant/ecoles'
     | '/etudiant/messages'
@@ -990,6 +1032,8 @@ export interface FileRouteTypes {
     | '/comptabilite/facturation/$invoiceId'
     | '/conseiller/etudiants/$studentId'
     | '/conseiller/facturation/$invoiceId'
+    | '/ecole/attestation/$applicationId'
+    | '/etudiant/attestation/$applicationId'
     | '/projets/cahier-des-charges/$projectId'
     | '/projets/facturation/$invoiceId'
     | '/rh/facturation/$invoiceId'
@@ -1032,8 +1076,10 @@ export interface FileRouteTypes {
     | '/conseiller/validations'
     | '/ecole/candidats'
     | '/ecole/formations'
+    | '/ecole/messages'
     | '/etudiant/candidatures'
     | '/etudiant/documents'
+    | '/etudiant/documents-officiels'
     | '/etudiant/dossier'
     | '/etudiant/ecoles'
     | '/etudiant/messages'
@@ -1066,6 +1112,8 @@ export interface FileRouteTypes {
     | '/comptabilite/facturation/$invoiceId'
     | '/conseiller/etudiants/$studentId'
     | '/conseiller/facturation/$invoiceId'
+    | '/ecole/attestation/$applicationId'
+    | '/etudiant/attestation/$applicationId'
     | '/projets/cahier-des-charges/$projectId'
     | '/projets/facturation/$invoiceId'
     | '/rh/facturation/$invoiceId'
@@ -1123,8 +1171,10 @@ export interface FileRouteTypes {
     | '/_authenticated/conseiller/validations'
     | '/_authenticated/ecole/candidats'
     | '/_authenticated/ecole/formations'
+    | '/_authenticated/ecole/messages'
     | '/_authenticated/etudiant/candidatures'
     | '/_authenticated/etudiant/documents'
+    | '/_authenticated/etudiant/documents-officiels'
     | '/_authenticated/etudiant/dossier'
     | '/_authenticated/etudiant/ecoles'
     | '/_authenticated/etudiant/messages'
@@ -1161,6 +1211,8 @@ export interface FileRouteTypes {
     | '/_authenticated/comptabilite/facturation/$invoiceId'
     | '/_authenticated/conseiller/etudiants/$studentId'
     | '/_authenticated/conseiller/facturation/$invoiceId'
+    | '/_authenticated/ecole/attestation/$applicationId'
+    | '/_authenticated/etudiant/attestation/$applicationId'
     | '/_authenticated/projets/cahier-des-charges/$projectId'
     | '/_authenticated/projets/facturation/$invoiceId'
     | '/_authenticated/rh/facturation/$invoiceId'
@@ -1509,6 +1561,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEtudiantDossierRouteImport
       parentRoute: typeof AuthenticatedEtudiantRoute
     }
+    '/_authenticated/etudiant/documents-officiels': {
+      id: '/_authenticated/etudiant/documents-officiels'
+      path: '/documents-officiels'
+      fullPath: '/etudiant/documents-officiels'
+      preLoaderRoute: typeof AuthenticatedEtudiantDocumentsOfficielsRouteImport
+      parentRoute: typeof AuthenticatedEtudiantRoute
+    }
     '/_authenticated/etudiant/documents': {
       id: '/_authenticated/etudiant/documents'
       path: '/documents'
@@ -1522,6 +1581,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/etudiant/candidatures'
       preLoaderRoute: typeof AuthenticatedEtudiantCandidaturesRouteImport
       parentRoute: typeof AuthenticatedEtudiantRoute
+    }
+    '/_authenticated/ecole/messages': {
+      id: '/_authenticated/ecole/messages'
+      path: '/messages'
+      fullPath: '/ecole/messages'
+      preLoaderRoute: typeof AuthenticatedEcoleMessagesRouteImport
+      parentRoute: typeof AuthenticatedEcoleRoute
     }
     '/_authenticated/ecole/formations': {
       id: '/_authenticated/ecole/formations'
@@ -1803,6 +1869,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProjetsCahierDesChargesProjectIdRouteImport
       parentRoute: typeof AuthenticatedProjetsRoute
     }
+    '/_authenticated/etudiant/attestation/$applicationId': {
+      id: '/_authenticated/etudiant/attestation/$applicationId'
+      path: '/attestation/$applicationId'
+      fullPath: '/etudiant/attestation/$applicationId'
+      preLoaderRoute: typeof AuthenticatedEtudiantAttestationApplicationIdRouteImport
+      parentRoute: typeof AuthenticatedEtudiantRoute
+    }
+    '/_authenticated/ecole/attestation/$applicationId': {
+      id: '/_authenticated/ecole/attestation/$applicationId'
+      path: '/attestation/$applicationId'
+      fullPath: '/ecole/attestation/$applicationId'
+      preLoaderRoute: typeof AuthenticatedEcoleAttestationApplicationIdRouteImport
+      parentRoute: typeof AuthenticatedEcoleRoute
+    }
     '/_authenticated/conseiller/facturation/$invoiceId': {
       id: '/_authenticated/conseiller/facturation/$invoiceId'
       path: '/$invoiceId'
@@ -2049,13 +2129,18 @@ const AuthenticatedConseillerRouteWithChildren =
 interface AuthenticatedEcoleRouteChildren {
   AuthenticatedEcoleCandidatsRoute: typeof AuthenticatedEcoleCandidatsRoute
   AuthenticatedEcoleFormationsRoute: typeof AuthenticatedEcoleFormationsRoute
+  AuthenticatedEcoleMessagesRoute: typeof AuthenticatedEcoleMessagesRoute
   AuthenticatedEcoleIndexRoute: typeof AuthenticatedEcoleIndexRoute
+  AuthenticatedEcoleAttestationApplicationIdRoute: typeof AuthenticatedEcoleAttestationApplicationIdRoute
 }
 
 const AuthenticatedEcoleRouteChildren: AuthenticatedEcoleRouteChildren = {
   AuthenticatedEcoleCandidatsRoute: AuthenticatedEcoleCandidatsRoute,
   AuthenticatedEcoleFormationsRoute: AuthenticatedEcoleFormationsRoute,
+  AuthenticatedEcoleMessagesRoute: AuthenticatedEcoleMessagesRoute,
   AuthenticatedEcoleIndexRoute: AuthenticatedEcoleIndexRoute,
+  AuthenticatedEcoleAttestationApplicationIdRoute:
+    AuthenticatedEcoleAttestationApplicationIdRoute,
 }
 
 const AuthenticatedEcoleRouteWithChildren =
@@ -2064,6 +2149,7 @@ const AuthenticatedEcoleRouteWithChildren =
 interface AuthenticatedEtudiantRouteChildren {
   AuthenticatedEtudiantCandidaturesRoute: typeof AuthenticatedEtudiantCandidaturesRoute
   AuthenticatedEtudiantDocumentsRoute: typeof AuthenticatedEtudiantDocumentsRoute
+  AuthenticatedEtudiantDocumentsOfficielsRoute: typeof AuthenticatedEtudiantDocumentsOfficielsRoute
   AuthenticatedEtudiantDossierRoute: typeof AuthenticatedEtudiantDossierRoute
   AuthenticatedEtudiantEcolesRoute: typeof AuthenticatedEtudiantEcolesRoute
   AuthenticatedEtudiantMessagesRoute: typeof AuthenticatedEtudiantMessagesRoute
@@ -2071,12 +2157,15 @@ interface AuthenticatedEtudiantRouteChildren {
   AuthenticatedEtudiantProfilRoute: typeof AuthenticatedEtudiantProfilRoute
   AuthenticatedEtudiantRendezVousRoute: typeof AuthenticatedEtudiantRendezVousRoute
   AuthenticatedEtudiantIndexRoute: typeof AuthenticatedEtudiantIndexRoute
+  AuthenticatedEtudiantAttestationApplicationIdRoute: typeof AuthenticatedEtudiantAttestationApplicationIdRoute
 }
 
 const AuthenticatedEtudiantRouteChildren: AuthenticatedEtudiantRouteChildren = {
   AuthenticatedEtudiantCandidaturesRoute:
     AuthenticatedEtudiantCandidaturesRoute,
   AuthenticatedEtudiantDocumentsRoute: AuthenticatedEtudiantDocumentsRoute,
+  AuthenticatedEtudiantDocumentsOfficielsRoute:
+    AuthenticatedEtudiantDocumentsOfficielsRoute,
   AuthenticatedEtudiantDossierRoute: AuthenticatedEtudiantDossierRoute,
   AuthenticatedEtudiantEcolesRoute: AuthenticatedEtudiantEcolesRoute,
   AuthenticatedEtudiantMessagesRoute: AuthenticatedEtudiantMessagesRoute,
@@ -2084,6 +2173,8 @@ const AuthenticatedEtudiantRouteChildren: AuthenticatedEtudiantRouteChildren = {
   AuthenticatedEtudiantProfilRoute: AuthenticatedEtudiantProfilRoute,
   AuthenticatedEtudiantRendezVousRoute: AuthenticatedEtudiantRendezVousRoute,
   AuthenticatedEtudiantIndexRoute: AuthenticatedEtudiantIndexRoute,
+  AuthenticatedEtudiantAttestationApplicationIdRoute:
+    AuthenticatedEtudiantAttestationApplicationIdRoute,
 }
 
 const AuthenticatedEtudiantRouteWithChildren =

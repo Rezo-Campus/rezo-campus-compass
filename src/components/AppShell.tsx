@@ -4,6 +4,7 @@ import type { ComponentType, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, type AppRole } from "@/hooks/use-auth";
 import { BrandMark } from "@/components/BrandMark";
+import { NotificationsBell } from "@/components/NotificationsBell";
 
 export interface NavItem {
   label: string;
@@ -128,7 +129,8 @@ export function AppShell({
           <div className="md:hidden">
             <BrandMark size="sm" />
           </div>
-          <div className="ml-auto flex items-center gap-3">
+          <div className="ml-auto flex items-center gap-2">
+            <NotificationsBell />
             <div className="text-right">
               <div className="text-sm font-medium leading-none">
                 {auth?.profile?.full_name || auth?.user?.email}
@@ -137,12 +139,20 @@ export function AppShell({
                 {auth?.role ? ROLE_LABEL[auth.role] : "—"}
               </div>
             </div>
-            <div
-              className="grid size-10 place-items-center rounded-full text-sm font-semibold text-primary-foreground"
-              style={{ background: "var(--gradient-hero)" }}
-            >
-              {initials}
-            </div>
+            {auth?.profile?.photo_url ? (
+              <img
+                src={auth.profile.photo_url}
+                alt={auth.profile.full_name ?? "Profil"}
+                className="size-10 rounded-full object-cover border border-border shrink-0"
+              />
+            ) : (
+              <div
+                className="grid size-10 place-items-center rounded-full text-sm font-semibold text-primary-foreground shrink-0"
+                style={{ background: "var(--gradient-hero)" }}
+              >
+                {initials}
+              </div>
+            )}
           </div>
         </header>
 

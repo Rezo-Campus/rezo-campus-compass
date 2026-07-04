@@ -24,6 +24,7 @@ export function Validations() {
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [showArchive, setShowArchive] = useState(false);
   const [view, setView] = useState<"documents" | "dossiers">("dossiers");
+  const [fraisRecus, setFraisRecus] = useState<Record<string, boolean>>({});
 
   /* ── Documents ── */
   const { data: docs = [], isLoading: docsLoading } = useQuery({
@@ -118,7 +119,7 @@ export function Validations() {
     mutationFn: async ({ studentId, status }: { studentId: string; status: "valide" | "refuse" }) => {
       const { data: updated, error } = await supabase
         .from("student_applications")
-        .update({ status })
+        .update({ status, frais_inscription_recus: !!fraisRecus[studentId] })
         .eq("student_id", studentId)
         .eq("status", "soumis")
         .select();
@@ -322,24 +323,44 @@ export function Validations() {
                     </div>
                   </div>
                   {!showArchive && (
-                    <div className="mt-3 flex flex-wrap justify-end gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="text-destructive hover:bg-destructive/10"
-                        disabled={reviewDossier.isPending}
-                        onClick={() => reviewDossier.mutate({ studentId: d.student!.id, status: "refuse" })}
-                      >
-                        <XCircle className="mr-1 size-4" /> Refuser
-                      </Button>
-                      <Button
-                        size="sm"
-                        disabled={reviewDossier.isPending}
-                        onClick={() => reviewDossier.mutate({ studentId: d.student!.id, status: "valide" })}
-                      >
-                        <CheckCircle2 className="mr-1 size-4" /> Valider
-                      </Button>
-                    </div>
+                    <>
+                      {/* Checkbox frais d'inscription */}
+                      <div className="mt-3 flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id={`frais-${d.student?.id}`}
+                          checked={!!fraisRecus[d.student?.id ?? ""]}
+                          onChange={(e) =>
+                            setFraisRecus((prev) => ({
+                              ...prev,
+                              [d.student?.id ?? ""]: e.target.checked,
+                            }))
+                          }
+                          className="size-4 rounded border-border"
+                        />
+                        <label htmlFor={`frais-${d.student?.id}`} className="text-sm text-muted-foreground cursor-pointer">
+                          Frais d'inscription reçus
+                        </label>
+                      </div>
+                      <div className="mt-3 flex flex-wrap justify-end gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-destructive hover:bg-destructive/10"
+                          disabled={reviewDossier.isPending}
+                          onClick={() => reviewDossier.mutate({ studentId: d.student!.id, status: "refuse" })}
+                        >
+                          <XCircle className="mr-1 size-4" /> Refuser
+                        </Button>
+                        <Button
+                          size="sm"
+                          disabled={reviewDossier.isPending}
+                          onClick={() => reviewDossier.mutate({ studentId: d.student!.id, status: "valide" })}
+                        >
+                          <CheckCircle2 className="mr-1 size-4" /> Valider
+                        </Button>
+                      </div>
+                    </>
                   )}
                 </li>
               ))}

@@ -9,7 +9,7 @@ export interface AuthSession {
   user: { id: string; email: string | null } | null;
   role: AppRole | null;
   roles: AppRole[];
-  profile: { full_name: string | null; email: string; blocked_at: string | null; school_id: string | null } | null;
+  profile: { full_name: string | null; email: string; blocked_at: string | null; school_id: string | null; photo_url: string | null } | null;
 }
 
 export function useAuth() {
@@ -28,7 +28,7 @@ export function useAuth() {
           .eq("user_id", user.id),
         supabase
           .from("profiles")
-          .select("full_name, email, blocked_at, school_id")
+          .select("full_name, email, blocked_at, school_id, photo_url")
           .eq("id", user.id)
           .maybeSingle(),
       ]);

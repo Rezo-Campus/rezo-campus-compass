@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import {
-  Loader2, Send, Trash2, AlertCircle, CheckCircle2, School, Clock, ShieldCheck,
+  Loader2, Send, Trash2, AlertCircle, CheckCircle2, School, Clock, ShieldCheck, Award,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/dashboard-bits";
@@ -39,6 +39,7 @@ type Application = {
   school_id: string;
   status: string;
   motivation_letter: string | null;
+  ecole_validated_at: string | null;
   created_at: string;
   program?: { id: string; name: string; level: string | null; domain: string | null } | null;
   school?: { id: string; name: string; logo_url: string | null } | null;
@@ -253,6 +254,16 @@ function EtudiantCandidatures() {
                         <span className="flex items-center gap-1 text-[10px] text-green-700">
                           <ShieldCheck className="size-3" /> Transmis à l'école
                         </span>
+                      )}
+                      {app.ecole_validated_at && (
+                        <a
+                          href={`/etudiant/attestation/${app.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-medium text-white hover:bg-emerald-700 transition"
+                        >
+                          <Award className="size-3" /> Attestation disponible
+                        </a>
                       )}
                     </div>
                     <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-muted-foreground">

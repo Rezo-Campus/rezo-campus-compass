@@ -60,7 +60,7 @@ type Program = {
 };
 
 const DOMAINS = ["Sciences", "Ingénierie & Technologie", "Commerce & Gestion", "Droit", "Santé", "Arts & Design", "Sciences Humaines", "Éducation","Informatique", "Lettres", "Autre"];
-const LEVELS = ["Classe prépa", "Technicien", "Technicien Spécialisé", "Licence (Bac+3)", "Master (Bac+5)", "Doctorat (Bac+8)", "BTS (Bac+2)", "MBA", "Mastère spécialisé"];
+const LEVELS = ["Classe prépa", "Technicien", "Technicien Spécialisé", "Bachelor", "Licence (Bac+3)", "Master (Bac+5)", "Doctorat (Bac+8)", "BTS (Bac+2)", "MBA", "Mastère spécialisé"];
 const LANGUAGES = ["Français", "Anglais", "Bilingue (Fr/En)", "Espagnol", "Autre"];
 
 const EMPTY_SCHOOL: Omit<School, "id" | "is_active"> = {
