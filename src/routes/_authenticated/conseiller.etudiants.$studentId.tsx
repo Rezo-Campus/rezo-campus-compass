@@ -75,6 +75,7 @@ export function ConseillerStudentDetail() {
   const qc = useQueryClient();
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
   const [noteText, setNoteText] = useState<string>("");
+  const [fraisState, setFraisState] = useState<Record<string, boolean>>({});
   const [selectedAdminDocType, setSelectedAdminDocType] = useState("prise_en_charge");
   const [uploadingAdminDoc, setUploadingAdminDoc] = useState(false);
   const adminDocInputRef = useRef<HTMLInputElement>(null);
@@ -124,6 +125,21 @@ export function ConseillerStudentDetail() {
     if (error || !data) { toast.error("Lien indisponible"); return; }
     window.open(data.signedUrl, "_blank", "noopener,noreferrer");
   }
+
+  const saveFrais = useMutation({
+    mutationFn: async ({ id, value }: { id: string; value: boolean }) => {
+      const { error } = await supabase
+        .from("student_applications")
+        .update({ frais_inscription_recus: value })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Statut des frais mis à jour");
+      qc.invalidateQueries({ queryKey: ["conseiller-student-detail", studentId] });
+    },
+    onError: (e: Error) => toast.error("Erreur", { description: e.message }),
+  });
 
   const saveNote = useMutation({
     mutationFn: async ({ id, note }: { id: string; note: string }) => {
@@ -398,6 +414,33 @@ export function ConseillerStudentDetail() {
                         {a.motivation_letter}
                       </p>
                     )}
+
+                    {/* Checkbox frais d'inscription */}
+                    <div className="mt-3 flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
+                      <input
+                        type="checkbox"
+                        id={`frais-${a.id}`}
+                        checked={
+                          fraisState[a.id] !== undefined
+                            ? fraisState[a.id]
+                            : !!(a as { frais_inscription_recus?: boolean }).frais_inscription_recus
+                        }
+                        onChange={(e) => {
+                          const val = e.target.checked;
+                          setFraisState((prev) => ({ ...prev, [a.id]: val }));
+                          saveFrais.mutate({ id: a.id, value: val });
+                        }}
+                        className="size-4 cursor-pointer rounded border-border accent-primary"
+                      />
+                      <label htmlFor={`frais-${a.id}`} className="cursor-pointer select-none text-sm text-muted-foreground">
+                        Frais d'inscription reçus par Rézo Campus
+                      </label>
+                      {!!(a as { frais_inscription_recus?: boolean }).frais_inscription_recus && (
+                        <span className="ml-auto rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-medium text-green-700">
+                          Confirmé
+                        </span>
+                      )}
+                    </div>
 
                     {/* Note à transmettre à l'établissement */}
                     <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
