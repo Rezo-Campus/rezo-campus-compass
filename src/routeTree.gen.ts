@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as BlockedRouteImport } from './routes/blocked'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as EntretienSessionIdRouteImport } from './routes/entretien.$sessionId'
 import { Route as AuthenticatedSecretaireRouteImport } from './routes/_authenticated/secretaire'
 import { Route as AuthenticatedRhRouteImport } from './routes/_authenticated/rh'
 import { Route as AuthenticatedProjetsRouteImport } from './routes/_authenticated/projets'
@@ -45,6 +46,7 @@ import { Route as AuthenticatedRhReunionsRouteImport } from './routes/_authentic
 import { Route as AuthenticatedRhRendezVousClientsRouteImport } from './routes/_authenticated/rh.rendez-vous-clients'
 import { Route as AuthenticatedRhPersonnelRouteImport } from './routes/_authenticated/rh.personnel'
 import { Route as AuthenticatedRhFacturationRouteImport } from './routes/_authenticated/rh.facturation'
+import { Route as AuthenticatedRhEntretiensRouteImport } from './routes/_authenticated/rh.entretiens'
 import { Route as AuthenticatedProjetsReunionsRouteImport } from './routes/_authenticated/projets.reunions'
 import { Route as AuthenticatedProjetsRendezVousClientsRouteImport } from './routes/_authenticated/projets.rendez-vous-clients'
 import { Route as AuthenticatedProjetsListeRouteImport } from './routes/_authenticated/projets.liste'
@@ -129,6 +131,11 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EntretienSessionIdRoute = EntretienSessionIdRouteImport.update({
+  id: '/entretien/$sessionId',
+  path: '/entretien/$sessionId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedSecretaireRoute = AuthenticatedSecretaireRouteImport.update({
@@ -302,6 +309,12 @@ const AuthenticatedRhFacturationRoute =
   AuthenticatedRhFacturationRouteImport.update({
     id: '/facturation',
     path: '/facturation',
+    getParentRoute: () => AuthenticatedRhRoute,
+  } as any)
+const AuthenticatedRhEntretiensRoute =
+  AuthenticatedRhEntretiensRouteImport.update({
+    id: '/entretiens',
+    path: '/entretiens',
     getParentRoute: () => AuthenticatedRhRoute,
   } as any)
 const AuthenticatedProjetsReunionsRoute =
@@ -686,6 +699,7 @@ export interface FileRoutesByFullPath {
   '/projets': typeof AuthenticatedProjetsRouteWithChildren
   '/rh': typeof AuthenticatedRhRouteWithChildren
   '/secretaire': typeof AuthenticatedSecretaireRouteWithChildren
+  '/entretien/$sessionId': typeof EntretienSessionIdRoute
   '/admin/dossiers': typeof AuthenticatedAdminDossiersRoute
   '/admin/ecoles': typeof AuthenticatedAdminEcolesRoute
   '/admin/facturation': typeof AuthenticatedAdminFacturationRouteWithChildren
@@ -726,6 +740,7 @@ export interface FileRoutesByFullPath {
   '/projets/liste': typeof AuthenticatedProjetsListeRoute
   '/projets/rendez-vous-clients': typeof AuthenticatedProjetsRendezVousClientsRoute
   '/projets/reunions': typeof AuthenticatedProjetsReunionsRoute
+  '/rh/entretiens': typeof AuthenticatedRhEntretiensRoute
   '/rh/facturation': typeof AuthenticatedRhFacturationRouteWithChildren
   '/rh/personnel': typeof AuthenticatedRhPersonnelRoute
   '/rh/rendez-vous-clients': typeof AuthenticatedRhRendezVousClientsRoute
@@ -775,6 +790,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/app': typeof AuthenticatedAppRoute
+  '/entretien/$sessionId': typeof EntretienSessionIdRoute
   '/admin/dossiers': typeof AuthenticatedAdminDossiersRoute
   '/admin/ecoles': typeof AuthenticatedAdminEcolesRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
@@ -809,6 +825,7 @@ export interface FileRoutesByTo {
   '/projets/liste': typeof AuthenticatedProjetsListeRoute
   '/projets/rendez-vous-clients': typeof AuthenticatedProjetsRendezVousClientsRoute
   '/projets/reunions': typeof AuthenticatedProjetsReunionsRoute
+  '/rh/entretiens': typeof AuthenticatedRhEntretiensRoute
   '/rh/personnel': typeof AuthenticatedRhPersonnelRoute
   '/rh/rendez-vous-clients': typeof AuthenticatedRhRendezVousClientsRoute
   '/rh/reunions': typeof AuthenticatedRhReunionsRoute
@@ -866,6 +883,7 @@ export interface FileRoutesById {
   '/_authenticated/projets': typeof AuthenticatedProjetsRouteWithChildren
   '/_authenticated/rh': typeof AuthenticatedRhRouteWithChildren
   '/_authenticated/secretaire': typeof AuthenticatedSecretaireRouteWithChildren
+  '/entretien/$sessionId': typeof EntretienSessionIdRoute
   '/_authenticated/admin/dossiers': typeof AuthenticatedAdminDossiersRoute
   '/_authenticated/admin/ecoles': typeof AuthenticatedAdminEcolesRoute
   '/_authenticated/admin/facturation': typeof AuthenticatedAdminFacturationRouteWithChildren
@@ -906,6 +924,7 @@ export interface FileRoutesById {
   '/_authenticated/projets/liste': typeof AuthenticatedProjetsListeRoute
   '/_authenticated/projets/rendez-vous-clients': typeof AuthenticatedProjetsRendezVousClientsRoute
   '/_authenticated/projets/reunions': typeof AuthenticatedProjetsReunionsRoute
+  '/_authenticated/rh/entretiens': typeof AuthenticatedRhEntretiensRoute
   '/_authenticated/rh/facturation': typeof AuthenticatedRhFacturationRouteWithChildren
   '/_authenticated/rh/personnel': typeof AuthenticatedRhPersonnelRoute
   '/_authenticated/rh/rendez-vous-clients': typeof AuthenticatedRhRendezVousClientsRoute
@@ -966,6 +985,7 @@ export interface FileRouteTypes {
     | '/projets'
     | '/rh'
     | '/secretaire'
+    | '/entretien/$sessionId'
     | '/admin/dossiers'
     | '/admin/ecoles'
     | '/admin/facturation'
@@ -1006,6 +1026,7 @@ export interface FileRouteTypes {
     | '/projets/liste'
     | '/projets/rendez-vous-clients'
     | '/projets/reunions'
+    | '/rh/entretiens'
     | '/rh/facturation'
     | '/rh/personnel'
     | '/rh/rendez-vous-clients'
@@ -1055,6 +1076,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/unauthorized'
     | '/app'
+    | '/entretien/$sessionId'
     | '/admin/dossiers'
     | '/admin/ecoles'
     | '/admin/messages'
@@ -1089,6 +1111,7 @@ export interface FileRouteTypes {
     | '/projets/liste'
     | '/projets/rendez-vous-clients'
     | '/projets/reunions'
+    | '/rh/entretiens'
     | '/rh/personnel'
     | '/rh/rendez-vous-clients'
     | '/rh/reunions'
@@ -1145,6 +1168,7 @@ export interface FileRouteTypes {
     | '/_authenticated/projets'
     | '/_authenticated/rh'
     | '/_authenticated/secretaire'
+    | '/entretien/$sessionId'
     | '/_authenticated/admin/dossiers'
     | '/_authenticated/admin/ecoles'
     | '/_authenticated/admin/facturation'
@@ -1185,6 +1209,7 @@ export interface FileRouteTypes {
     | '/_authenticated/projets/liste'
     | '/_authenticated/projets/rendez-vous-clients'
     | '/_authenticated/projets/reunions'
+    | '/_authenticated/rh/entretiens'
     | '/_authenticated/rh/facturation'
     | '/_authenticated/rh/personnel'
     | '/_authenticated/rh/rendez-vous-clients'
@@ -1235,6 +1260,7 @@ export interface RootRouteChildren {
   BlockedRoute: typeof BlockedRoute
   LoginRoute: typeof LoginRoute
   UnauthorizedRoute: typeof UnauthorizedRoute
+  EntretienSessionIdRoute: typeof EntretienSessionIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1272,6 +1298,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/entretien/$sessionId': {
+      id: '/entretien/$sessionId'
+      path: '/entretien/$sessionId'
+      fullPath: '/entretien/$sessionId'
+      preLoaderRoute: typeof EntretienSessionIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/secretaire': {
@@ -1489,6 +1522,13 @@ declare module '@tanstack/react-router' {
       path: '/facturation'
       fullPath: '/rh/facturation'
       preLoaderRoute: typeof AuthenticatedRhFacturationRouteImport
+      parentRoute: typeof AuthenticatedRhRoute
+    }
+    '/_authenticated/rh/entretiens': {
+      id: '/_authenticated/rh/entretiens'
+      path: '/entretiens'
+      fullPath: '/rh/entretiens'
+      preLoaderRoute: typeof AuthenticatedRhEntretiensRouteImport
       parentRoute: typeof AuthenticatedRhRoute
     }
     '/_authenticated/projets/reunions': {
@@ -2242,6 +2282,7 @@ const AuthenticatedRhFacturationRouteWithChildren =
   )
 
 interface AuthenticatedRhRouteChildren {
+  AuthenticatedRhEntretiensRoute: typeof AuthenticatedRhEntretiensRoute
   AuthenticatedRhFacturationRoute: typeof AuthenticatedRhFacturationRouteWithChildren
   AuthenticatedRhPersonnelRoute: typeof AuthenticatedRhPersonnelRoute
   AuthenticatedRhRendezVousClientsRoute: typeof AuthenticatedRhRendezVousClientsRoute
@@ -2250,6 +2291,7 @@ interface AuthenticatedRhRouteChildren {
 }
 
 const AuthenticatedRhRouteChildren: AuthenticatedRhRouteChildren = {
+  AuthenticatedRhEntretiensRoute: AuthenticatedRhEntretiensRoute,
   AuthenticatedRhFacturationRoute: AuthenticatedRhFacturationRouteWithChildren,
   AuthenticatedRhPersonnelRoute: AuthenticatedRhPersonnelRoute,
   AuthenticatedRhRendezVousClientsRoute: AuthenticatedRhRendezVousClientsRoute,
@@ -2368,6 +2410,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlockedRoute: BlockedRoute,
   LoginRoute: LoginRoute,
   UnauthorizedRoute: UnauthorizedRoute,
+  EntretienSessionIdRoute: EntretienSessionIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

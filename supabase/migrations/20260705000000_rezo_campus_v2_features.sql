@@ -830,3 +830,158 @@ do $$ begin
       )
     );
 exception when duplicate_object then null; end $$;
+
+
+-- =====================================================================
+-- SECTION 13 — SYSTÈME D'ENTRETIENS RH
+-- =====================================================================
+
+-- Sessions d'entretien (postes ouverts)
+create table if not exists public.interview_sessions (
+  id          uuid        primary key default gen_random_uuid(),
+  title       text        not null,
+  position    text        not null,
+  description text,
+  created_by  uuid        references auth.users(id) on delete set null,
+  is_active   boolean     not null default true,
+  created_at  timestamptz not null default now()
+);
+
+alter table public.interview_sessions enable row level security;
+
+-- Créneaux disponibles par session
+create table if not exists public.interview_slots (
+  id           uuid        primary key default gen_random_uuid(),
+  session_id   uuid        not null references public.interview_sessions(id) on delete cascade,
+  starts_at    timestamptz not null,
+  duration_min smallint    not null default 30,
+  mode         text        not null default 'presentiel',   -- 'presentiel' | 'en_ligne'
+  location     text,                                         -- adresse ou lien Teams/Meet
+  is_booked    boolean     not null default false,
+  created_at   timestamptz not null default now()
+);
+
+alter table public.interview_slots enable row level security;
+
+-- Réservations des candidats
+create table if not exists public.interview_bookings (
+  id               uuid        primary key default gen_random_uuid(),
+  slot_id          uuid        not null references public.interview_slots(id) on delete cascade,
+  session_id       uuid        not null references public.interview_sessions(id) on delete cascade,
+  applicant_name   text        not null,
+  applicant_email  text        not null,
+  applicant_phone  text,
+  google_uid       text,
+  notes            text,
+  created_at       timestamptz not null default now(),
+  unique (session_id, applicant_email)   -- un seul entretien par email par session
+);
+
+alter table public.interview_bookings enable row level security;
+
+-- ── Politiques interview_sessions ──
+
+-- RH et admin gèrent leurs sessions
+do $$ begin
+  create policy "RH gère ses sessions"
+    on public.interview_sessions for all to authenticated
+    using (
+      auth.uid() = created_by
+      or exists (select 1 from public.user_roles where user_id = auth.uid() and role = 'admin')
+    )
+    with check (
+      auth.uid() = created_by
+      or exists (select 1 from public.user_roles where user_id = auth.uid() and role = 'admin')
+    );
+exception when duplicate_object then null; end $$;
+
+-- Lecture publique des sessions actives (page de réservation)
+do $$ begin
+  create policy "Lecture publique des sessions actives"
+    on public.interview_sessions for select
+    using (is_active = true);
+exception when duplicate_object then null; end $$;
+
+-- ── Politiques interview_slots ──
+
+-- RH et admin gèrent les créneaux de leurs sessions
+do $$ begin
+  create policy "RH gère ses créneaux"
+    on public.interview_slots for all to authenticated
+    using (
+      exists (
+        select 1 from public.interview_sessions s
+        where s.id = session_id
+          and (
+            s.created_by = auth.uid()
+            or exists (select 1 from public.user_roles where user_id = auth.uid() and role = 'admin')
+          )
+      )
+    )
+    with check (
+      exists (
+        select 1 from public.interview_sessions s
+        where s.id = session_id
+          and (
+            s.created_by = auth.uid()
+            or exists (select 1 from public.user_roles where user_id = auth.uid() and role = 'admin')
+          )
+      )
+    );
+exception when duplicate_object then null; end $$;
+
+-- Lecture publique des créneaux disponibles
+do $$ begin
+  create policy "Lecture publique des créneaux disponibles"
+    on public.interview_slots for select
+    using (is_booked = false);
+exception when duplicate_object then null; end $$;
+
+-- Mise à jour publique (marquer comme réservé au moment de la réservation)
+do $$ begin
+  create policy "Réservation publique d un créneau"
+    on public.interview_slots for update
+    using (is_booked = false)
+    with check (is_booked = true);
+exception when duplicate_object then null; end $$;
+
+-- ── Politiques interview_bookings ──
+
+-- Insertion publique (les candidats réservent sans compte)
+do $$ begin
+  create policy "Candidats insèrent leur réservation"
+    on public.interview_bookings for insert
+    with check (true);
+exception when duplicate_object then null; end $$;
+
+-- Lecture par le RH/admin de toutes les réservations de leurs sessions
+do $$ begin
+  create policy "RH lit les réservations de ses sessions"
+    on public.interview_bookings for select to authenticated
+    using (
+      exists (
+        select 1 from public.interview_sessions s
+        where s.id = session_id
+          and (
+            s.created_by = auth.uid()
+            or exists (select 1 from public.user_roles where user_id = auth.uid() and role = 'admin')
+          )
+      )
+    );
+exception when duplicate_object then null; end $$;
+
+-- Suppression par le RH/admin
+do $$ begin
+  create policy "RH supprime les réservations"
+    on public.interview_bookings for delete to authenticated
+    using (
+      exists (
+        select 1 from public.interview_sessions s
+        where s.id = session_id
+          and (
+            s.created_by = auth.uid()
+            or exists (select 1 from public.user_roles where user_id = auth.uid() and role = 'admin')
+          )
+      )
+    );
+exception when duplicate_object then null; end $$;
