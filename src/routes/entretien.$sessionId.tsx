@@ -443,8 +443,19 @@ function PageWrapper({ children, session }: { children: React.ReactNode; session
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Rézo Campus · campusrezo@gmail.com · Brazzaville, République du Congo
+      <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground space-y-1">
+        <p>
+          Pour en savoir plus sur Rézo Campus,{" "}
+          <a
+            href="https://rezocampus.fr/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-primary underline-offset-2 hover:underline"
+          >
+            cliquez sur ce lien
+          </a>
+        </p>
+        <p>© {new Date().getFullYear()} Rézo Campus · contact@rezoconnect.com · Brazzaville, République du Congo</p>
       </footer>
     </div>
   );

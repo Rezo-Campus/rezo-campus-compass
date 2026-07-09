@@ -57,7 +57,7 @@ function PendingAccess() {
 
           <div className="mt-6 flex flex-col gap-2">
             <a
-              href="mailto:campusrezo@gmail.com"
+              href="mailto:contact@rezoconnect.com"
               className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium transition hover:bg-secondary"
             >
               <Mail className="size-4" /> Contacter l'équipe
@@ -72,7 +72,7 @@ function PendingAccess() {
         </div>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Rézo Campus Consulting · campusrezo@gmail.com
+          © {new Date().getFullYear()} Rézo Campus Consulting · contact@rezoconnect.com
         </p>
       </div>
     </div>

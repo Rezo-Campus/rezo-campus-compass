@@ -254,7 +254,7 @@ Un administrateur peut bloquer un compte à tout moment. Un compte bloqué conse
 
 | Contact | Coordonnées |
 |---|---|
-| E-mail Rézo Campus | campusrezo@gmail.com |
+| E-mail Rézo Campus | contact@rezoconnect.com |
 | Adresse | Avenue de l'OUA, bloc 88-91, quartier Moukoundzi Ngouaka, Brazzaville, République du Congo |
 
 ---

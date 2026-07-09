@@ -94,7 +94,7 @@ export function FactureDetail() {
           <div>
             <img src="/1.png" alt="Rézo Campus" className="h-14 w-auto object-contain" />
             <p className="mt-2 text-xs text-gray-600">Recrutement · Accompagnement · Solutions numériques</p>
-            <p className="text-xs text-gray-600">campusrezo@gmail.com · +242 06 668 5543</p>
+            <p className="text-xs text-gray-600">contact@rezoconnect.com · +242 06 668 5543</p>
           </div>
           <div className="text-right">
             <h1 className="text-2xl font-bold text-gray-900">FACTURE</h1>

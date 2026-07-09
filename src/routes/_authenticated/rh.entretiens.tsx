@@ -382,43 +382,85 @@ function RhEntretiens() {
                             Aucun créneau. Ajoutez vos disponibilités pour générer des réservations.
                           </div>
                         ) : (
-                          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                            {slots.map((sl) => (
-                              <div key={sl.id} className={`relative rounded-xl border p-3 ${sl.is_booked ? "border-green-200 bg-green-50/50" : "border-border bg-background"}`}>
-                                {sl.is_booked && (
-                                  <span className="absolute right-2 top-2 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-medium text-green-700">
-                                    Réservé
-                                  </span>
-                                )}
-                                <div className="flex items-start gap-2">
-                                  <div className={`mt-0.5 grid size-7 shrink-0 place-items-center rounded-lg ${sl.mode === "en_ligne" ? "bg-blue-100 text-blue-600" : "bg-amber-100 text-amber-600"}`}>
-                                    {sl.mode === "en_ligne" ? <Video className="size-3.5" /> : <MapPin className="size-3.5" />}
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <div className="text-xs font-semibold capitalize">
-                                      {new Date(sl.starts_at).toLocaleDateString("fr-FR", { weekday: "short", day: "2-digit", month: "short" })}
-                                    </div>
-                                    <div className="text-sm font-bold">
-                                      {new Date(sl.starts_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
-                                      <span className="ml-1 text-xs font-normal text-muted-foreground">
-                                        · {DURATIONS.find((d) => d.value === String(sl.duration_min))?.label ?? `${sl.duration_min} min`}
-                                      </span>
-                                    </div>
-                                    <div className="mt-1 text-[10px] text-muted-foreground truncate">
-                                      {sl.mode === "en_ligne" ? "En ligne" : "Présentiel"} · {sl.location}
-                                    </div>
-                                  </div>
-                                </div>
-                                {!sl.is_booked && (
-                                  <button
-                                    className="absolute bottom-2 right-2 rounded-md p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition"
-                                    onClick={() => setPendingDeleteSlot(sl.id)}
+                          <div className="overflow-x-auto rounded-xl border border-border">
+                            <table className="w-full text-sm">
+                              <thead>
+                                <tr className="border-b border-border bg-muted/40">
+                                  <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Date</th>
+                                  <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Heure</th>
+                                  <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Durée</th>
+                                  <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Mode</th>
+                                  <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Lieu / Lien</th>
+                                  <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Statut</th>
+                                  <th className="px-4 py-2.5 text-right text-xs font-medium text-muted-foreground">Action</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-border">
+                                {slots.map((sl) => (
+                                  <tr
+                                    key={sl.id}
+                                    className={`transition-colors ${sl.is_booked ? "bg-green-50/40" : "hover:bg-muted/20"}`}
                                   >
-                                    <Trash2 className="size-3" />
-                                  </button>
-                                )}
-                              </div>
-                            ))}
+                                    <td className="px-4 py-3 text-sm font-semibold capitalize whitespace-nowrap">
+                                      {new Date(sl.starts_at).toLocaleDateString("fr-FR", {
+                                        weekday: "short", day: "2-digit", month: "short", year: "numeric",
+                                      })}
+                                    </td>
+                                    <td className="px-4 py-3 font-mono text-sm whitespace-nowrap">
+                                      {new Date(sl.starts_at).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+                                    </td>
+                                    <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
+                                      {DURATIONS.find((d) => d.value === String(sl.duration_min))?.label ?? `${sl.duration_min} min`}
+                                    </td>
+                                    <td className="px-4 py-3">
+                                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium whitespace-nowrap ${sl.mode === "en_ligne" ? "bg-blue-100 text-blue-700" : "bg-amber-100 text-amber-700"}`}>
+                                        {sl.mode === "en_ligne" ? <Video className="size-3" /> : <MapPin className="size-3" />}
+                                        {sl.mode === "en_ligne" ? "En ligne" : "Présentiel"}
+                                      </span>
+                                    </td>
+                                    <td className="px-4 py-3 max-w-[200px]">
+                                      {sl.mode === "en_ligne" && sl.location ? (
+                                        <a
+                                          href={sl.location}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-xs text-blue-600 underline underline-offset-2 hover:text-blue-800 truncate block max-w-[180px]"
+                                          title={sl.location}
+                                        >
+                                          {sl.location}
+                                        </a>
+                                      ) : (
+                                        <span className="text-xs text-muted-foreground truncate block max-w-[180px]" title={sl.location ?? ""}>
+                                          {sl.location ?? "—"}
+                                        </span>
+                                      )}
+                                    </td>
+                                    <td className="px-4 py-3">
+                                      {sl.is_booked ? (
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-medium text-green-700 whitespace-nowrap">
+                                          ✓ Réservé
+                                        </span>
+                                      ) : (
+                                        <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] text-muted-foreground whitespace-nowrap">
+                                          Disponible
+                                        </span>
+                                      )}
+                                    </td>
+                                    <td className="px-4 py-3 text-right">
+                                      {!sl.is_booked && (
+                                        <button
+                                          className="rounded-md p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition"
+                                          title="Supprimer ce créneau"
+                                          onClick={() => setPendingDeleteSlot(sl.id)}
+                                        >
+                                          <Trash2 className="size-3.5" />
+                                        </button>
+                                      )}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
                           </div>
                         )}
                       </div>

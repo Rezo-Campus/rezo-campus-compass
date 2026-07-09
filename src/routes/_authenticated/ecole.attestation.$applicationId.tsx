@@ -450,7 +450,7 @@ function EcoleAttestation() {
         <div style={{ position: "absolute", bottom: 32, left: 48, right: 48 }}>
           <div style={{ background: "var(--color-primary, #0d6b5b)", height: 3, borderRadius: 2, marginBottom: 10 }} />
           <p style={{ fontSize: 9, color: "#9ca3af", textAlign: "center" }}>
-            Document généré via la plateforme Rézo Campus · campusrezo@gmail.com ·{" "}
+            Document généré via la plateforme Rézo Campus · contact@rezoconnect.com ·{" "}
             Avenue de l'OUA, bloc 88-91, quartier Moukoundzi Ngouaka, Brazzaville, République du Congo.
           </p>
         </div>

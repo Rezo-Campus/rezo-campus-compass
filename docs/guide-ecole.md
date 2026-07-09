@@ -205,4 +205,4 @@ Vérifiez que la candidature affiche bien la date de validation (encadré vert).
 
 ---
 
-*Pour toute question technique, contactez l'équipe Rézo Campus à l'adresse : campusrezo@gmail.com*
+*Pour toute question technique, contactez l'équipe Rézo Campus à l'adresse : contact@rezoconnect.com*

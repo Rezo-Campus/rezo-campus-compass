@@ -41,7 +41,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Combien coûte l'accompagnement ?",
-    a: "Contactez-nous directement à campusrezo@gmail.com ou au +212 617-725 867 pour obtenir nos tarifs et formules d'accompagnement.",
+    a: "Contactez-nous directement à contact@rezoconnect.com ou au +212 617-725 867 pour obtenir nos tarifs et formules d'accompagnement.",
   },
 ];
 
@@ -155,7 +155,7 @@ function Landing() {
                     <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
                   </Link>
                   <a
-                    href="mailto:campusrezo@gmail.com"
+                    href="mailto:contact@rezoconnect.com"
                     className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-6 py-3 text-sm font-medium text-primary transition hover:bg-primary/10"
                   >
                     Nous contacter
@@ -240,10 +240,10 @@ function Landing() {
           </div>
           <div className="flex flex-wrap justify-center gap-4">
             <a
-              href="mailto:campusrezo@gmail.com"
+              href="mailto:contact@rezoconnect.com"
               className="inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:opacity-90"
             >
-              campusrezo@gmail.com
+              contact@rezoconnect.com
             </a>
             <a
               href="tel:+212617725867"
@@ -283,7 +283,7 @@ function Landing() {
           </div>
           <div>
             <h3 className="mb-2 font-semibold text-foreground">5. Contact</h3>
-            <p>Pour toute question relative à vos données ou à cette politique, contactez-nous à <a href="mailto:campusrezo@gmail.com" className="text-primary underline underline-offset-2">campusrezo@gmail.com</a>.</p>
+            <p>Pour toute question relative à vos données ou à cette politique, contactez-nous à <a href="mailto:contact@rezoconnect.com" className="text-primary underline underline-offset-2">contact@rezoconnect.com</a>.</p>
           </div>
         </div>
       </section>
