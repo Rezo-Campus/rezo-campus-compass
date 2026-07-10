@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import {
   Loader2, ArrowLeft, GraduationCap, Mail, Phone, FileText, Download,
   CheckCircle2, Circle, School, Send, MessageSquare, User, StickyNote,
-  Upload, Trash2,
+  Upload, Trash2, Lock, LockOpen, CalendarDays,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
@@ -66,6 +66,9 @@ const APP_STATUS_LABELS: Record<string, string> = {
   refuse: "Refusé",
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = supabase as any;
+
 export function ConseillerStudentDetail() {
   const { studentId } = useParams({ strict: false }) as { studentId: string };
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -84,9 +87,9 @@ export function ConseillerStudentDetail() {
     queryKey: ["conseiller-student-detail", studentId],
     queryFn: async () => {
       const [profileRes, fileRes, docsRes, appsRes] = await Promise.all([
-        supabase
+        db
           .from("profiles")
-          .select("id, full_name, email, phone, photo_url")
+          .select("id, full_name, email, phone, photo_url, dossier_submitted_at, dossier_can_edit")
           .eq("id", studentId)
           .single(),
         supabase
@@ -153,6 +156,36 @@ export function ConseillerStudentDetail() {
       toast.success("Note enregistrée");
       qc.invalidateQueries({ queryKey: ["conseiller-student-detail", studentId] });
       setEditingNoteId(null);
+    },
+    onError: (e: Error) => toast.error("Erreur", { description: e.message }),
+  });
+
+  const unlockDossier = useMutation({
+    mutationFn: async () => {
+      const { error } = await db
+        .from("profiles")
+        .update({ dossier_can_edit: true, dossier_unlocked_by: uid })
+        .eq("id", studentId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("L'étudiant peut de nouveau modifier son dossier");
+      qc.invalidateQueries({ queryKey: ["conseiller-student-detail", studentId] });
+    },
+    onError: (e: Error) => toast.error("Erreur", { description: e.message }),
+  });
+
+  const lockDossier = useMutation({
+    mutationFn: async () => {
+      const { error } = await db
+        .from("profiles")
+        .update({ dossier_can_edit: false })
+        .eq("id", studentId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Dossier verrouillé");
+      qc.invalidateQueries({ queryKey: ["conseiller-student-detail", studentId] });
     },
     onError: (e: Error) => toast.error("Erreur", { description: e.message }),
   });
@@ -339,7 +372,7 @@ export function ConseillerStudentDetail() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Checklist d'avancement */}
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 space-y-6">
           <Panel title={`Avancement (${doneCount}/${steps.length})`} description="Ce qui est fait et ce qu'il reste à faire.">
             <ol className="space-y-2">
               {steps.map((s) => (
@@ -366,6 +399,74 @@ export function ConseillerStudentDetail() {
               ))}
             </ol>
           </Panel>
+
+          {/* ── Contrôle dossier ── */}
+          {(profile as any)?.dossier_submitted_at ? (
+            <Panel
+              title="Dossier académique"
+              description="Gérez l'accès de l'étudiant à son dossier."
+            >
+              <div className="space-y-3">
+                <div className="rounded-lg border border-border bg-muted/30 p-3">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <CalendarDays className="size-3.5" />
+                    Transmis le{" "}
+                    {new Date((profile as any).dossier_submitted_at).toLocaleDateString("fr-FR", {
+                      day: "numeric", month: "long", year: "numeric",
+                    })}
+                  </div>
+                  <div className="mt-2 flex items-center gap-2">
+                    {(profile as any).dossier_can_edit === false ? (
+                      <>
+                        <Lock className="size-4 text-amber-500" />
+                        <span className="text-xs font-medium text-amber-700">Verrouillé</span>
+                      </>
+                    ) : (
+                      <>
+                        <LockOpen className="size-4 text-blue-500" />
+                        <span className="text-xs font-medium text-blue-700">Modification autorisée</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {(profile as any).dossier_can_edit === false ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="w-full gap-1.5"
+                    disabled={unlockDossier.isPending}
+                    onClick={() => unlockDossier.mutate()}
+                  >
+                    {unlockDossier.isPending
+                      ? <Loader2 className="size-4 animate-spin" />
+                      : <LockOpen className="size-4" />}
+                    Permettre la modification
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="w-full gap-1.5"
+                    disabled={lockDossier.isPending}
+                    onClick={() => lockDossier.mutate()}
+                  >
+                    {lockDossier.isPending
+                      ? <Loader2 className="size-4 animate-spin" />
+                      : <Lock className="size-4" />}
+                    Reverrouiller le dossier
+                  </Button>
+                )}
+              </div>
+            </Panel>
+          ) : (
+            <Panel title="Dossier académique" description="L'étudiant n'a pas encore transmis son dossier.">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Lock className="size-4 text-muted-foreground/50" />
+                Aucune soumission
+              </div>
+            </Panel>
+          )}
         </div>
 
         <div className="lg:col-span-2 space-y-6">

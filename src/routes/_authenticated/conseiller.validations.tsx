@@ -17,13 +17,25 @@ export const Route = createFileRoute("/_authenticated/conseiller/validations")({
   component: Validations,
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = supabase as any;
+
+const DIPLOMA_LABELS: Record<string, string> = {
+  bac: "Baccalauréat (BAC)", bts: "BTS", dts: "DTS",
+  licence_gen: "Licence Générale", licence_pro: "Licence Professionnelle",
+  master_pro: "Master Professionnel", master_rec: "Master Recherche",
+  master_sp: "Master Spécialisé", deug: "DEUG / DEUST",
+  doctorat: "Doctorat", autre: "Autre diplôme",
+};
+
 export function Validations() {
   const { data: auth } = useAuth();
   const uid = auth?.user?.id;
   const qc = useQueryClient();
   const [notes, setNotes] = useState<Record<string, string>>({});
+  const [rejections, setRejections] = useState<Record<string, string>>({});
   const [showArchive, setShowArchive] = useState(false);
-  const [view, setView] = useState<"documents" | "dossiers">("dossiers");
+  const [view, setView] = useState<"documents" | "dossiers" | "parcours">("dossiers");
   const [fraisRecus, setFraisRecus] = useState<Record<string, boolean>>({});
 
   /* ── Documents ── */
@@ -138,7 +150,58 @@ export function Validations() {
     onError: (e: Error) => toast.error("Erreur de validation", { description: e.message }),
   });
 
-  const isLoading = view === "documents" ? docsLoading : dossiersLoading;
+  /* ── Parcours scolaire (academic_records) ── */
+  const { data: records = [], isLoading: recordsLoading } = useQuery({
+    enabled: !!uid && view === "parcours",
+    queryKey: ["pending-records", showArchive],
+    queryFn: async () => {
+      const statuses = showArchive ? ["valide", "rejete"] : ["en_attente"];
+      const { data, error } = await db
+        .from("academic_records")
+        .select("*")
+        .in("status", statuses)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      if (!data || !data.length) return [];
+      const sids = [...new Set(data.map((r: { student_id: string }) => r.student_id))];
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id, full_name, email, photo_url")
+        .in("id", sids);
+      type Rec = { student_id: string; [k: string]: unknown };
+      const grouped = new Map<string, { profile: typeof profs extends (infer P)[] | null | undefined ? P : never; items: Rec[] }>();
+      for (const r of (data as Rec[])) {
+        if (!grouped.has(r.student_id))
+          grouped.set(r.student_id, { profile: profs?.find(p => p.id === r.student_id), items: [] } as never);
+        grouped.get(r.student_id)!.items.push(r);
+      }
+      return [...grouped.values()];
+    },
+  });
+
+  const reviewRecord = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: "valide" | "rejete" }) => {
+      const { error } = await db
+        .from("academic_records")
+        .update({ status, rejection_reason: status === "rejete" ? (rejections[id] || null) : null })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Diplôme traité");
+      qc.invalidateQueries({ queryKey: ["pending-records"] });
+      qc.invalidateQueries({ queryKey: ["academic-records"] });
+    },
+    onError: (e: Error) => toast.error("Erreur", { description: e.message }),
+  });
+
+  const downloadJustif = async (path: string) => {
+    const { data, error } = await supabase.storage.from("student-documents").createSignedUrl(path, 60);
+    if (error || !data) return toast.error("Lien indisponible");
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  };
+
+  const isLoading = view === "documents" ? docsLoading : view === "parcours" ? recordsLoading : dossiersLoading;
 
   return (
     <>
@@ -152,7 +215,7 @@ export function Validations() {
         }
       />
 
-      {/* Onglets Documents / Dossiers */}
+      {/* Onglets Dossiers / Documents / Parcours */}
       <div className="mb-4 inline-flex rounded-lg border border-border bg-muted/40 p-1 text-sm">
         <button
           type="button"
@@ -171,6 +234,15 @@ export function Validations() {
           }`}
         >
           <FileText className="size-3.5" /> Documents
+        </button>
+        <button
+          type="button"
+          onClick={() => { setView("parcours"); setShowArchive(false); }}
+          className={`flex items-center gap-1.5 rounded-md px-4 py-1.5 font-medium transition ${
+            view === "parcours" ? "bg-background shadow-sm" : "text-muted-foreground"
+          }`}
+        >
+          <GraduationCap className="size-3.5" /> Parcours
         </button>
       </div>
 
@@ -268,6 +340,110 @@ export function Validations() {
                                 <XCircle className="mr-1 size-4 text-destructive" /> Rejeter
                               </Button>
                               <Button size="sm" onClick={() => review.mutate({ id: d.id, status: "valide" })} disabled={review.isPending}>
+                                <CheckCircle2 className="mr-1 size-4" /> Valider
+                              </Button>
+                            </div>
+                          </>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Panel>
+      )}
+
+      {/* ── Vue Parcours scolaire ── */}
+      {view === "parcours" && (
+        <Panel title={`${records.length} diplôme${records.length > 1 ? "s" : ""} ${showArchive ? "traité" + (records.length > 1 ? "s" : "") : "à examiner"}`}>
+          {isLoading ? (
+            <Loader2 className="mx-auto size-5 animate-spin text-primary" />
+          ) : records.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
+              {showArchive ? "Aucun diplôme archivé." : "Aucun diplôme en attente de vérification."}
+            </div>
+          ) : (
+            <ul className="space-y-5">
+              {records.map((g, i) => (
+                <li key={(g.profile as { id?: string } | undefined)?.id ?? i} className="rounded-xl border border-border p-4">
+                  <div className="mb-3 flex items-center gap-3 border-b border-border pb-3">
+                    {(g.profile as { photo_url?: string | null } | undefined)?.photo_url ? (
+                      <img
+                        src={(g.profile as { photo_url: string }).photo_url}
+                        alt={(g.profile as { full_name?: string }).full_name ?? ""}
+                        className="size-9 rounded-full object-cover border border-border shrink-0"
+                      />
+                    ) : (
+                      <div className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+                        <GraduationCap className="size-4" />
+                      </div>
+                    )}
+                    <div>
+                      <div className="font-semibold text-sm">
+                        {(g.profile as { full_name?: string; email?: string } | undefined)?.full_name
+                          || (g.profile as { email?: string } | undefined)?.email || "—"}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {(g.items as unknown[]).length} diplôme{(g.items as unknown[]).length > 1 ? "s" : ""}
+                      </div>
+                    </div>
+                  </div>
+
+                  <ul className="space-y-3">
+                    {(g.items as Record<string, unknown>[]).map((rec) => (
+                      <li key={rec.id as string} className="rounded-lg border border-border p-3">
+                        <div className="flex flex-wrap items-start gap-3">
+                          <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground">
+                            <GraduationCap className="size-4" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="font-medium text-sm">
+                              {DIPLOMA_LABELS[rec.diploma_type as string] ?? rec.diploma_type as string}
+                              {rec.diploma_name ? ` — ${rec.diploma_name}` : ""}
+                            </div>
+                            <div className="mt-0.5 text-xs text-muted-foreground">
+                              {rec.school_name as string}
+                              {rec.school_city ? `, ${rec.school_city as string}` : ""}
+                              {rec.school_country ? ` (${rec.school_country as string})` : ""}
+                              {rec.year ? ` · ${rec.year as number}` : ""}
+                              {rec.mention ? ` · ${rec.mention as string}` : ""}
+                              {rec.average ? ` · Moy. ${rec.average as string}` : ""}
+                            </div>
+                          </div>
+                          {rec.justificatif_path && (
+                            <Button
+                              size="sm" variant="ghost"
+                              className="shrink-0 text-xs gap-1"
+                              onClick={() => downloadJustif(rec.justificatif_path as string)}
+                            >
+                              <Download className="size-3" /> Justificatif
+                            </Button>
+                          )}
+                        </div>
+                        {!showArchive && (
+                          <>
+                            <Textarea
+                              rows={2}
+                              className="mt-3"
+                              placeholder="Motif de rejet (facultatif)"
+                              value={rejections[rec.id as string] || ""}
+                              onChange={(e) => setRejections(r => ({ ...r, [rec.id as string]: e.target.value }))}
+                            />
+                            <div className="mt-3 flex justify-end gap-2">
+                              <Button
+                                size="sm" variant="outline"
+                                disabled={reviewRecord.isPending}
+                                onClick={() => reviewRecord.mutate({ id: rec.id as string, status: "rejete" })}
+                              >
+                                <XCircle className="mr-1 size-4 text-destructive" /> Rejeter
+                              </Button>
+                              <Button
+                                size="sm"
+                                disabled={reviewRecord.isPending}
+                                onClick={() => reviewRecord.mutate({ id: rec.id as string, status: "valide" })}
+                              >
                                 <CheckCircle2 className="mr-1 size-4" /> Valider
                               </Button>
                             </div>

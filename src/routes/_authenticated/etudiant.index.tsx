@@ -19,6 +19,9 @@ export const Route = createFileRoute("/_authenticated/etudiant/")({
   component: EtudiantDashboard,
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = supabase as any;
+
 function EtudiantDashboard() {
   const { data: auth } = useAuth();
   const uid = auth?.user?.id;
@@ -28,7 +31,7 @@ function EtudiantDashboard() {
     enabled: !!uid,
     queryKey: ["etudiant-overview", uid],
     queryFn: async () => {
-      const [file, docs, unread, nextRdv] = await Promise.all([
+      const [file, docs, unread, nextRdv, applications, records, messagesSent] = await Promise.all([
         supabase.from("student_files").select("*").eq("student_id", uid!).maybeSingle(),
         supabase.from("documents").select("id,status", { count: "exact" }).eq("student_id", uid!),
         supabase
@@ -45,12 +48,27 @@ function EtudiantDashboard() {
           .order("scheduled_at")
           .limit(1)
           .maybeSingle(),
+        supabase
+          .from("student_applications")
+          .select("id, motivation_letter")
+          .eq("student_id", uid!),
+        db
+          .from("academic_records")
+          .select("id", { count: "exact", head: true })
+          .eq("student_id", uid!),
+        supabase
+          .from("messages")
+          .select("id", { count: "exact", head: true })
+          .eq("sender_id", uid!),
       ]);
       return {
         file: file.data,
         docs: docs.data ?? [],
         unread: unread.count ?? 0,
         nextRdv: nextRdv.data,
+        applications: applications.data ?? [],
+        recordsCount: records.count ?? 0,
+        hasSentMessages: (messagesSent.count ?? 0) > 0,
       };
     },
   });
@@ -66,6 +84,11 @@ function EtudiantDashboard() {
         minute: "2-digit",
       })
     : "—";
+
+  const hasApplications   = (data?.applications ?? []).length > 0;
+  const hasMotivation     = (data?.applications ?? []).some((a: { motivation_letter: string | null }) => !!a.motivation_letter);
+  const hasSentMessages   = data?.hasSentMessages ?? false;
+  const hasParcours       = (data?.recordsCount ?? 0) > 0;
 
   return (
     <>
@@ -89,11 +112,11 @@ function EtudiantDashboard() {
               {[
                 { label: "Compléter votre profil personnel", done: !!data?.file?.bio, to: "/etudiant/profil", icon: User },
                 { label: "Remplir votre dossier", done: !!(data?.file?.target_country && data?.file?.target_level && data?.file?.target_program), to: "/etudiant/dossier", icon: FileText },
-                { label: "Ajouter votre parcours scolaire", done: totalDocs > 0, to: "/etudiant/parcours", icon: GraduationCap },
-                { label: "Téléverser vos documents", done: totalDocs > 0, to: "/etudiant/documents", icon: FileText },
-                { label: "Choisir des formations", done: false, to: "/etudiant/ecoles", icon: School },
-                { label: "Rédiger vos lettres de motivation", done: false, to: "/etudiant/candidatures", icon: Send },
-                { label: "Échanger avec votre conseiller", done: false, to: "/etudiant/messages", icon: MessageSquare },
+                { label: "Ajouter votre parcours scolaire", done: hasParcours, to: "/etudiant/parcours", icon: GraduationCap },
+                { label: "Téléverser vos documents", done: totalDocs > 0, to: "/etudiant/parcours", icon: FileText },
+                { label: "Choisir des formations", done: hasApplications, to: "/etudiant/ecoles", icon: School },
+                { label: "Rédiger vos lettres de motivation", done: hasMotivation, to: "/etudiant/candidatures", icon: Send },
+                { label: "Échanger avec votre conseiller", done: hasSentMessages, to: "/etudiant/messages", icon: MessageSquare },
                 { label: "Confirmer un rendez-vous", done: !!data?.nextRdv, to: "/etudiant/rendez-vous", icon: CalendarDays },
               ].map((step) => (
                 <li key={step.label}>

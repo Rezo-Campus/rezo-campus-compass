@@ -1024,6 +1024,7 @@ export type Database = {
         | "releve_notes"
         | "lettre_motivation"
         | "cv"
+        | "photo"
         | "autre"
       file_status:
         | "nouveau"
@@ -1168,6 +1169,7 @@ export const Constants = {
         "releve_notes",
         "lettre_motivation",
         "cv",
+        "photo",
         "autre",
       ],
       file_status: [
