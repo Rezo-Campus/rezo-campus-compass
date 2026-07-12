@@ -16,9 +16,12 @@ export function useAuth() {
   return useQuery<AuthSession>({
     queryKey: ["auth-session"],
     staleTime: 30_000,
+    retry: false,
     queryFn: async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      const user = userData.user;
+      // getSession() lit depuis le localStorage (instantané).
+      // getUser() fait une requête réseau (lente sur reload direct d'URL profonde).
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user ?? null;
       if (!user) return { user: null, role: null, roles: [], profile: null };
 
       const [{ data: roleRows }, { data: profile }] = await Promise.all([

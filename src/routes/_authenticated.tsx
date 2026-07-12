@@ -22,7 +22,8 @@ function AuthenticatedLayout() {
     }
   }, [data, isLoading, navigate]);
 
-  if (isLoading || !data?.user) {
+  // Spinner uniquement pendant le chargement réel — pas si l'utilisateur est absent
+  if (isLoading) {
     return (
       <div className="grid min-h-screen place-items-center bg-background">
         <Loader2 className="size-6 animate-spin text-primary" />
@@ -30,12 +31,9 @@ function AuthenticatedLayout() {
     );
   }
 
-  if (data.profile?.blocked_at) {
-    return (
-      <div className="grid min-h-screen place-items-center bg-background">
-        <Loader2 className="size-6 animate-spin text-primary" />
-      </div>
-    );
+  // Auth résolue mais pas connecté → useEffect redirige vers /login, rien à afficher
+  if (!data?.user || data.profile?.blocked_at) {
+    return null;
   }
 
   return <Outlet />;
