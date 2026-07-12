@@ -85,6 +85,7 @@ function BookingPage() {
   /* Queries */
   const { data: session, isLoading: loadingSession, error: sessionError } = useQuery({
     queryKey: ["booking-session", sessionId],
+    retry: false,
     queryFn: async () => {
       const { data, error } = await db
         .from("interview_sessions")
@@ -98,6 +99,8 @@ function BookingPage() {
 
   const { data: slots = [], isLoading: loadingSlots, refetch: refetchSlots } = useQuery({
     queryKey: ["booking-slots", sessionId],
+    retry: false,
+    enabled: !!session,
     queryFn: async () => {
       const { data, error } = await db
         .from("interview_slots")
