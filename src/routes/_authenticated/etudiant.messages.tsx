@@ -18,24 +18,68 @@ function MessagesEtudiant() {
   const { data: auth } = useAuth();
   const uid = auth?.user?.id;
 
-  // Récupère destinataires possibles : conseillers et admins
+  // Contacts : conseillers/admins (toujours) + utilisateurs ecole des écoles ciblées par l'étudiant
   const { data: staff = [] } = useQuery({
-    queryKey: ["staff-list"],
+    queryKey: ["student-contacts", uid],
+    enabled: !!uid,
     queryFn: async () => {
-      const { data: roles, error } = await supabase
+      // 1. Conseillers et admins — toujours visibles
+      const { data: staffRoles } = await supabase
         .from("user_roles")
         .select("user_id, role")
         .in("role", ["conseiller", "admin"]);
-      if (error) throw error;
-      const ids = roles.map((r) => r.user_id);
-      if (!ids.length) return [];
-      const { data: profs } = await supabase
-        .from("profiles")
-        .select("id, full_name, email")
-        .in("id", ids);
-      return (profs ?? []).map((p) => ({
+
+      const allIds = new Set((staffRoles ?? []).map((r) => r.user_id));
+
+      // 2. Écoles liées aux candidatures de l'étudiant
+      const { data: apps } = await supabase
+        .from("student_applications")
+        .select("school_id")
+        .eq("student_id", uid!);
+
+      const schoolIds = [...new Set((apps ?? []).map((a: any) => a.school_id).filter(Boolean))];
+
+      if (schoolIds.length > 0) {
+        // Utilisateurs ecole dont profiles.school_id correspond aux écoles candidates
+        const { data: ecoleProfs } = await supabase
+          .from("profiles")
+          .select("id")
+          .in("school_id", schoolIds);
+
+        const ecoleIds = (ecoleProfs ?? []).map((p) => p.id);
+
+        if (ecoleIds.length > 0) {
+          const { data: ecoleRoles } = await supabase
+            .from("user_roles")
+            .select("user_id")
+            .eq("role", "ecole")
+            .in("user_id", ecoleIds);
+          (ecoleRoles ?? []).forEach((r) => allIds.add(r.user_id));
+        }
+      }
+
+      // 3. Filet de sécurité : personnes ayant échangé un message (cas edge)
+      const { data: msgs } = await supabase
+        .from("messages")
+        .select("sender_id, recipient_id")
+        .or(`sender_id.eq.${uid},recipient_id.eq.${uid}`);
+
+      (msgs ?? []).forEach((m) => {
+        if (m.sender_id !== uid) allIds.add(m.sender_id);
+        if (m.recipient_id !== uid) allIds.add(m.recipient_id);
+      });
+
+      if (!allIds.size) return [];
+
+      const ids = [...allIds];
+      const [profsRes, rolesRes] = await Promise.all([
+        supabase.from("profiles").select("id, full_name, email").in("id", ids),
+        supabase.from("user_roles").select("user_id, role").in("user_id", ids),
+      ]);
+
+      return (profsRes.data ?? []).map((p) => ({
         ...p,
-        role: roles.find((r) => r.user_id === p.id)?.role as AppRole,
+        role: (rolesRes.data ?? []).find((r) => r.user_id === p.id)?.role as AppRole,
       }));
     },
   });

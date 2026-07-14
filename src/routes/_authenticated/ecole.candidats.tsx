@@ -66,9 +66,18 @@ const DOC_STATUS_LABELS: Record<string, string> = {
 // Required doc types for validation
 const REQUIRED_TYPES = ["diplome", "identite"];
 
+const DIPLOMA_LABELS: Record<string, string> = {
+  bac: "Baccalauréat (BAC)", bts: "BTS", dts: "DTS",
+  licence_gen: "Licence Générale", licence_pro: "Licence Professionnelle",
+  master_pro: "Master Professionnel", master_rec: "Master Recherche",
+  master_sp: "Master Spécialisé", deug: "DEUG / DEUST",
+  doctorat: "Doctorat", autre: "Autre diplôme",
+};
+
 function EcoleCandidats() {
   const qc = useQueryClient();
   const { data: auth } = useAuth();
+  const db = supabase as any;
   const schoolId = auth?.profile?.school_id ?? null;
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [validatingId, setValidatingId] = useState<string | null>(null);
@@ -120,13 +129,22 @@ function EcoleCandidats() {
     enabled: !!expandedStudentId,
     queryKey: ["ecole-dossier", expandedStudentId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("documents")
-        .select("*")
-        .eq("student_id", expandedStudentId!)
-        .order("uploaded_at", { ascending: false });
-      if (error) throw error;
-      return data;
+      const [docsRes, recordsRes] = await Promise.all([
+        supabase
+          .from("documents")
+          .select("*")
+          .eq("student_id", expandedStudentId!)
+          .order("uploaded_at", { ascending: false }),
+        db
+          .from("academic_records")
+          .select("*")
+          .eq("student_id", expandedStudentId!)
+          .order("year", { ascending: false }),
+      ]);
+      return {
+        docs: docsRes.data ?? [],
+        records: recordsRes.data ?? [],
+      };
     },
   });
 
@@ -224,9 +242,9 @@ function EcoleCandidats() {
     window.open(data.signedUrl, "_blank", "noopener,noreferrer");
   }
 
-  // Check required docs for a student
-  function getDocCheck(docs: { type: string }[]) {
-    const hasDiplome = docs.some((d) => ["diplome", "releve_notes"].includes(d.type));
+  // Check required docs for a student (diplôme = document table OU academic_records)
+  function getDocCheck(docs: { type: string }[], records: unknown[]) {
+    const hasDiplome = records.length > 0 || docs.some((d) => ["diplome", "releve_notes"].includes(d.type));
     const hasIdentite = docs.some((d) => d.type === "identite");
     return { hasDiplome, hasIdentite, ok: hasDiplome && hasIdentite };
   }
@@ -244,8 +262,11 @@ function EcoleCandidats() {
   }
 
   const validatingApp = validatingId ? apps.find((a) => a.id === validatingId) : null;
-  const validatingDocs = validatingApp && expandedId === validatingId ? (studentDossier ?? []) : [];
-  const docCheck = validatingDocs.length > 0 ? getDocCheck(validatingDocs) : null;
+  const validatingDocs = validatingApp && expandedId === validatingId ? (studentDossier?.docs ?? []) : [];
+  const validatingRecords = validatingApp && expandedId === validatingId ? (studentDossier?.records ?? []) : [];
+  const docCheck = (validatingDocs.length > 0 || validatingRecords.length > 0)
+    ? getDocCheck(validatingDocs, validatingRecords)
+    : null;
 
   return (
     <>
@@ -266,7 +287,8 @@ function EcoleCandidats() {
           <ul className="space-y-3">
             {apps.map((a) => {
               const isExpanded = expandedId === a.id;
-              const docs = isExpanded ? (studentDossier ?? []) : [];
+              const docs = isExpanded ? (studentDossier?.docs ?? []) : [];
+              const records = isExpanded ? (studentDossier?.records ?? []) : [];
               const isValidated = !!(a as { ecole_validated_at?: string | null }).ecole_validated_at;
               const noteToSchool = (a as { notes_to_school?: string | null }).notes_to_school;
 
@@ -428,6 +450,43 @@ function EcoleCandidats() {
                             )}
                           </div>
 
+                          {/* Parcours scolaire (academic_records) */}
+                          <div>
+                            <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                              Parcours scolaire
+                            </h4>
+                            {records.length === 0 ? (
+                              <p className="text-xs text-muted-foreground">Aucun diplôme renseigné.</p>
+                            ) : (
+                              <ul className="space-y-1.5">
+                                {records.map((r: any) => (
+                                  <li key={r.id} className="flex items-start gap-3 rounded-lg border border-border bg-background px-3 py-2">
+                                    <GraduationCap className="size-4 shrink-0 text-muted-foreground mt-0.5" />
+                                    <div className="flex-1 min-w-0">
+                                      <div className="text-sm font-medium">
+                                        {DIPLOMA_LABELS[r.diploma_type] ?? r.diploma_type}
+                                        {r.field_of_study && <span className="text-muted-foreground"> — {r.field_of_study}</span>}
+                                      </div>
+                                      <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                                        <span>{r.institution}</span>
+                                        {r.city && <span>{r.city}{r.country ? `, ${r.country}` : ""}</span>}
+                                        {r.year && <span>{r.year}</span>}
+                                        {r.mention && <span>{r.mention}</span>}
+                                      </div>
+                                    </div>
+                                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                                      r.status === "valide" ? "bg-green-100 text-green-700"
+                                      : r.status === "rejete" ? "bg-red-100 text-red-700"
+                                      : "bg-amber-100 text-amber-700"
+                                    }`}>
+                                      {r.status === "valide" ? "Validé" : r.status === "rejete" ? "Rejeté" : "En attente"}
+                                    </span>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+
                           {/* Lettre de motivation */}
                           <div>
                             <h4 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -516,11 +575,14 @@ function EcoleCandidats() {
                   </p>
                   <DocRequirement
                     label="Diplôme ou relevé de notes"
-                    ok={studentDossier.some((d) => ["diplome", "releve_notes"].includes(d.type))}
+                    ok={
+                      (studentDossier.records ?? []).length > 0 ||
+                      (studentDossier.docs ?? []).some((d: { type: string }) => ["diplome", "releve_notes"].includes(d.type))
+                    }
                   />
                   <DocRequirement
                     label="Pièce d'identité / Passeport"
-                    ok={studentDossier.some((d) => d.type === "identite")}
+                    ok={(studentDossier.docs ?? []).some((d: { type: string }) => d.type === "identite")}
                   />
                   {docCheck && !docCheck.ok && (
                     <div className="flex items-start gap-2 rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700">

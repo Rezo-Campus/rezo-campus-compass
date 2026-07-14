@@ -163,7 +163,7 @@ export function Validations() {
         .order("created_at", { ascending: false });
       if (error) throw error;
       if (!data || !data.length) return [];
-      const sids = [...new Set(data.map((r: { student_id: string }) => r.student_id))];
+      const sids: string[] = Array.from(new Set(data.map((r: { student_id: string }) => r.student_id)));
       const { data: profs } = await supabase
         .from("profiles")
         .select("id, full_name, email, photo_url")
@@ -412,7 +412,7 @@ export function Validations() {
                               {rec.average ? ` · Moy. ${rec.average as string}` : ""}
                             </div>
                           </div>
-                          {rec.justificatif_path && (
+                          {!!(rec.justificatif_path as string | null) && (
                             <Button
                               size="sm" variant="ghost"
                               className="shrink-0 text-xs gap-1"
