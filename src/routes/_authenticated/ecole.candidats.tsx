@@ -458,29 +458,58 @@ function EcoleCandidats() {
                             {records.length === 0 ? (
                               <p className="text-xs text-muted-foreground">Aucun diplôme renseigné.</p>
                             ) : (
-                              <ul className="space-y-1.5">
+                              <ul className="space-y-2">
                                 {records.map((r: any) => (
-                                  <li key={r.id} className="flex items-start gap-3 rounded-lg border border-border bg-background px-3 py-2">
-                                    <GraduationCap className="size-4 shrink-0 text-muted-foreground mt-0.5" />
-                                    <div className="flex-1 min-w-0">
-                                      <div className="text-sm font-medium">
-                                        {DIPLOMA_LABELS[r.diploma_type] ?? r.diploma_type}
-                                        {r.field_of_study && <span className="text-muted-foreground"> — {r.field_of_study}</span>}
+                                  <li key={r.id} className="rounded-lg border border-border bg-background p-3">
+                                    <div className="flex items-start gap-3">
+                                      <GraduationCap className="size-4 shrink-0 text-muted-foreground mt-0.5" />
+                                      <div className="flex-1 min-w-0">
+                                        {/* Type + intitulé */}
+                                        <div className="text-sm font-semibold">
+                                          {DIPLOMA_LABELS[r.diploma_type] ?? r.diploma_type}
+                                          {r.is_in_progress && (
+                                            <span className="ml-1.5 text-[10px] font-medium text-amber-600">(En cours)</span>
+                                          )}
+                                        </div>
+                                        {r.diploma_name && (
+                                          <div className="text-sm text-muted-foreground">{r.diploma_name}</div>
+                                        )}
+                                        {r.speciality && (
+                                          <div className="text-xs text-muted-foreground italic">{r.speciality}</div>
+                                        )}
+                                        {r.domain && (
+                                          <div className="text-xs text-muted-foreground">{r.domain}</div>
+                                        )}
+                                        {/* Établissement */}
+                                        <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+                                          <span className="font-medium text-foreground uppercase">{r.school_name}</span>
+                                          {r.school_city && <span>{r.school_city}</span>}
+                                          {r.school_country && <span>{r.school_country}</span>}
+                                          {r.year && <span>· {r.year}</span>}
+                                          {r.mention && <span>· {r.mention}</span>}
+                                          {r.average && <span>· Moy. {r.average}/20</span>}
+                                        </div>
                                       </div>
-                                      <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                                        <span>{r.institution}</span>
-                                        {r.city && <span>{r.city}{r.country ? `, ${r.country}` : ""}</span>}
-                                        {r.year && <span>{r.year}</span>}
-                                        {r.mention && <span>{r.mention}</span>}
+                                      <div className="flex shrink-0 flex-col items-end gap-1.5">
+                                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                                          r.status === "valide" ? "bg-green-100 text-green-700"
+                                          : r.status === "rejete" ? "bg-red-100 text-red-700"
+                                          : "bg-amber-100 text-amber-700"
+                                        }`}>
+                                          {r.status === "valide" ? "Validé" : r.status === "rejete" ? "Rejeté" : "En attente"}
+                                        </span>
+                                        {r.justificatif_path && (
+                                          <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="h-7 gap-1 px-2 text-xs"
+                                            onClick={() => downloadDoc(r.justificatif_path, r.justificatif_name ?? "Relevé")}
+                                          >
+                                            <Download className="size-3" /> Relevé
+                                          </Button>
+                                        )}
                                       </div>
                                     </div>
-                                    <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                                      r.status === "valide" ? "bg-green-100 text-green-700"
-                                      : r.status === "rejete" ? "bg-red-100 text-red-700"
-                                      : "bg-amber-100 text-amber-700"
-                                    }`}>
-                                      {r.status === "valide" ? "Validé" : r.status === "rejete" ? "Rejeté" : "En attente"}
-                                    </span>
                                   </li>
                                 ))}
                               </ul>

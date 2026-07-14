@@ -299,8 +299,12 @@ function EtudiantParcours() {
       if (rec.justificatif_path) {
         await supabase.storage.from("student-documents").remove([rec.justificatif_path]);
       }
-      const { error } = await db.from("academic_records").delete().eq("id", rec.id);
+      const { error, count } = await db
+        .from("academic_records")
+        .delete({ count: "exact" })
+        .eq("id", rec.id);
       if (error) throw error;
+      if (count === 0) throw new Error("Suppression bloquée — exécutez la politique RLS DELETE dans Supabase.");
     },
     onSuccess: () => {
       toast.success("Diplôme supprimé");
@@ -339,12 +343,17 @@ function EtudiantParcours() {
   const deleteDoc = useMutation({
     mutationFn: async (doc: { id: string; storage_path: string }) => {
       await supabase.storage.from("student-documents").remove([doc.storage_path]);
-      const { error } = await supabase.from("documents").delete().eq("id", doc.id);
+      const { error, count } = await supabase
+        .from("documents")
+        .delete({ count: "exact" })
+        .eq("id", doc.id);
       if (error) throw error;
+      if (count === 0) throw new Error("Suppression bloquée — exécutez la politique RLS DELETE dans Supabase.");
     },
     onSuccess: () => {
       toast.success("Document supprimé");
       qc.invalidateQueries({ queryKey: ["documents", uid] });
+      qc.invalidateQueries({ queryKey: ["etudiant-overview", uid] });
     },
     onError: (e: Error) => toast.error("Erreur", { description: e.message }),
   });
@@ -584,11 +593,12 @@ function EtudiantParcours() {
                       <Button size="sm" variant="ghost" onClick={() => downloadDoc(d.storage_path)}>
                         <Download className="size-4" />
                       </Button>
-                      {!isLocked && d.status === "en_attente" && (
+                      {!isLocked && (
                         <Button
                           size="sm"
                           variant="ghost"
                           onClick={() => setPendingDocDel({ id: d.id, storage_path: d.storage_path })}
+                          title="Supprimer ce document"
                         >
                           <Trash2 className="size-4 text-destructive" />
                         </Button>
@@ -949,8 +959,7 @@ function RecordRow({
               variant="ghost"
               className="h-7 px-2 text-xs text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
               onClick={onDelete}
-              disabled={rec.status === "valide"}
-              title={rec.status === "valide" ? "Impossible de supprimer un dossier validé" : "Supprimer"}
+              title="Supprimer"
             >
               <Trash2 className="size-3" />
             </Button>

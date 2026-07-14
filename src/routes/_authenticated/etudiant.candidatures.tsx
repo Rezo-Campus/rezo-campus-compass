@@ -427,7 +427,8 @@ function EtudiantCandidatures() {
                       Ajoutée le {new Date(app.created_at).toLocaleDateString("fr-FR")}
                     </div>
                   </div>
-                  {!isSubmitted && (
+                  {/* Suppression possible sauf si l'école a déjà validé (attestation émise) */}
+                  {!app.ecole_validated_at && (
                     <Button
                       size="sm"
                       variant="ghost"
@@ -499,7 +500,11 @@ function EtudiantCandidatures() {
         open={pendingDeleteId !== null}
         onOpenChange={(o) => { if (!o) setPendingDeleteId(null); }}
         title="Retirer cette candidature ?"
-        description="La candidature sera définitivement supprimée de votre dossier."
+        description={
+          applications.find((a) => a.id === pendingDeleteId)?.status !== "selection"
+            ? "Cette candidature a déjà été soumise. La supprimer retirera votre dossier de cet établissement."
+            : "La candidature sera définitivement supprimée de votre dossier."
+        }
         confirmLabel="Retirer"
         onConfirm={() => {
           if (pendingDeleteId) removeApplication.mutate(pendingDeleteId);
