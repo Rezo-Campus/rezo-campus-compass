@@ -332,6 +332,22 @@ function EtudiantParcours() {
       toast.success("Document téléversé");
       qc.invalidateQueries({ queryKey: ["documents", uid] });
       qc.invalidateQueries({ queryKey: ["etudiant-overview", uid] });
+
+      // Notifier les admins du nouveau document (best-effort)
+      void (async () => {
+        try {
+          const studentName = auth?.profile?.full_name || "Un étudiant";
+          const { data: admins } = await supabase
+            .from("user_roles").select("user_id").eq("role", "admin");
+          const notifs = (admins ?? []).map((a) => ({
+            user_id: a.user_id,
+            title: "Nouveau document",
+            body: `${studentName} a téléversé un nouveau document : ${file.name}`,
+            data: { type: "new_document", student_id: uid } as { [k: string]: string },
+          }));
+          if (notifs.length) await supabase.from("notifications").insert(notifs);
+        } catch { /* best-effort */ }
+      })();
     } catch (e) {
       toast.error("Erreur", { description: (e as Error).message });
     } finally {

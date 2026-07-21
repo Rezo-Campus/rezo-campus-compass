@@ -139,6 +139,29 @@ export function Validations() {
       if (!updated || updated.length === 0) {
         throw new Error("Aucune candidature mise à jour. Il manque probablement une politique RLS UPDATE sur student_applications — exécutez le SQL fourni dans Supabase.");
       }
+
+      // Notifier les écoles concernées si dossier validé (best-effort)
+      if (status === "valide") {
+        void (async () => {
+          try {
+            const schoolIds = [...new Set(updated.map((a) => a.school_id as string))];
+            const [studentProfRes, ecoleProfsRes] = await Promise.all([
+              supabase.from("profiles").select("full_name, email").eq("id", studentId).single(),
+              supabase.from("profiles").select("id, school_id").in("school_id", schoolIds),
+            ]);
+            const studentName =
+              studentProfRes.data?.full_name || studentProfRes.data?.email || "Un étudiant";
+            const notifs = (ecoleProfsRes.data ?? []).map((p) => ({
+              user_id: p.id,
+              title: "Nouveau dossier reçu",
+              body: `Le dossier de ${studentName} vient d'être transmis à votre établissement`,
+              data: { type: "new_candidature", student_id: studentId } as { [k: string]: string },
+            }));
+            if (notifs.length) await supabase.from("notifications").insert(notifs);
+          } catch { /* best-effort */ }
+        })();
+      }
+
       return updated;
     },
     onSuccess: (_, { status }) => {
