@@ -18,20 +18,57 @@ function MessagesEtudiant() {
   const { data: auth } = useAuth();
   const uid = auth?.user?.id;
 
-  // Contacts : conseillers, admins et établissements
+  // Contacts : conseillers/admins (via user_roles) + écoles ciblées (via profiles.school_id)
   const { data: staff = [] } = useQuery({
     queryKey: ["student-contacts", uid],
     enabled: !!uid,
     queryFn: async () => {
-      const { data: roleRows, error } = await supabase
+      // map : user_id → role
+      const contactMap = new Map<string, string>();
+
+      // 1. Conseillers et admins — via user_roles (fonctionne car RLS les autorise)
+      const { data: staffRoles } = await supabase
         .from("user_roles")
         .select("user_id, role")
-        .in("role", ["conseiller", "admin", "ecole"]);
-      if (error) throw error;
+        .in("role", ["conseiller", "admin"]);
+      (staffRoles ?? []).forEach((r) => contactMap.set(r.user_id, r.role));
 
-      const ids = [...new Set((roleRows ?? []).map((r) => r.user_id))];
-      if (!ids.length) return [];
+      // 2. Écoles des candidatures de l'étudiant — via profiles.school_id
+      //    On contourne user_roles pour éviter les restrictions RLS sur le rôle "ecole"
+      const { data: apps } = await supabase
+        .from("student_applications")
+        .select("school_id")
+        .eq("student_id", uid!);
 
+      const schoolIds = [
+        ...new Set((apps ?? []).map((a: any) => a.school_id).filter(Boolean)),
+      ] as string[];
+
+      if (schoolIds.length > 0) {
+        const { data: ecoleProfs } = await supabase
+          .from("profiles")
+          .select("id")
+          .in("school_id", schoolIds);
+        (ecoleProfs ?? []).forEach((p) => {
+          if (!contactMap.has(p.id)) contactMap.set(p.id, "ecole");
+        });
+      }
+
+      // 3. Filet : toute personne qui a déjà envoyé un message à l'étudiant
+      const { data: msgs } = await supabase
+        .from("messages")
+        .select("sender_id, recipient_id")
+        .or(`sender_id.eq.${uid},recipient_id.eq.${uid}`);
+      (msgs ?? []).forEach((m) => {
+        if (m.sender_id !== uid && !contactMap.has(m.sender_id))
+          contactMap.set(m.sender_id, "ecole");
+        if (m.recipient_id !== uid && !contactMap.has(m.recipient_id))
+          contactMap.set(m.recipient_id, "ecole");
+      });
+
+      if (!contactMap.size) return [];
+
+      const ids = [...contactMap.keys()];
       const { data: profs } = await supabase
         .from("profiles")
         .select("id, full_name, email")
@@ -39,7 +76,7 @@ function MessagesEtudiant() {
 
       return (profs ?? []).map((p) => ({
         ...p,
-        role: (roleRows ?? []).find((r) => r.user_id === p.id)?.role as AppRole,
+        role: contactMap.get(p.id) as AppRole,
       }));
     },
   });
@@ -79,6 +116,65 @@ function MessagesEtudiant() {
       </div>
     </>
   );
+}
+
+/* ── Notifications lors d'un envoi de message ── */
+async function sendMessageNotifications(senderId: string, recipientId: string) {
+  try {
+    const [rolesRes, senderProfRes, recipientProfRes] = await Promise.all([
+      supabase.from("user_roles").select("role").eq("user_id", senderId),
+      supabase.from("profiles").select("full_name, email").eq("id", senderId).single(),
+      supabase.from("profiles").select("full_name, email").eq("id", recipientId).single(),
+    ]);
+
+    const roles = (rolesRes.data ?? []).map((r) => r.role as string);
+    const senderName =
+      senderProfRes.data?.full_name || senderProfRes.data?.email || "Un utilisateur";
+    const recipientName =
+      recipientProfRes.data?.full_name || recipientProfRes.data?.email || "un utilisateur";
+
+    const notifs: {
+      user_id: string;
+      title: string;
+      body: string;
+      data: { [k: string]: string };
+    }[] = [];
+
+    // 1. Notification au destinataire
+    notifs.push({
+      user_id: recipientId,
+      title: "Nouveau message",
+      body: `${senderName} vous a envoyé un message`,
+      data: { type: "new_message", sender_id: senderId },
+    });
+
+    // 2. Si étudiant ou école → alerte aux admins (qui, quoi, sans le contenu)
+    const needsAdminAlert = roles.some((r) => ["etudiant", "ecole"].includes(r));
+    if (needsAdminAlert) {
+      const { data: admins } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "admin");
+
+      const isEcole = roles.includes("ecole");
+      (admins ?? [])
+        .filter((a) => a.user_id !== senderId && a.user_id !== recipientId)
+        .forEach((a) =>
+          notifs.push({
+            user_id: a.user_id,
+            title: isEcole ? "Message d'un établissement" : "Message d'un étudiant",
+            body: `${senderName} a écrit à ${recipientName}`,
+            data: { type: "message_alert", sender_id: senderId, recipient_id: recipientId },
+          }),
+        );
+    }
+
+    if (notifs.length) {
+      await supabase.from("notifications").insert(notifs);
+    }
+  } catch {
+    // Notifications best-effort — ne bloque pas l'envoi du message
+  }
 }
 
 export function Thread({ me, peer }: { me: string; peer: string }) {
@@ -141,6 +237,8 @@ export function Thread({ me, peer }: { me: string; peer: string }) {
         .insert({ sender_id: me, recipient_id: peer, body: body.trim() });
       if (error) throw error;
       setBody("");
+      // Notifications asynchrones — ne bloque pas si elles échouent
+      void sendMessageNotifications(me, peer);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: key }),
     onError: (e: Error) => toast.error("Erreur", { description: e.message }),
