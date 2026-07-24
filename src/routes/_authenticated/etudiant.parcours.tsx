@@ -109,6 +109,8 @@ type AcademicRecord = {
   rejection_reason: string | null;
   justificatif_path: string | null;
   justificatif_name: string | null;
+  releve_path: string | null;
+  releve_name: string | null;
   created_at: string;
 };
 
@@ -165,11 +167,9 @@ function EtudiantParcours() {
   const qc = useQueryClient();
 
   /* ── États : parcours scolaire ── */
-  const justifRef = useRef<HTMLInputElement>(null);
   const [showForm, setShowForm]           = useState(false);
   const [editingRecord, setEditingRecord] = useState<AcademicRecord | null>(null);
   const [form, setForm]                   = useState<RecordForm>(emptyForm());
-  const [pendingJustif, setPendingJustif] = useState<File | null>(null);
   const [pendingDelete, setPendingDelete] = useState<AcademicRecord | null>(null);
 
   /* ── États : documents ── */
@@ -264,30 +264,23 @@ function EtudiantParcours() {
         status:        "en_attente",
       };
 
-      let recordId = editingRecord?.id;
       if (editingRecord) {
         const { error } = await db.from("academic_records").update(payload).eq("id", editingRecord.id);
         if (error) throw error;
       } else {
-        const { data, error } = await db.from("academic_records").insert(payload).select("id").single();
+        const { error } = await db.from("academic_records").insert(payload);
         if (error) throw error;
-        recordId = data.id;
-      }
-
-      if (pendingJustif && recordId) {
-        const ext  = pendingJustif.name.split(".").pop() ?? "pdf";
-        const path = `${uid}/parcours/${recordId}.${ext}`;
-        const { error: upErr } = await supabase.storage
-          .from("student-documents")
-          .upload(path, pendingJustif, { upsert: true });
-        if (upErr) throw upErr;
-        await db.from("academic_records")
-          .update({ justificatif_path: path, justificatif_name: pendingJustif.name })
-          .eq("id", recordId);
       }
     },
     onSuccess: () => {
-      toast.success(editingRecord ? "Diplôme mis à jour" : "Diplôme ajouté");
+      if (!editingRecord) {
+        toast.success("Informations enregistrées", {
+          description: "Téléversez maintenant votre diplôme et votre relevé de notes via les boutons dédiés dans la liste.",
+          duration: 8000,
+        });
+      } else {
+        toast.success("Diplôme mis à jour");
+      }
       qc.invalidateQueries({ queryKey: ["academic-records", uid] });
       closeForm();
     },
@@ -308,6 +301,30 @@ function EtudiantParcours() {
     },
     onSuccess: () => {
       toast.success("Diplôme supprimé");
+      qc.invalidateQueries({ queryKey: ["academic-records", uid] });
+    },
+    onError: (e: Error) => toast.error("Erreur", { description: e.message }),
+  });
+
+  /* ── Upload justificatif / relevé sur une ligne de parcours ── */
+
+  const uploadRecordDoc = useMutation({
+    mutationFn: async ({ rec, file, field }: { rec: AcademicRecord; file: File; field: "justificatif" | "releve" }) => {
+      if (file.size > 5 * 1024 * 1024) throw new Error("Max. 5 Mo");
+      const ext  = file.name.split(".").pop() ?? "pdf";
+      const path = `${uid}/parcours/${rec.id}_${field}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("student-documents")
+        .upload(path, file, { upsert: true });
+      if (upErr) throw upErr;
+      const patch = field === "justificatif"
+        ? { justificatif_path: path, justificatif_name: file.name }
+        : { releve_path: path, releve_name: file.name };
+      const { error } = await db.from("academic_records").update(patch).eq("id", rec.id);
+      if (error) throw error;
+    },
+    onSuccess: (_, { field }) => {
+      toast.success(field === "justificatif" ? "Diplôme téléversé" : "Relevé de notes téléversé");
       qc.invalidateQueries({ queryKey: ["academic-records", uid] });
     },
     onError: (e: Error) => toast.error("Erreur", { description: e.message }),
@@ -379,7 +396,6 @@ function EtudiantParcours() {
   function openAdd() {
     setEditingRecord(null);
     setForm(emptyForm());
-    setPendingJustif(null);
     setShowForm(true);
   }
 
@@ -398,7 +414,6 @@ function EtudiantParcours() {
       mention:        rec.mention        ?? "",
       average:        rec.average        ?? "",
     });
-    setPendingJustif(null);
     setShowForm(true);
   }
 
@@ -406,7 +421,6 @@ function EtudiantParcours() {
     setShowForm(false);
     setEditingRecord(null);
     setForm(emptyForm());
-    setPendingJustif(null);
   }
 
   function sf<K extends keyof RecordForm>(key: K, val: RecordForm[K]) {
@@ -418,6 +432,15 @@ function EtudiantParcours() {
     const { data, error } = await supabase.storage
       .from("student-documents")
       .createSignedUrl(rec.justificatif_path, 120);
+    if (error) { toast.error("Erreur d'accès"); return; }
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  }
+
+  async function viewReleve(rec: AcademicRecord) {
+    if (!rec.releve_path) return;
+    const { data, error } = await supabase.storage
+      .from("student-documents")
+      .createSignedUrl(rec.releve_path, 120);
     if (error) { toast.error("Erreur d'accès"); return; }
     window.open(data.signedUrl, "_blank", "noopener,noreferrer");
   }
@@ -520,6 +543,9 @@ function EtudiantParcours() {
                     onEdit={() => openEdit(rec)}
                     onDelete={() => setPendingDelete(rec)}
                     onViewJustif={() => viewJustif(rec)}
+                    onViewReleve={() => viewReleve(rec)}
+                    onUploadDoc={(file, field) => uploadRecordDoc.mutate({ rec, file, field })}
+                    uploading={uploadRecordDoc.isPending}
                   />
                 ))}
               </div>
@@ -775,63 +801,6 @@ function EtudiantParcours() {
                     </F>
                   </div>
                 )}
-
-                <div>
-                  <Label className="mb-1.5 block text-xs text-muted-foreground">
-                    Justificatif (diplôme, relevé de notes…)
-                  </Label>
-                  {pendingJustif ? (
-                    <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 px-4 py-3">
-                      <FileText className="size-4 shrink-0 text-green-600" />
-                      <span className="flex-1 truncate text-sm">{pendingJustif.name}</span>
-                      <button
-                        className="text-xs text-muted-foreground hover:text-destructive"
-                        onClick={() => setPendingJustif(null)}
-                      >
-                        Retirer
-                      </button>
-                    </div>
-                  ) : editingRecord?.justificatif_path ? (
-                    <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/30 px-4 py-3">
-                      <FileText className="size-4 shrink-0 text-muted-foreground" />
-                      <span className="flex-1 truncate text-sm">
-                        {editingRecord.justificatif_name ?? "Document existant"}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 text-xs"
-                        onClick={() => justifRef.current?.click()}
-                      >
-                        Remplacer
-                      </Button>
-                    </div>
-                  ) : (
-                    <div
-                      className="flex cursor-pointer items-center gap-3 rounded-lg border-2 border-dashed border-border px-4 py-4 transition hover:border-primary/40 hover:bg-muted/20"
-                      onClick={() => justifRef.current?.click()}
-                    >
-                      <Upload className="size-4 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">
-                        Cliquer pour ajouter un justificatif
-                      </span>
-                    </div>
-                  )}
-                  <input
-                    ref={justifRef}
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    className="hidden"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) {
-                        if (f.size > 5 * 1024 * 1024) { toast.error("Max. 5 Mo"); return; }
-                        setPendingJustif(f);
-                      }
-                      e.target.value = "";
-                    }}
-                  />
-                </div>
               </>
             )}
           </div>
@@ -878,7 +847,7 @@ function EtudiantParcours() {
 /* ── RecordRow : ligne d'un diplôme ── */
 
 function RecordRow({
-  rec, isLast, locked, onEdit, onDelete, onViewJustif,
+  rec, isLast, locked, onEdit, onDelete, onViewJustif, onViewReleve, onUploadDoc, uploading,
 }: {
   rec: AcademicRecord;
   isLast: boolean;
@@ -886,7 +855,12 @@ function RecordRow({
   onEdit: () => void;
   onDelete: () => void;
   onViewJustif: () => void;
+  onViewReleve: () => void;
+  onUploadDoc: (file: File, field: "justificatif" | "releve") => void;
+  uploading: boolean;
 }) {
+  const justifRef = useRef<HTMLInputElement>(null);
+  const releveRef  = useRef<HTMLInputElement>(null);
   const st = RECORD_STATUS[rec.status] ?? RECORD_STATUS.en_attente;
   const isRejected = rec.status === "rejete";
 
@@ -949,37 +923,61 @@ function RecordRow({
 
         {/* Actions */}
         <div className="flex shrink-0 flex-col items-end gap-1.5">
-          {rec.justificatif_path && (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-7 px-3 text-xs gap-1.5 text-muted-foreground"
-              onClick={onViewJustif}
-            >
-              <Eye className="size-3" /> Justificatif
+          {/* Diplôme (justificatif) */}
+          {rec.justificatif_path ? (
+            <div className="flex items-center gap-1">
+              <Button size="sm" variant="ghost" className="h-7 px-2 text-xs gap-1 text-emerald-700" onClick={onViewJustif} title="Voir le diplôme">
+                <Eye className="size-3" /> Diplôme
+              </Button>
+              {!locked && (
+                <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-muted-foreground" onClick={() => justifRef.current?.click()} disabled={uploading} title="Remplacer">
+                  <Upload className="size-3" />
+                </Button>
+              )}
+            </div>
+          ) : !locked && (
+            <Button size="sm" variant="outline" className="h-7 px-3 text-xs gap-1.5 border-dashed" onClick={() => justifRef.current?.click()} disabled={uploading}>
+              {uploading ? <Loader2 className="size-3 animate-spin" /> : <Upload className="size-3" />}
+              Diplôme
             </Button>
           )}
+
+          {/* Relevé de notes */}
+          {rec.releve_path ? (
+            <div className="flex items-center gap-1">
+              <Button size="sm" variant="ghost" className="h-7 px-2 text-xs gap-1 text-emerald-700" onClick={onViewReleve} title="Voir le relevé">
+                <Eye className="size-3" /> Relevé
+              </Button>
+              {!locked && (
+                <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-muted-foreground" onClick={() => releveRef.current?.click()} disabled={uploading} title="Remplacer">
+                  <Upload className="size-3" />
+                </Button>
+              )}
+            </div>
+          ) : !locked && (
+            <Button size="sm" variant="outline" className="h-7 px-3 text-xs gap-1.5 border-dashed" onClick={() => releveRef.current?.click()} disabled={uploading}>
+              {uploading ? <Loader2 className="size-3 animate-spin" /> : <Upload className="size-3" />}
+              Relevé
+            </Button>
+          )}
+
+          {/* Modifier / Supprimer */}
           {!locked && (isRejected || rec.status === "en_attente") && (
-            <Button
-              size="sm"
-              variant={isRejected ? "destructive" : "outline"}
-              className="h-7 px-3 text-xs gap-1.5"
-              onClick={onEdit}
-            >
+            <Button size="sm" variant={isRejected ? "destructive" : "outline"} className="h-7 px-3 text-xs gap-1.5" onClick={onEdit}>
               <Pencil className="size-3" /> Modifier
             </Button>
           )}
           {!locked && (
-            <Button
-              size="sm"
-              variant="ghost"
-              className="h-7 px-2 text-xs text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-              onClick={onDelete}
-              title="Supprimer"
-            >
+            <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-muted-foreground hover:bg-destructive/10 hover:text-destructive" onClick={onDelete} title="Supprimer">
               <Trash2 className="size-3" />
             </Button>
           )}
+
+          {/* Inputs fichiers cachés */}
+          <input ref={justifRef} type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) onUploadDoc(f, "justificatif"); e.target.value = ""; }} />
+          <input ref={releveRef} type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden"
+            onChange={(e) => { const f = e.target.files?.[0]; if (f) onUploadDoc(f, "releve"); e.target.value = ""; }} />
         </div>
       </div>
 
