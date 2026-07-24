@@ -86,7 +86,7 @@ export function ConseillerStudentDetail() {
   const { data, isLoading } = useQuery({
     queryKey: ["conseiller-student-detail", studentId],
     queryFn: async () => {
-      const [profileRes, fileRes, docsRes, appsRes] = await Promise.all([
+      const [profileRes, fileRes, docsRes, appsRes, recordsRes] = await Promise.all([
         db
           .from("profiles")
           .select("id, full_name, email, phone, photo_url, dossier_submitted_at, dossier_can_edit")
@@ -107,6 +107,10 @@ export function ConseillerStudentDetail() {
           .select("*, school:school_id(name), program:program_id(name, level, domain)")
           .eq("student_id", studentId)
           .order("created_at", { ascending: false }),
+        db
+          .from("academic_records")
+          .select("id")
+          .eq("student_id", studentId),
       ]);
       if (profileRes.error) throw profileRes.error;
       if (docsRes.error) throw docsRes.error;
@@ -117,6 +121,7 @@ export function ConseillerStudentDetail() {
         file: fileRes.data,
         docs: docsRes.data ?? [],
         apps: appsRes.data ?? [],
+        records: recordsRes.data ?? [],
       };
     },
   });
@@ -268,9 +273,9 @@ export function ConseillerStudentDetail() {
     );
   }
 
-  const { profile, file, docs, apps } = data ?? { profile: null, file: null, docs: [], apps: [] };
+  const { profile, file, docs, apps, records } = data ?? { profile: null, file: null, docs: [], apps: [], records: [] };
 
-  const hasSchoolDiploma = docs.some((d) => ["diplome", "releve_notes"].includes(d.type));
+  const hasSchoolDiploma = (records ?? []).length > 0 || docs.some((d) => ["diplome", "releve_notes"].includes(d.type));
   const hasAdminDocs = docs.length > 0;
   const hasApplications = apps.length > 0;
   const hasLetter = apps.some((a) => !!a.motivation_letter);
@@ -290,7 +295,7 @@ export function ConseillerStudentDetail() {
     {
       label: "Parcours scolaire ajouté",
       done: hasSchoolDiploma,
-      detail: "Diplôme ou relevé de notes",
+      detail: hasSchoolDiploma ? null : "Aucun diplôme dans le parcours scolaire",
     },
     {
       label: "Documents administratifs téléversés",

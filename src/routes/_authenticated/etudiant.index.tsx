@@ -117,7 +117,6 @@ function EtudiantDashboard() {
                 { label: "Choisir des formations", done: hasApplications, to: "/etudiant/ecoles", icon: School },
                 { label: "Rédiger vos lettres de motivation", done: hasMotivation, to: "/etudiant/candidatures", icon: Send },
                 { label: "Échanger avec votre conseiller", done: hasSentMessages, to: "/etudiant/messages", icon: MessageSquare },
-                { label: "Confirmer un rendez-vous", done: !!data?.nextRdv, to: "/etudiant/rendez-vous", icon: CalendarDays },
               ].map((step) => (
                 <li key={step.label}>
                   <Link
