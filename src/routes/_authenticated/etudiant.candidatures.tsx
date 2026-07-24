@@ -32,19 +32,21 @@ export const Route = createFileRoute("/_authenticated/etudiant/candidatures")({
 const db = supabase as any;
 
 const STATUS_COLORS: Record<string, string> = {
-  selection: "bg-yellow-100 text-yellow-700",
-  soumis:    "bg-blue-100 text-blue-700",
-  valide:    "bg-green-100 text-green-700",
-  accepte:   "bg-emerald-100 text-emerald-700",
-  refuse:    "bg-red-100 text-red-700",
+  selection:          "bg-yellow-100 text-yellow-700",
+  soumis:             "bg-blue-100 text-blue-700",
+  valide:             "bg-green-100 text-green-700",
+  accepte:            "bg-emerald-100 text-emerald-700",
+  refuse:             "bg-red-100 text-red-700",
+  refuse_conseiller:  "bg-red-100 text-red-700",
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  selection: "En sélection",
-  soumis:    "Soumis",
-  valide:    "Validé",
-  accepte:   "Accepté",
-  refuse:    "Refusé",
+  selection:          "En sélection",
+  soumis:             "Soumis",
+  valide:             "Validé",
+  accepte:            "Accepté",
+  refuse:             "Refusé",
+  refuse_conseiller:  "Refusé",
 };
 
 type Application = {

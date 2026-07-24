@@ -95,7 +95,7 @@ export function Validations() {
     enabled: !!uid && view === "dossiers",
     queryKey: ["pending-dossiers", showArchive],
     queryFn: async () => {
-      const statuses = showArchive ? ["valide", "refuse"] : ["soumis"];
+      const statuses = showArchive ? ["valide", "refuse_conseiller"] : ["soumis"];
       const { data, error } = await supabase
         .from("student_applications")
         .select("*")
@@ -128,7 +128,7 @@ export function Validations() {
   });
 
   const reviewDossier = useMutation({
-    mutationFn: async ({ studentId, status }: { studentId: string; status: "valide" | "refuse" }) => {
+    mutationFn: async ({ studentId, status }: { studentId: string; status: "valide" | "refuse_conseiller" }) => {
       const { data: updated, error } = await supabase
         .from("student_applications")
         .update({ status, frais_inscription_recus: !!fraisRecus[studentId] })
@@ -165,7 +165,7 @@ export function Validations() {
       return updated;
     },
     onSuccess: (_, { status }) => {
-      toast.success(status === "valide" ? "Dossier validé — visible par l'école" : "Dossier refusé");
+      toast.success(status === "valide" ? "Dossier validé — visible par l'école" : "Dossier refusé (non transmis à l'école)");
       qc.invalidateQueries({ queryKey: ["pending-dossiers"] });
       qc.invalidateQueries({ queryKey: ["ecole-applications"] });
       qc.invalidateQueries({ queryKey: ["ecole-pending-count"] });
@@ -513,7 +513,7 @@ export function Validations() {
                               <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
                                 a.status === "valide" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                               }`}>
-                                {a.status === "valide" ? "Validé" : "Refusé"}
+                                {a.status === "valide" ? "Validé" : "Refusé (conseiller)"}
                               </span>
                             )}
                           </li>
@@ -547,7 +547,7 @@ export function Validations() {
                           variant="outline"
                           className="text-destructive hover:bg-destructive/10"
                           disabled={reviewDossier.isPending}
-                          onClick={() => reviewDossier.mutate({ studentId: d.student!.id, status: "refuse" })}
+                          onClick={() => reviewDossier.mutate({ studentId: d.student!.id, status: "refuse_conseiller" })}
                         >
                           <XCircle className="mr-1 size-4" /> Refuser
                         </Button>
