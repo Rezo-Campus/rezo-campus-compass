@@ -188,15 +188,33 @@ function EtudiantCandidatures() {
     const missing: { label: string; to: string }[] = [];
 
     const [profileRes, fileRes, recordsRes, docsRes] = await Promise.all([
-      supabase.from("profiles").select("full_name, phone").eq("id", uid).single(),
+      supabase.from("profiles")
+        .select("first_name, last_name, gender, date_of_birth, birth_country, nationality, id_type, id_number, phone, phone_mobile, id_document_path")
+        .eq("id", uid).single(),
       db.from("student_files").select("target_country, target_level, target_program, bio").eq("student_id", uid).maybeSingle(),
       db.from("academic_records").select("id", { count: "exact", head: true }).eq("student_id", uid),
       supabase.from("documents").select("id", { count: "exact", head: true }).eq("student_id", uid),
     ]);
 
-    const prof = profileRes.data as { full_name: string | null; phone: string | null } | null;
-    if (!prof?.full_name?.trim() || !prof?.phone?.trim()) {
-      missing.push({ label: "Profil incomplet — nom complet et numéro de téléphone requis", to: "/etudiant/profil" });
+    const prof = profileRes.data as {
+      first_name: string | null; last_name: string | null;
+      gender: string | null; date_of_birth: string | null;
+      birth_country: string | null; nationality: string | null;
+      id_type: string | null; id_number: string | null;
+      phone: string | null; phone_mobile: string | null;
+      id_document_path: string | null;
+    } | null;
+
+    const profileComplete =
+      !!prof?.first_name?.trim() && !!prof?.last_name?.trim() &&
+      !!prof?.gender?.trim() && !!prof?.date_of_birth?.trim() &&
+      !!prof?.birth_country?.trim() && !!prof?.nationality?.trim() &&
+      !!prof?.id_type?.trim() && !!prof?.id_number?.trim() &&
+      (!!prof?.phone?.trim() || !!prof?.phone_mobile?.trim()) &&
+      !!prof?.id_document_path;
+
+    if (!profileComplete) {
+      missing.push({ label: "Profil incomplet — remplissez toutes les informations et téléversez votre pièce d'identité", to: "/etudiant/profil" });
     }
 
     const file = fileRes.data as { target_country: string | null; target_level: string | null; target_program: string | null; bio: string | null } | null;
