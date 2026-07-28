@@ -503,7 +503,17 @@ function EcoleCandidats() {
                                             size="sm"
                                             variant="outline"
                                             className="h-7 gap-1 px-2 text-xs"
-                                            onClick={() => downloadDoc(r.justificatif_path, r.justificatif_name ?? "Relevé")}
+                                            onClick={() => downloadDoc(r.justificatif_path, r.justificatif_name ?? "Diplôme")}
+                                          >
+                                            <Download className="size-3" /> Diplôme
+                                          </Button>
+                                        )}
+                                        {r.releve_path && (
+                                          <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="h-7 gap-1 px-2 text-xs"
+                                            onClick={() => downloadDoc(r.releve_path, r.releve_name ?? "Relevé de notes")}
                                           >
                                             <Download className="size-3" /> Relevé
                                           </Button>

@@ -38,6 +38,14 @@ const DOC_TYPE_LABELS: Record<string, string> = {
   autre: "Autre document",
 };
 
+const DIPLOMA_LABELS: Record<string, string> = {
+  bac: "Baccalauréat (BAC)", bts: "BTS", dts: "DTS",
+  licence_gen: "Licence Générale", licence_pro: "Licence Professionnelle",
+  master_pro: "Master Professionnel", master_rec: "Master Recherche",
+  master_sp: "Master Spécialisé", deug: "DEUG / DEUST",
+  doctorat: "Doctorat", autre: "Autre diplôme",
+};
+
 const DOC_STATUS_COLORS: Record<string, string> = {
   en_attente: "bg-amber-100 text-amber-700",
   valide: "bg-green-100 text-green-700",
@@ -109,8 +117,9 @@ export function ConseillerStudentDetail() {
           .order("created_at", { ascending: false }),
         db
           .from("academic_records")
-          .select("id")
-          .eq("student_id", studentId),
+          .select("*")
+          .eq("student_id", studentId)
+          .order("year", { ascending: false }),
       ]);
       if (profileRes.error) throw profileRes.error;
       if (docsRes.error) throw docsRes.error;
@@ -632,6 +641,77 @@ export function ConseillerStudentDetail() {
                     <Button size="sm" variant="ghost" className="shrink-0" onClick={() => downloadDoc(d.storage_path)}>
                       <Download className="size-3.5" />
                     </Button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Panel>
+
+          {/* Parcours scolaire */}
+          <Panel
+            title={`Parcours scolaire (${records.length})`}
+            description="Diplômes et justificatifs téléversés par l'étudiant."
+          >
+            {records.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+                <GraduationCap className="mx-auto mb-2 size-8 text-muted-foreground/30" />
+                Aucun diplôme renseigné dans le parcours scolaire.
+              </div>
+            ) : (
+              <ul className="space-y-3">
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                {(records as any[]).map((r) => (
+                  <li key={r.id} className="rounded-xl border border-border p-3">
+                    <div className="flex items-start gap-3">
+                      <GraduationCap className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-semibold">
+                          {DIPLOMA_LABELS[r.diploma_type] ?? r.diploma_type}
+                          {r.is_in_progress && (
+                            <span className="ml-1.5 text-[10px] font-medium text-amber-600">(En cours)</span>
+                          )}
+                        </div>
+                        {r.diploma_name && <div className="text-sm text-muted-foreground">{r.diploma_name}</div>}
+                        {r.speciality && <div className="text-xs italic text-muted-foreground">{r.speciality}</div>}
+                        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted-foreground">
+                          <span className="font-medium uppercase text-foreground">{r.school_name}</span>
+                          {r.school_city && <span>{r.school_city}</span>}
+                          {r.school_country && <span>{r.school_country}</span>}
+                          {r.year && <span>· {r.year}</span>}
+                          {r.mention && <span>· {r.mention}</span>}
+                          {r.average && <span>· Moy. {r.average}/20</span>}
+                        </div>
+                      </div>
+                      <div className="flex shrink-0 flex-col items-end gap-1.5">
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                          r.status === "valide" ? "bg-green-100 text-green-700"
+                          : r.status === "rejete" ? "bg-red-100 text-red-700"
+                          : "bg-amber-100 text-amber-700"
+                        }`}>
+                          {r.status === "valide" ? "Validé" : r.status === "rejete" ? "Rejeté" : "En attente"}
+                        </span>
+                        {r.justificatif_path && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 gap-1 px-2 text-xs"
+                            onClick={() => downloadDoc(r.justificatif_path)}
+                          >
+                            <Download className="size-3" /> Diplôme
+                          </Button>
+                        )}
+                        {r.releve_path && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 gap-1 px-2 text-xs"
+                            onClick={() => downloadDoc(r.releve_path)}
+                          >
+                            <Download className="size-3" /> Relevé
+                          </Button>
+                        )}
+                      </div>
+                    </div>
                   </li>
                 ))}
               </ul>
