@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   Loader2, Send, Trash2, AlertCircle, CheckCircle2, School, Clock,
   ShieldCheck, Award, Lock, LockOpen, FileText, GraduationCap, CalendarDays,
+  ArrowRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/dashboard-bits";
@@ -71,6 +72,9 @@ function EtudiantCandidatures() {
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [showChecklist, setShowChecklist] = useState(false);
   const [checks, setChecks]               = useState<boolean[]>(Array(CHECKLIST.length).fill(false));
+  const [missingItems, setMissingItems]   = useState<{ label: string; to: string }[]>([]);
+  const [showMissingDialog, setShowMissingDialog] = useState(false);
+  const [validating, setValidating]       = useState(false);
 
   /* ── Statut dossier (retry:false = pas de retentatives si colonnes absentes) ── */
   const { data: profile } = useQuery({
@@ -178,6 +182,56 @@ function EtudiantCandidatures() {
     onError: (e: Error) => toast.error("Erreur", { description: e.message }),
   });
 
+  async function handleTransmettre() {
+    if (!uid) return;
+    setValidating(true);
+    const missing: { label: string; to: string }[] = [];
+
+    const [profileRes, fileRes, recordsRes, docsRes] = await Promise.all([
+      supabase.from("profiles").select("full_name, phone").eq("id", uid).single(),
+      db.from("student_files").select("target_country, target_level, target_program, bio").eq("student_id", uid).maybeSingle(),
+      db.from("academic_records").select("id", { count: "exact", head: true }).eq("student_id", uid),
+      supabase.from("documents").select("id", { count: "exact", head: true }).eq("student_id", uid),
+    ]);
+
+    const prof = profileRes.data as { full_name: string | null; phone: string | null } | null;
+    if (!prof?.full_name?.trim() || !prof?.phone?.trim()) {
+      missing.push({ label: "Profil incomplet — nom complet et numéro de téléphone requis", to: "/etudiant/profil" });
+    }
+
+    const file = fileRes.data as { target_country: string | null; target_level: string | null; target_program: string | null; bio: string | null } | null;
+    if (!file?.target_country || !file?.target_level || !file?.target_program || !file?.bio?.trim()) {
+      missing.push({ label: "Projet d'études incomplet — pays, niveau, formation et présentation requis", to: "/etudiant/dossier" });
+    }
+
+    if (!recordsRes.count || recordsRes.count === 0) {
+      missing.push({ label: "Parcours scolaire vide — ajoutez au moins un diplôme dans Parcours & Documents", to: "/etudiant/parcours" });
+    }
+
+    if (!docsRes.count || docsRes.count === 0) {
+      missing.push({ label: "Aucun document administratif — téléversez au moins une pièce", to: "/etudiant/parcours" });
+    }
+
+    if (applications.length === 0) {
+      missing.push({ label: "Aucune formation choisie — parcourez nos établissements partenaires", to: "/etudiant/ecoles" });
+    } else if (missingLetters > 0) {
+      missing.push({
+        label: `${missingLetters} lettre${missingLetters > 1 ? "s" : ""} de motivation manquante${missingLetters > 1 ? "s" : ""} — rédigez-les avant de transmettre`,
+        to: "/etudiant/candidatures",
+      });
+    }
+
+    setValidating(false);
+
+    if (missing.length > 0) {
+      setMissingItems(missing);
+      setShowMissingDialog(true);
+    } else {
+      setChecks(Array(CHECKLIST.length).fill(false));
+      setShowChecklist(true);
+    }
+  }
+
   async function saveLetter(appId: string) {
     setSaving((s) => ({ ...s, [appId]: true }));
     try {
@@ -278,9 +332,11 @@ function EtudiantCandidatures() {
               </p>
               <Button
                 size="sm"
-                onClick={() => { setChecks(Array(CHECKLIST.length).fill(false)); setShowChecklist(true); }}
+                disabled={validating}
+                onClick={handleTransmettre}
               >
-                <Send className="mr-2 size-4" /> Retransmettre mon dossier
+                {validating ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Send className="mr-2 size-4" />}
+                Retransmettre mon dossier
               </Button>
             </div>
           ) : (
@@ -294,9 +350,11 @@ function EtudiantCandidatures() {
               </p>
               <Button
                 size="sm"
-                onClick={() => { setChecks(Array(CHECKLIST.length).fill(false)); setShowChecklist(true); }}
+                disabled={validating}
+                onClick={handleTransmettre}
               >
-                <Send className="mr-2 size-4" /> Transmettre mon dossier
+                {validating ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Send className="mr-2 size-4" />}
+                Transmettre mon dossier
               </Button>
             </div>
           )}
@@ -514,6 +572,39 @@ function EtudiantCandidatures() {
         }}
         loading={removeApplication.isPending}
       />
+
+      {/* ══ Modal éléments manquants ══ */}
+      <Dialog open={showMissingDialog} onOpenChange={(o) => { if (!o) setShowMissingDialog(false); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertCircle className="size-5" /> Dossier incomplet
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-2">
+            <p className="mb-4 text-sm text-muted-foreground">
+              Complétez les points suivants avant de transmettre votre dossier :
+            </p>
+            <div className="space-y-2">
+              {missingItems.map((item, idx) => (
+                <Link
+                  key={idx}
+                  to={item.to as any}
+                  onClick={() => setShowMissingDialog(false)}
+                  className="flex items-center gap-3 rounded-lg border border-destructive/20 bg-destructive/5 p-3 transition hover:bg-destructive/10"
+                >
+                  <AlertCircle className="size-4 shrink-0 text-destructive" />
+                  <span className="flex-1 text-sm text-foreground">{item.label}</span>
+                  <ArrowRight className="size-4 shrink-0 text-muted-foreground" />
+                </Link>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowMissingDialog(false)}>Fermer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* ══ Modal checklist de transmission ══ */}
       <Dialog open={showChecklist} onOpenChange={(o) => { if (!o) setShowChecklist(false); }}>
