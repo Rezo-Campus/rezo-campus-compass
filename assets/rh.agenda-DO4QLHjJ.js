@@ -1,0 +1,1 @@
+import{j as t}from"./index-DXKDnE13.js";import{A as o}from"./AgendaView-DxcHGnO2.js";import"./bell-R7gTCxE2.js";const m=()=>t.jsx(o,{department:"rh",canEdit:!0,title:"Agenda RH"});export{m as component};
