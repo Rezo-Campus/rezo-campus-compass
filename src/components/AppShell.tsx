@@ -1,9 +1,12 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   LogOut, Users, BookOpen, Calculator, FolderOpen, BarChart3,
-  ShieldCheck, UserCheck, School, Briefcase,
+  ShieldCheck, UserCheck, School, Briefcase, Layers,
+  CalendarDays, CalendarClock, Receipt, Calendar, ArrowLeftRight,
+  ClipboardList, TrendingUp, FileSignature, MoreHorizontal,
 } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
+import { useRef, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, type AppRole } from "@/hooks/use-auth";
 import { NotificationsBell } from "@/components/NotificationsBell";
@@ -24,6 +27,7 @@ export const ROLE_LABEL: Record<AppRole, string> = {
   rh:          "Ressources Humaines",
   ecole:       "Établissement",
   secretaire:  "Secrétaire Particulière",
+  aadf:        "AADF",
 };
 
 /* ── Identité visuelle par rôle ── */
@@ -41,6 +45,7 @@ const ROLE_COLORS: Record<AppRole, {
   commercial:  { gradFrom: "#431407", gradTo: "#0f172a", accent: "#f97316", dot: "#fdba74",  mobileActive: "#ea580c" },
   rh:          { gradFrom: "#4c0519", gradTo: "#0f172a", accent: "#f43f5e", dot: "#fda4af",  mobileActive: "#e11d48" },
   secretaire:  { gradFrom: "#083344", gradTo: "#0f172a", accent: "#06b6d4", dot: "#67e8f9",  mobileActive: "#0891b2" },
+  aadf:        { gradFrom: "#042f2e", gradTo: "#0f172a", accent: "#14b8a6", dot: "#2dd4bf",  mobileActive: "#0d9488" },
 };
 
 const SECTION_LINKS: {
@@ -56,7 +61,100 @@ const SECTION_LINKS: {
   { role: "rh",          label: "Ressources Humaines",   to: "/rh",           icon: UserCheck },
   { role: "ecole",       label: "Espace École",          to: "/ecole",        icon: School },
   { role: "secretaire",  label: "Secrétariat",           to: "/secretaire",   icon: Briefcase },
+  { role: "aadf",        label: "AADF",                  to: "/aadf",         icon: Layers },
 ];
+
+/* ── Accès rapides par rôle (menu 3-points dans le topbar) ── */
+const ROLE_QUICK_ACTIONS: Partial<Record<AppRole, {
+  label: string; to: string; icon: ComponentType<{ className?: string }>;
+}[]>> = {
+  secretaire:  [
+    { label: "Agenda",       to: "/secretaire/agenda",         icon: Calendar },
+    { label: "Rendez-vous",  to: "/secretaire/rendez-vous",    icon: CalendarClock },
+    { label: "Réunions",     to: "/secretaire/reunions",       icon: CalendarDays },
+    { label: "Facturation",  to: "/secretaire/facturation",    icon: Receipt },
+  ],
+  comptable: [
+    { label: "Réunions", to: "/comptabilite/reunions", icon: CalendarDays },
+  ],
+  rh: [
+    { label: "Agenda",     to: "/rh/agenda",     icon: Calendar },
+    { label: "Contrats",   to: "/rh/contrats",   icon: FileSignature },
+    { label: "Entretiens", to: "/rh/entretiens", icon: UserCheck },
+    { label: "Réunions",   to: "/rh/reunions",   icon: CalendarDays },
+  ],
+  commercial: [
+    { label: "Agenda",    to: "/commercial/agenda",              icon: Calendar },
+    { label: "Marketing", to: "/commercial/marketing",           icon: TrendingUp },
+    { label: "RDV",       to: "/commercial/rendez-vous-clients", icon: CalendarClock },
+    { label: "Réunions",  to: "/commercial/reunions",            icon: CalendarDays },
+  ],
+  chef_projet: [
+    { label: "Agenda",       to: "/projets/agenda",      icon: Calendar },
+    { label: "Projets",      to: "/projets/liste",        icon: FolderOpen },
+    { label: "Analytiques",  to: "/projets/analytiques",  icon: TrendingUp },
+    { label: "Réunions",     to: "/projets/reunions",     icon: CalendarDays },
+  ],
+  admin: [
+    { label: "Utilisateurs", to: "/admin/utilisateurs", icon: Users },
+    { label: "Dossiers",     to: "/admin/dossiers",      icon: FolderOpen },
+    { label: "Réunions",     to: "/admin/reunions",      icon: CalendarDays },
+    { label: "Facturation",  to: "/admin/facturation",   icon: Receipt },
+  ],
+};
+
+/* ── Menu 3-points accès rapides ── */
+function QuickActionsMenu({ role, C }: { role: AppRole | undefined; C: typeof ROLE_COLORS[AppRole] }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const actions = role ? (ROLE_QUICK_ACTIONS[role] ?? []) : [];
+
+  useEffect(() => {
+    function close(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, []);
+
+  if (actions.length === 0) return null;
+
+  return (
+    <div ref={ref} className="relative print:hidden">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="relative grid size-9 place-items-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
+        aria-label="Actions rapides"
+      >
+        <MoreHorizontal className="size-5" />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-11 z-[200] w-52 overflow-hidden rounded-xl border border-border bg-card shadow-lg">
+          <div className="border-b border-border px-3 py-2.5">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Accès rapides
+            </p>
+          </div>
+          <div className="p-1.5">
+            {actions.map((a) => (
+              <Link
+                key={a.to}
+                to={a.to as any}
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-foreground transition hover:bg-muted/60"
+              >
+                <span className="grid size-7 place-items-center rounded-lg" style={{ background: `${C.accent}18`, color: C.accent }}>
+                  <a.icon className="size-3.5" />
+                </span>
+                {a.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function AppShell({ nav, children }: { nav: NavItem[]; children: ReactNode }) {
   const navigate   = useNavigate();
@@ -217,7 +315,7 @@ export function AppShell({ nav, children }: { nav: NavItem[]; children: ReactNod
       <div className="flex min-w-0 flex-1 flex-col print:w-full print:flex-none">
 
         {/* ── Topbar ── */}
-        <header className="flex h-[68px] items-center justify-between border-b border-border bg-card/90 px-5 backdrop-blur-sm print:hidden">
+        <header className="sticky top-0 z-30 flex h-[68px] items-center justify-between border-b border-border bg-card/90 px-5 backdrop-blur-sm print:hidden">
 
           {/* Left — mobile logo + breadcrumb */}
           <div className="flex items-center gap-3 min-w-0">
@@ -241,8 +339,9 @@ export function AppShell({ nav, children }: { nav: NavItem[]; children: ReactNod
             )}
           </div>
 
-          {/* Right — bell + user */}
+          {/* Right — quick actions + bell + user */}
           <div className="flex items-center gap-3">
+            <QuickActionsMenu role={role} C={C} />
             <NotificationsBell />
 
             <div className="hidden sm:flex items-center gap-2.5 rounded-xl border border-border bg-muted/30 px-3 py-1.5">

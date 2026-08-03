@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export type AppRole = "etudiant" | "conseiller" | "admin" | "comptable" | "chef_projet" | "commercial" | "rh" | "ecole" | "secretaire";
+export type AppRole = "etudiant" | "conseiller" | "admin" | "comptable" | "chef_projet" | "commercial" | "rh" | "ecole" | "secretaire" | "aadf";
 
-const ROLE_PRIORITY: AppRole[] = ["admin", "conseiller", "chef_projet", "comptable", "commercial", "rh", "secretaire", "ecole", "etudiant"];
+const ROLE_PRIORITY: AppRole[] = ["admin", "conseiller", "chef_projet", "comptable", "aadf", "commercial", "rh", "secretaire", "ecole", "etudiant"];
 
 export interface AuthSession {
   user: { id: string; email: string | null } | null;

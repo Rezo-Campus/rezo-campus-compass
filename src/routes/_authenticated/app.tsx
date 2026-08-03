@@ -19,15 +19,16 @@ function AppHub() {
       return;
     }
     let target = "/unauthorized";
-    if (roles.includes("admin")) target = "/admin";
-    else if (roles.includes("conseiller")) target = "/conseiller";
+    if (roles.includes("admin"))       target = "/admin";
+    else if (roles.includes("conseiller"))  target = "/conseiller";
     else if (roles.includes("chef_projet")) target = "/projets";
-    else if (roles.includes("comptable")) target = "/comptabilite";
-    else if (roles.includes("commercial")) target = "/commercial";
-    else if (roles.includes("rh")) target = "/rh";
-    else if (roles.includes("ecole")) target = "/ecole";
-    else if (roles.includes("secretaire")) target = "/secretaire";
-    else if (roles.includes("etudiant")) target = "/etudiant";
+    else if (roles.includes("comptable"))   target = "/comptabilite";
+    else if (roles.includes("aadf"))        target = "/aadf";
+    else if (roles.includes("commercial"))  target = "/commercial";
+    else if (roles.includes("rh"))          target = "/rh";
+    else if (roles.includes("secretaire"))  target = "/secretaire";
+    else if (roles.includes("ecole"))       target = "/ecole";
+    else if (roles.includes("etudiant"))    target = "/etudiant";
     navigate({ to: target, replace: true });
   }, [data, isLoading, navigate]);
 
