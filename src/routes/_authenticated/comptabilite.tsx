@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { LayoutDashboard, ArrowUpDown, CalendarClock, Calendar, BarChart2, ClipboardList, Receipt } from "lucide-react";
+import { LayoutDashboard, ArrowUpDown, CalendarClock, Calendar, BarChart2, ClipboardList, Receipt, UserCircle } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { RoleGuard } from "@/components/RoleGuard";
 
@@ -11,6 +11,7 @@ const NAV = [
   { label: "Factures",            to: "/comptabilite/factures",                 icon: Receipt },
   { label: "Agenda",              to: "/comptabilite/agenda",                   icon: Calendar },
   { label: "RDV Clients",         to: "/comptabilite/rendez-vous-clients",      icon: CalendarClock },
+  { label: "Mon Profil",         to: "/comptabilite/profil",                   icon: UserCircle },
 ];
 
 export const Route = createFileRoute("/_authenticated/comptabilite")({

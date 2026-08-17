@@ -6,17 +6,19 @@ import {
   MessageSquare,
   CalendarDays,
   CalendarRange,
+  UserCircle,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { RoleGuard } from "@/components/RoleGuard";
 
 const NAV = [
-  { label: "Tableau de bord", to: "/conseiller", icon: LayoutDashboard },
-  { label: "Mes étudiants", to: "/conseiller/etudiants", icon: Users },
-  { label: "Validations", to: "/conseiller/validations", icon: FileCheck2 },
-  { label: "Messagerie", to: "/conseiller/messages", icon: MessageSquare },
-  { label: "Rendez-vous", to: "/conseiller/rendez-vous", icon: CalendarDays },
-  { label: "Réunions", to: "/conseiller/reunions", icon: CalendarRange },
+  { label: "Tableau de bord", to: "/conseiller",         icon: LayoutDashboard },
+  { label: "Mes étudiants",   to: "/conseiller/etudiants", icon: Users },
+  { label: "Validations",     to: "/conseiller/validations", icon: FileCheck2 },
+  { label: "Messagerie",      to: "/conseiller/messages", icon: MessageSquare },
+  { label: "Rendez-vous",     to: "/conseiller/rendez-vous", icon: CalendarDays },
+  { label: "Réunions",        to: "/conseiller/reunions", icon: CalendarRange },
+  { label: "Mon Profil",      to: "/conseiller/profil",   icon: UserCircle },
 ];
 
 export const Route = createFileRoute("/_authenticated/conseiller")({

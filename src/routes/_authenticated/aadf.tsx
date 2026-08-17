@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { LayoutDashboard, ArrowLeftRight, ClipboardList, Calendar, CalendarDays, MessageSquare, FileText } from "lucide-react";
+import { LayoutDashboard, ArrowLeftRight, ClipboardList, Calendar, CalendarDays, MessageSquare, FileText, UserCircle } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { RoleGuard } from "@/components/RoleGuard";
 
@@ -11,6 +11,7 @@ const NAV = [
   { label: "Réunions",        to: "/aadf/reunions",      icon: CalendarDays },
   { label: "Protocoles",      to: "/aadf/protocoles",    icon: FileText },
   { label: "Messagerie",      to: "/aadf/messages",      icon: MessageSquare },
+  { label: "Mon Profil",     to: "/aadf/profil",        icon: UserCircle },
 ];
 
 export const Route = createFileRoute("/_authenticated/aadf")({

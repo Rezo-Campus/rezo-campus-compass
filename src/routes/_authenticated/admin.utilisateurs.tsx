@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useRef } from "react";
-import { Loader2, Ban, ShieldCheck, X, Plus, School, Camera, User, Save } from "lucide-react";
+import { Loader2, Ban, ShieldCheck, X, Plus, School, Camera, User, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
 import { Badge } from "@/components/ui/badge";
@@ -60,6 +60,25 @@ export const Route = createFileRoute("/_authenticated/admin/utilisateurs")({
   component: AdminUsers,
 });
 
+/* ─── Redimensionne une image et la convertit en base64 ─────── */
+function resizeToBase64(file: File, maxPx = 300): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const ratio = Math.min(maxPx / img.width, maxPx / img.height, 1);
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * ratio);
+      canvas.height = Math.round(img.height * ratio);
+      canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL("image/jpeg", 0.85));
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
 /* ─── Panneau profil — pur React, pas de Portal/Radix ────────── */
 function ProfilePanel({
   user, onClose,
@@ -77,14 +96,10 @@ function ProfilePanel({
   async function uploadPhoto(file: File) {
     setUploading(true);
     try {
-      const ext = file.name.split(".").pop() || "jpg";
-      const path = `avatars/${user.id}.${ext}`;
-      const { error: upErr } = await supabase.storage
-        .from("student-documents").upload(path, file, { upsert: true, contentType: file.type });
-      if (upErr) throw upErr;
-      const { data: { publicUrl } } = supabase.storage.from("student-documents").getPublicUrl(path);
-      await supabase.from("profiles").update({ photo_url: publicUrl }).eq("id", user.id);
-      setPreviewUrl(publicUrl);
+      const dataUrl = await resizeToBase64(file, 300);
+      const { error } = await supabase.from("profiles").update({ photo_url: dataUrl }).eq("id", user.id);
+      if (error) throw error;
+      setPreviewUrl(dataUrl);
       toast.success("Photo mise à jour");
       qc.invalidateQueries({ queryKey: ["admin-users"] });
     } catch (e: unknown) {
@@ -247,6 +262,7 @@ function AdminUsers() {
   const [pendingEcole, setPendingEcole] = useState<{ userId: string } | null>(null);
   const [schoolPickId, setSchoolPickId] = useState("");
   const [assigningSchool, setAssigningSchool] = useState(false);
+  const [pendingDeleteUser, setPendingDeleteUser] = useState<UserRow | null>(null);
 
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["admin-users"],
@@ -319,6 +335,26 @@ function AdminUsers() {
     onError: (e: Error) => toast.error("Erreur", { description: e.message }),
   });
 
+  const deleteUser = useMutation({
+    mutationFn: async (userId: string) => {
+      const { error } = await (supabase as any).rpc("delete_user_account", { target_user_id: userId });
+      if (error) throw error;
+      return userId;
+    },
+    onSuccess: (userId) => {
+      /* Retirer immédiatement de la liste sans attendre le refetch */
+      qc.setQueryData(["admin-users"], (old: UserRow[] | undefined) =>
+        (old ?? []).filter((u) => u.id !== userId)
+      );
+      toast.success("Compte supprimé définitivement");
+      setPendingDeleteUser(null);
+    },
+    onError: (e: Error) => {
+      toast.error("Erreur lors de la suppression", { description: e.message });
+      setPendingDeleteUser(null);
+    },
+  });
+
   async function confirmEcoleAssignment() {
     if (!pendingEcole || !schoolPickId) return;
     setAssigningSchool(true);
@@ -379,6 +415,7 @@ function AdminUsers() {
                 <TableHead>Rôles actuels</TableHead>
                 <TableHead>Ajouter un rôle</TableHead>
                 <TableHead className="text-right">Accès</TableHead>
+                <TableHead className="text-right"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -521,6 +558,21 @@ function AdminUsers() {
                         <span className="text-xs text-muted-foreground">Vous</span>
                       )}
                     </TableCell>
+
+                    {/* ── Suppression ── */}
+                    <TableCell className="text-right">
+                      {u.id !== currentUserId && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={(e) => { e.stopPropagation(); setPendingDeleteUser(u); }}
+                          title="Supprimer ce compte"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </TableCell>
                   </TableRow>
                 );
               })}
@@ -537,6 +589,39 @@ function AdminUsers() {
           onClose={() => setProfileUser(null)}
         />
       )}
+
+      {/* ── Dialog confirmation suppression ── */}
+      <Dialog open={!!pendingDeleteUser} onOpenChange={(o) => { if (!o) setPendingDeleteUser(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <Trash2 className="w-5 h-5" /> Supprimer ce compte ?
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 text-sm text-muted-foreground">
+            <p>Vous êtes sur le point de supprimer définitivement le compte de :</p>
+            <p className="font-semibold text-foreground">
+              {pendingDeleteUser?.full_name || pendingDeleteUser?.email}
+            </p>
+            <p className="rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-2 text-destructive text-xs">
+              Cette action est irréversible. Toutes les données liées à ce compte (dossier, documents, messages, candidatures) seront supprimées.
+            </p>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setPendingDeleteUser(null)}>
+              Annuler
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={deleteUser.isPending}
+              onClick={() => pendingDeleteUser && deleteUser.mutate(pendingDeleteUser.id)}
+            >
+              {deleteUser.isPending && <Loader2 className="mr-2 w-4 h-4 animate-spin" />}
+              Supprimer définitivement
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* ── Dialog affectation école ── */}
       <Dialog open={!!pendingEcole} onOpenChange={(o) => { if (!o) setPendingEcole(null); }}>
