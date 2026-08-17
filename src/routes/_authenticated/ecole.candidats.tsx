@@ -134,11 +134,13 @@ function EcoleCandidats() {
           .from("documents")
           .select("*")
           .eq("student_id", expandedStudentId!)
+          .eq("status", "valide")
           .order("uploaded_at", { ascending: false }),
         db
           .from("academic_records")
           .select("*")
           .eq("student_id", expandedStudentId!)
+          .eq("status", "valide")
           .order("year", { ascending: false }),
       ]);
       return {
