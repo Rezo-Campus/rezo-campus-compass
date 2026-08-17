@@ -18,6 +18,7 @@ type UserRow = {
   id: string;
   full_name: string | null;
   email: string | null;
+  created_at: string;
 };
 
 function SecretaireAttribution() {
@@ -29,8 +30,8 @@ function SecretaireAttribution() {
     queryFn: async () => {
       const { data, error } = await db
         .from("profiles")
-        .select("id, full_name, email")
-        .order("full_name");
+        .select("id, full_name, email, created_at")
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as UserRow[];
     },
@@ -150,6 +151,9 @@ function SecretaireAttribution() {
                       )}
                     </div>
                     <div className="mt-0.5 text-xs text-muted-foreground">{u.email}</div>
+                    <div className="mt-0.5 text-xs text-muted-foreground">
+                      Inscrit le {new Date(u.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                    </div>
                     <div className="mt-1 flex flex-wrap gap-1">
                       {roles.length === 0 ? (
                         <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700">
