@@ -112,7 +112,15 @@ function MessagesEtudiant() {
             </ul>
           )}
         </Panel>
-        <div>{peer && uid && <Thread me={uid} peer={peer} />}</div>
+        <div>
+          {peer && uid && (
+            <Thread
+              me={uid}
+              peer={peer}
+              peerName={staff.find((s) => s.id === peer)?.full_name || staff.find((s) => s.id === peer)?.email}
+            />
+          )}
+        </div>
       </div>
     </>
   );
@@ -177,7 +185,7 @@ async function sendMessageNotifications(senderId: string, recipientId: string) {
   }
 }
 
-export function Thread({ me, peer }: { me: string; peer: string }) {
+export function Thread({ me, peer, peerName }: { me: string; peer: string; peerName?: string }) {
   const qc = useQueryClient();
   const [body, setBody] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -273,7 +281,7 @@ export function Thread({ me, peer }: { me: string; peer: string }) {
   });
 
   return (
-    <Panel title="Conversation">
+    <Panel title={peerName ? `Conversation avec ${peerName}` : "Conversation"}>
       <div
         ref={scrollRef}
         className="mb-3 h-[420px] overflow-y-auto rounded-xl border border-border bg-muted/20 p-4"

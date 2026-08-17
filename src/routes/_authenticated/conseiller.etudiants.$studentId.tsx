@@ -377,7 +377,10 @@ export function ConseillerStudentDetail() {
             <span className="text-xs text-muted-foreground">{file?.progress ?? 0}%</span>
           </div>
         </div>
-        <Link to={`/${section}/messages` as "/conseiller/messages"}>
+        <Link
+          to={`/${section}/messages` as "/conseiller/messages"}
+          search={{ studentId }}
+        >
           <Button size="sm" variant="outline" className="gap-1.5">
             <MessageSquare className="size-3.5" /> Message
           </Button>

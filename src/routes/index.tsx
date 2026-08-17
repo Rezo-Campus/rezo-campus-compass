@@ -341,10 +341,31 @@ function Landing() {
       <main>
         {/* ── Hero ── */}
         <section className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#050e24] via-[#091b3e] to-[#040d1e]" />
-          <div className="absolute left-1/3 top-0 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/3 rounded-full bg-blue-600/25 blur-[130px]" />
-          <div className="absolute bottom-0 right-1/4 h-[450px] w-[450px] rounded-full bg-cyan-500/15 blur-[130px]" />
-          <div className="absolute left-0 top-1/2 h-[320px] w-[320px] rounded-full bg-indigo-700/20 blur-[100px]" />
+          {/* Vidéo YouTube en fond — démarre automatiquement sans son */}
+          <div className="absolute inset-0 overflow-hidden">
+            <iframe
+              src="https://www.youtube.com/embed/Zrz8LV0sQ-g?autoplay=1&mute=1&loop=1&playlist=Zrz8LV0sQ-g&start=20&controls=0&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3"
+              allow="autoplay; encrypted-media; fullscreen"
+              title="Rézo Campus"
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                width: "177.78vh",
+                height: "100%",
+                minHeight: "56.25vw",
+                minWidth: "100%",
+                transform: "translate(-50%, -50%)",
+                border: "none",
+                pointerEvents: "none",
+              }}
+            />
+          </div>
+          {/* Overlay sombre pour lisibilité du texte */}
+          <div className="absolute inset-0 bg-[#050e24]/75" />
+          <div className="absolute left-1/3 top-0 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/3 rounded-full bg-blue-600/20 blur-[130px]" />
+          <div className="absolute bottom-0 right-1/4 h-[450px] w-[450px] rounded-full bg-cyan-500/10 blur-[130px]" />
+          <div className="absolute left-0 top-1/2 h-[320px] w-[320px] rounded-full bg-indigo-700/15 blur-[100px]" />
 
           <div className="relative mx-auto max-w-6xl px-6 py-24 sm:py-36">
             <div className="flex flex-col items-start gap-12 lg:flex-row lg:items-center">

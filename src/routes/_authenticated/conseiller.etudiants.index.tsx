@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2, GraduationCap, AlertTriangle, MessageSquare } from "lucide-react";
+import { useState } from "react";
+import { Loader2, GraduationCap, AlertTriangle, MessageSquare, Search } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -41,6 +43,7 @@ export function MesEtudiants() {
   const uid = auth?.user?.id;
   const isAdmin = auth?.role === "admin";
   const qc = useQueryClient();
+  const [searchQ, setSearchQ] = useState("");
 
   const { data: rows = [], isLoading } = useQuery({
     enabled: !!uid,
@@ -55,7 +58,7 @@ export function MesEtudiants() {
       if (!ids.length) return [];
       const { data: profs } = await supabase
         .from("profiles")
-        .select("id, full_name, email, phone, photo_url")
+        .select("id, full_name, email, phone, photo_url, created_at")
         .in("id", ids);
       // Ignore les dossiers orphelins (profil supprimé sans cascade en base)
       return files
@@ -110,6 +113,16 @@ export function MesEtudiants() {
         />
 
         <Panel title={`${rows.length} dossier${rows.length > 1 ? "s" : ""}`}>
+          {/* Recherche */}
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+            <Input
+              placeholder="Rechercher un étudiant…"
+              value={searchQ}
+              onChange={(e) => setSearchQ(e.target.value)}
+              className="pl-9"
+            />
+          </div>
           {isLoading ? (
             <Loader2 className="mx-auto size-5 animate-spin text-primary" />
           ) : rows.length === 0 ? (
@@ -118,7 +131,16 @@ export function MesEtudiants() {
             </div>
           ) : (
             <ul className="space-y-3">
-              {rows.map((r) => {
+              {rows
+                .filter((r) => {
+                  if (!searchQ.trim()) return true;
+                  const q = searchQ.toLowerCase();
+                  return (
+                    r.profile?.full_name?.toLowerCase().includes(q) ||
+                    r.profile?.email?.toLowerCase().includes(q)
+                  );
+                })
+                .map((r) => {
                 const missing = getMissingFields(r);
                 const hasMissing = missing.length > 0;
                 return (
@@ -150,6 +172,11 @@ export function MesEtudiants() {
                           <Badge variant="secondary" className="capitalize text-[10px]">
                             {r.status.replace("_", " ")}
                           </Badge>
+                          {r.profile?.created_at && (
+                            <span className="text-[10px] text-muted-foreground">
+                              Inscrit le {new Date(r.profile.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}
+                            </span>
+                          )}
                           {hasMissing && (
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -190,7 +217,7 @@ export function MesEtudiants() {
                     </div>
 
                     <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-                      <Link to="/conseiller/messages">
+                      <Link to="/conseiller/messages" search={{ studentId: r.student_id }}>
                         <Button size="sm" variant="outline" className="gap-1.5 text-xs">
                           <MessageSquare className="size-3" />
                           Message

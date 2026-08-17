@@ -78,11 +78,11 @@ function ProfilePanel({
     setUploading(true);
     try {
       const ext = file.name.split(".").pop() || "jpg";
-      const path = `${user.id}.${ext}`;
+      const path = `avatars/${user.id}.${ext}`;
       const { error: upErr } = await supabase.storage
-        .from("avatars").upload(path, file, { upsert: true, contentType: file.type });
+        .from("student-documents").upload(path, file, { upsert: true, contentType: file.type });
       if (upErr) throw upErr;
-      const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
+      const { data: { publicUrl } } = supabase.storage.from("student-documents").getPublicUrl(path);
       await supabase.from("profiles").update({ photo_url: publicUrl }).eq("id", user.id);
       setPreviewUrl(publicUrl);
       toast.success("Photo mise à jour");

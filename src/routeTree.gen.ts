@@ -38,6 +38,7 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAadfIndexRouteImport } from './routes/_authenticated/aadf.index'
 import { Route as AuthenticatedSecretaireValidationsRouteImport } from './routes/_authenticated/secretaire.validations'
 import { Route as AuthenticatedSecretaireReunionsRouteImport } from './routes/_authenticated/secretaire.reunions'
+import { Route as AuthenticatedSecretaireRendezVousEtudiantsRouteImport } from './routes/_authenticated/secretaire.rendez-vous-etudiants'
 import { Route as AuthenticatedSecretaireRendezVousRouteImport } from './routes/_authenticated/secretaire.rendez-vous'
 import { Route as AuthenticatedSecretaireMessagesRouteImport } from './routes/_authenticated/secretaire.messages'
 import { Route as AuthenticatedSecretaireFacturationRouteImport } from './routes/_authenticated/secretaire.facturation'
@@ -105,6 +106,7 @@ import { Route as AuthenticatedAdminUtilisateursRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminReunionsRouteImport } from './routes/_authenticated/admin.reunions'
 import { Route as AuthenticatedAdminRendezVousClientsRouteImport } from './routes/_authenticated/admin.rendez-vous-clients'
 import { Route as AuthenticatedAdminRendezVousRouteImport } from './routes/_authenticated/admin.rendez-vous'
+import { Route as AuthenticatedAdminProfilRouteImport } from './routes/_authenticated/admin.profil'
 import { Route as AuthenticatedAdminMessagesRouteImport } from './routes/_authenticated/admin.messages'
 import { Route as AuthenticatedAdminFacturationRouteImport } from './routes/_authenticated/admin.facturation'
 import { Route as AuthenticatedAdminEcolesRouteImport } from './routes/_authenticated/admin.ecoles'
@@ -288,6 +290,12 @@ const AuthenticatedSecretaireReunionsRoute =
   AuthenticatedSecretaireReunionsRouteImport.update({
     id: '/reunions',
     path: '/reunions',
+    getParentRoute: () => AuthenticatedSecretaireRoute,
+  } as any)
+const AuthenticatedSecretaireRendezVousEtudiantsRoute =
+  AuthenticatedSecretaireRendezVousEtudiantsRouteImport.update({
+    id: '/rendez-vous-etudiants',
+    path: '/rendez-vous-etudiants',
     getParentRoute: () => AuthenticatedSecretaireRoute,
   } as any)
 const AuthenticatedSecretaireRendezVousRoute =
@@ -689,6 +697,12 @@ const AuthenticatedAdminRendezVousRoute =
     path: '/rendez-vous',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminProfilRoute =
+  AuthenticatedAdminProfilRouteImport.update({
+    id: '/profil',
+    path: '/profil',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminMessagesRoute =
   AuthenticatedAdminMessagesRouteImport.update({
     id: '/messages',
@@ -901,6 +915,7 @@ export interface FileRoutesByFullPath {
   '/admin/ecoles': typeof AuthenticatedAdminEcolesRoute
   '/admin/facturation': typeof AuthenticatedAdminFacturationRouteWithChildren
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
+  '/admin/profil': typeof AuthenticatedAdminProfilRoute
   '/admin/rendez-vous': typeof AuthenticatedAdminRendezVousRoute
   '/admin/rendez-vous-clients': typeof AuthenticatedAdminRendezVousClientsRoute
   '/admin/reunions': typeof AuthenticatedAdminReunionsRoute
@@ -968,6 +983,7 @@ export interface FileRoutesByFullPath {
   '/secretaire/facturation': typeof AuthenticatedSecretaireFacturationRouteWithChildren
   '/secretaire/messages': typeof AuthenticatedSecretaireMessagesRoute
   '/secretaire/rendez-vous': typeof AuthenticatedSecretaireRendezVousRoute
+  '/secretaire/rendez-vous-etudiants': typeof AuthenticatedSecretaireRendezVousEtudiantsRoute
   '/secretaire/reunions': typeof AuthenticatedSecretaireReunionsRoute
   '/secretaire/validations': typeof AuthenticatedSecretaireValidationsRoute
   '/aadf/': typeof AuthenticatedAadfIndexRoute
@@ -1018,6 +1034,7 @@ export interface FileRoutesByTo {
   '/admin/dossiers': typeof AuthenticatedAdminDossiersRoute
   '/admin/ecoles': typeof AuthenticatedAdminEcolesRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
+  '/admin/profil': typeof AuthenticatedAdminProfilRoute
   '/admin/rendez-vous': typeof AuthenticatedAdminRendezVousRoute
   '/admin/rendez-vous-clients': typeof AuthenticatedAdminRendezVousClientsRoute
   '/admin/reunions': typeof AuthenticatedAdminReunionsRoute
@@ -1077,6 +1094,7 @@ export interface FileRoutesByTo {
   '/secretaire/courriers': typeof AuthenticatedSecretaireCourriersRoute
   '/secretaire/messages': typeof AuthenticatedSecretaireMessagesRoute
   '/secretaire/rendez-vous': typeof AuthenticatedSecretaireRendezVousRoute
+  '/secretaire/rendez-vous-etudiants': typeof AuthenticatedSecretaireRendezVousEtudiantsRoute
   '/secretaire/reunions': typeof AuthenticatedSecretaireReunionsRoute
   '/secretaire/validations': typeof AuthenticatedSecretaireValidationsRoute
   '/aadf': typeof AuthenticatedAadfIndexRoute
@@ -1140,6 +1158,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/ecoles': typeof AuthenticatedAdminEcolesRoute
   '/_authenticated/admin/facturation': typeof AuthenticatedAdminFacturationRouteWithChildren
   '/_authenticated/admin/messages': typeof AuthenticatedAdminMessagesRoute
+  '/_authenticated/admin/profil': typeof AuthenticatedAdminProfilRoute
   '/_authenticated/admin/rendez-vous': typeof AuthenticatedAdminRendezVousRoute
   '/_authenticated/admin/rendez-vous-clients': typeof AuthenticatedAdminRendezVousClientsRoute
   '/_authenticated/admin/reunions': typeof AuthenticatedAdminReunionsRoute
@@ -1207,6 +1226,7 @@ export interface FileRoutesById {
   '/_authenticated/secretaire/facturation': typeof AuthenticatedSecretaireFacturationRouteWithChildren
   '/_authenticated/secretaire/messages': typeof AuthenticatedSecretaireMessagesRoute
   '/_authenticated/secretaire/rendez-vous': typeof AuthenticatedSecretaireRendezVousRoute
+  '/_authenticated/secretaire/rendez-vous-etudiants': typeof AuthenticatedSecretaireRendezVousEtudiantsRoute
   '/_authenticated/secretaire/reunions': typeof AuthenticatedSecretaireReunionsRoute
   '/_authenticated/secretaire/validations': typeof AuthenticatedSecretaireValidationsRoute
   '/_authenticated/aadf/': typeof AuthenticatedAadfIndexRoute
@@ -1270,6 +1290,7 @@ export interface FileRouteTypes {
     | '/admin/ecoles'
     | '/admin/facturation'
     | '/admin/messages'
+    | '/admin/profil'
     | '/admin/rendez-vous'
     | '/admin/rendez-vous-clients'
     | '/admin/reunions'
@@ -1337,6 +1358,7 @@ export interface FileRouteTypes {
     | '/secretaire/facturation'
     | '/secretaire/messages'
     | '/secretaire/rendez-vous'
+    | '/secretaire/rendez-vous-etudiants'
     | '/secretaire/reunions'
     | '/secretaire/validations'
     | '/aadf/'
@@ -1387,6 +1409,7 @@ export interface FileRouteTypes {
     | '/admin/dossiers'
     | '/admin/ecoles'
     | '/admin/messages'
+    | '/admin/profil'
     | '/admin/rendez-vous'
     | '/admin/rendez-vous-clients'
     | '/admin/reunions'
@@ -1446,6 +1469,7 @@ export interface FileRouteTypes {
     | '/secretaire/courriers'
     | '/secretaire/messages'
     | '/secretaire/rendez-vous'
+    | '/secretaire/rendez-vous-etudiants'
     | '/secretaire/reunions'
     | '/secretaire/validations'
     | '/aadf'
@@ -1508,6 +1532,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/ecoles'
     | '/_authenticated/admin/facturation'
     | '/_authenticated/admin/messages'
+    | '/_authenticated/admin/profil'
     | '/_authenticated/admin/rendez-vous'
     | '/_authenticated/admin/rendez-vous-clients'
     | '/_authenticated/admin/reunions'
@@ -1575,6 +1600,7 @@ export interface FileRouteTypes {
     | '/_authenticated/secretaire/facturation'
     | '/_authenticated/secretaire/messages'
     | '/_authenticated/secretaire/rendez-vous'
+    | '/_authenticated/secretaire/rendez-vous-etudiants'
     | '/_authenticated/secretaire/reunions'
     | '/_authenticated/secretaire/validations'
     | '/_authenticated/aadf/'
@@ -1822,6 +1848,13 @@ declare module '@tanstack/react-router' {
       path: '/reunions'
       fullPath: '/secretaire/reunions'
       preLoaderRoute: typeof AuthenticatedSecretaireReunionsRouteImport
+      parentRoute: typeof AuthenticatedSecretaireRoute
+    }
+    '/_authenticated/secretaire/rendez-vous-etudiants': {
+      id: '/_authenticated/secretaire/rendez-vous-etudiants'
+      path: '/rendez-vous-etudiants'
+      fullPath: '/secretaire/rendez-vous-etudiants'
+      preLoaderRoute: typeof AuthenticatedSecretaireRendezVousEtudiantsRouteImport
       parentRoute: typeof AuthenticatedSecretaireRoute
     }
     '/_authenticated/secretaire/rendez-vous': {
@@ -2293,6 +2326,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRendezVousRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/profil': {
+      id: '/_authenticated/admin/profil'
+      path: '/profil'
+      fullPath: '/admin/profil'
+      preLoaderRoute: typeof AuthenticatedAdminProfilRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/messages': {
       id: '/_authenticated/admin/messages'
       path: '/messages'
@@ -2559,6 +2599,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminEcolesRoute: typeof AuthenticatedAdminEcolesRoute
   AuthenticatedAdminFacturationRoute: typeof AuthenticatedAdminFacturationRouteWithChildren
   AuthenticatedAdminMessagesRoute: typeof AuthenticatedAdminMessagesRoute
+  AuthenticatedAdminProfilRoute: typeof AuthenticatedAdminProfilRoute
   AuthenticatedAdminRendezVousRoute: typeof AuthenticatedAdminRendezVousRoute
   AuthenticatedAdminRendezVousClientsRoute: typeof AuthenticatedAdminRendezVousClientsRoute
   AuthenticatedAdminReunionsRoute: typeof AuthenticatedAdminReunionsRoute
@@ -2573,6 +2614,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminFacturationRoute:
     AuthenticatedAdminFacturationRouteWithChildren,
   AuthenticatedAdminMessagesRoute: AuthenticatedAdminMessagesRoute,
+  AuthenticatedAdminProfilRoute: AuthenticatedAdminProfilRoute,
   AuthenticatedAdminRendezVousRoute: AuthenticatedAdminRendezVousRoute,
   AuthenticatedAdminRendezVousClientsRoute:
     AuthenticatedAdminRendezVousClientsRoute,
@@ -2966,6 +3008,7 @@ interface AuthenticatedSecretaireRouteChildren {
   AuthenticatedSecretaireFacturationRoute: typeof AuthenticatedSecretaireFacturationRouteWithChildren
   AuthenticatedSecretaireMessagesRoute: typeof AuthenticatedSecretaireMessagesRoute
   AuthenticatedSecretaireRendezVousRoute: typeof AuthenticatedSecretaireRendezVousRoute
+  AuthenticatedSecretaireRendezVousEtudiantsRoute: typeof AuthenticatedSecretaireRendezVousEtudiantsRoute
   AuthenticatedSecretaireReunionsRoute: typeof AuthenticatedSecretaireReunionsRoute
   AuthenticatedSecretaireValidationsRoute: typeof AuthenticatedSecretaireValidationsRoute
   AuthenticatedSecretaireIndexRoute: typeof AuthenticatedSecretaireIndexRoute
@@ -2986,6 +3029,8 @@ const AuthenticatedSecretaireRouteChildren: AuthenticatedSecretaireRouteChildren
     AuthenticatedSecretaireMessagesRoute: AuthenticatedSecretaireMessagesRoute,
     AuthenticatedSecretaireRendezVousRoute:
       AuthenticatedSecretaireRendezVousRoute,
+    AuthenticatedSecretaireRendezVousEtudiantsRoute:
+      AuthenticatedSecretaireRendezVousEtudiantsRoute,
     AuthenticatedSecretaireReunionsRoute: AuthenticatedSecretaireReunionsRoute,
     AuthenticatedSecretaireValidationsRoute:
       AuthenticatedSecretaireValidationsRoute,

@@ -1,12 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Thread } from "./etudiant.messages";
 
 export const Route = createFileRoute("/_authenticated/conseiller/messages")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    studentId: typeof s.studentId === "string" ? s.studentId : undefined,
+  }),
   component: MessagesConseiller,
 });
 
@@ -15,11 +19,15 @@ export function MessagesConseiller() {
   const uid = auth?.user?.id;
   const isAdmin = auth?.role === "admin";
 
+  /* Lire l'éventuel studentId passé en URL (?studentId=xxx) */
+  const search = useRouterState({ select: (s) => s.location.search });
+  const initStudentId: string | undefined =
+    new URLSearchParams(search).get("studentId") ?? undefined;
+
   const { data: contacts = [] } = useQuery({
     enabled: !!uid,
     queryKey: ["conseiller-contacts", uid, isAdmin],
     queryFn: async () => {
-      // Tous les étudiants + tous ceux ayant écrit ou reçu un message
       const ids = new Set<string>();
 
       if (isAdmin) {
@@ -39,6 +47,9 @@ export function MessagesConseiller() {
         if (m.recipient_id !== uid) ids.add(m.recipient_id);
       });
 
+      /* S'assurer que l'étudiant ciblé est dans la liste même sans historique */
+      if (initStudentId) ids.add(initStudentId);
+
       if (!ids.size) return [];
       const { data: profs } = await supabase
         .from("profiles")
@@ -48,10 +59,13 @@ export function MessagesConseiller() {
     },
   });
 
-  const [peer, setPeer] = useState<string | null>(null);
+  /* Peer sélectionné — initialisé avec l'étudiant ciblé si présent */
+  const [peer, setPeer] = useState<string | null>(initStudentId ?? null);
+
   useEffect(() => {
-    if (!peer && contacts.length) setPeer(contacts[0].id);
-  }, [contacts, peer]);
+    /* Auto-sélection du premier contact seulement si aucun étudiant cible */
+    if (!peer && !initStudentId && contacts.length) setPeer(contacts[0].id);
+  }, [contacts, peer, initStudentId]);
 
   return (
     <>
@@ -67,7 +81,7 @@ export function MessagesConseiller() {
                   <button
                     onClick={() => setPeer(c.id)}
                     className={`w-full rounded-lg px-3 py-2 text-left text-sm transition ${
-                      peer === c.id ? "bg-primary/10 text-primary" : "hover:bg-muted"
+                      peer === c.id ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted"
                     }`}
                   >
                     <div className="font-medium">{c.full_name || c.email}</div>
@@ -78,7 +92,15 @@ export function MessagesConseiller() {
             </ul>
           )}
         </Panel>
-        <div>{peer && uid && <Thread me={uid} peer={peer} />}</div>
+        <div>
+          {peer && uid && (
+            <Thread
+              me={uid}
+              peer={peer}
+              peerName={contacts.find((c) => c.id === peer)?.full_name || contacts.find((c) => c.id === peer)?.email}
+            />
+          )}
+        </div>
       </div>
     </>
   );
