@@ -1,0 +1,1 @@
+import{j as t}from"./index-DTYqTSX8.js";import{A as e}from"./AgendaView-DAXn6Oe0.js";import"./bell-DXvu-4eo.js";const m=()=>t.jsx(e,{department:"all",canEdit:!0,title:"Tâches inter-départements"});export{m as component};
