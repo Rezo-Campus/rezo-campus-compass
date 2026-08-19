@@ -7,6 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BrandMark } from "@/components/BrandMark";
+import emailjs from "@emailjs/browser";
+
+const EMAILJS_SERVICE_ID = "service_717iiir";   // vérifiez dans votre dashboard EmailJS
+const EMAILJS_TEMPLATE_ID = "template_rqa0hqc";
+const EMAILJS_PUBLIC_KEY = "xgYkC3rP4oY01KUy-";
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Connexion — Rézo Campus" }] }),
@@ -87,6 +92,18 @@ function LoginPage() {
         toast.error("Inscription impossible", { description: error.message });
         return;
       }
+
+      /* Envoi de l'e-mail de bienvenue automatique via EmailJS */
+      emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        {
+          name: fullName || email,
+          email: email,
+        },
+        EMAILJS_PUBLIC_KEY,
+      ).catch(() => { /* ne pas bloquer si l'email échoue */ });
+
       if (signupData.session) {
         toast.success("Compte créé !", {
           description: "Votre accès sera activé par un administrateur.",

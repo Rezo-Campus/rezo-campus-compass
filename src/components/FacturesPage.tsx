@@ -62,7 +62,8 @@ export function calcHT(items: LineItem[]) {
 export function buildFacturePrintHTML(f: Facture): string {
   const items = f.items || [];
   const totalHT = calcHT(items);
-  const tva = totalHT * ((Number(f.tva_rate) || 20) / 100);
+  const tvaRate = f.tva_rate != null ? Number(f.tva_rate) : 0;
+  const tva = totalHT * (tvaRate / 100);
   const totalTTC = totalHT + tva;
   const logoUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/1.png`;
 
@@ -121,18 +122,37 @@ export function buildFacturePrintHTML(f: Facture): string {
 <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
   <table style="width:260px;border-collapse:collapse;">
     <tr><td style="padding:4px 8px;text-align:right;font-size:9pt;background:#f5f5f5;border:1px solid #ddd;">Total HT</td><td style="padding:4px 8px;text-align:right;font-size:9pt;border:1px solid #ddd;width:110px;">${fmtNum(totalHT)} F CFA</td></tr>
-    <tr><td style="padding:4px 8px;text-align:right;font-size:9pt;background:#f5f5f5;border:1px solid #ddd;"><span style="font-style:italic;font-size:8pt;color:#666;">Taux TVA -> </span>${f.tva_rate || 20}% &nbsp; TVA</td><td style="padding:4px 8px;text-align:right;font-size:9pt;border:1px solid #ddd;">${fmtNum(tva)} F CFA</td></tr>
+    <tr><td style="padding:4px 8px;text-align:right;font-size:9pt;background:#f5f5f5;border:1px solid #ddd;"><span style="font-style:italic;font-size:8pt;color:#666;">Taux TVA -> </span>${tvaRate}% &nbsp; TVA</td><td style="padding:4px 8px;text-align:right;font-size:9pt;border:1px solid #ddd;">${fmtNum(tva)} F CFA</td></tr>
     <tr style="background:${DK};color:white;font-weight:bold;"><td style="padding:5px 8px;text-align:right;font-size:10pt;border:1px solid ${DK};">TOTAL TTC</td><td style="padding:5px 8px;text-align:right;font-size:10pt;border:1px solid ${DK};">${fmtNum(totalTTC)} F CFA</td></tr>
   </table>
 </div>
 <div style="margin-bottom:12px;"><div style="font-weight:bold;font-size:9pt;margin-bottom:3px;">Arrêtée la présente facture à la somme de :</div><div style="border:1px solid #ddd;padding:5px 8px;background:#fffde7;font-size:9pt;min-height:30px;">${f.amount_words || "(montant en toutes lettres) francs CFA, toutes taxes comprises."}</div></div>
-<div style="border:1px solid #ddd;margin-bottom:12px;">
+<div style="border:1px solid #ddd;margin-bottom:8px;">
   <div style="background:#d4edda;padding:4px 8px;font-weight:bold;font-size:9pt;color:${DK};border-bottom:1px solid #ddd;">MODALITÉS DE RÈGLEMENT</div>
   <table style="width:100%;border-collapse:collapse;">
-    <tr><td style="padding:4px 8px;font-weight:bold;font-size:9pt;width:160px;">Mode de règlement</td><td style="padding:4px 8px;font-size:9pt;">${f.mode_reglement || "Virement bancaire / Mobile Money"}</td></tr>
-    <tr><td style="padding:4px 8px;font-weight:bold;font-size:9pt;">Banque</td><td style="padding:4px 8px;font-size:9pt;">${f.banque || "À compléter"}</td></tr>
-    <tr><td style="padding:4px 8px;font-weight:bold;font-size:9pt;">RIB / IBAN</td><td style="padding:4px 8px;font-size:9pt;">${f.rib || "À compléter"}</td></tr>
+    <tr><td style="padding:4px 8px;font-weight:bold;font-size:9pt;width:160px;">Mode de règlement</td><td style="padding:4px 8px;font-size:9pt;">${f.mode_reglement || "Virement bancaire"}</td></tr>
     <tr><td style="padding:4px 8px;font-weight:bold;font-size:9pt;">Délai de paiement</td><td style="padding:4px 8px;font-size:9pt;">${f.delai || "30 jours date de facture"}</td></tr>
+  </table>
+</div>
+<div style="border:1px solid #ddd;margin-bottom:12px;">
+  <div style="background:#d4edda;padding:4px 8px;font-weight:bold;font-size:9pt;color:${DK};border-bottom:1px solid #ddd;">RIB BANCAIRE — RÉZO CAMPUS SARL</div>
+  <table style="width:100%;border-collapse:collapse;">
+    <tr>
+      <td style="padding:4px 8px;font-weight:bold;font-size:8.5pt;width:160px;">Banque</td>
+      <td style="padding:4px 8px;font-size:8.5pt;">Attijari Wafa Bank &nbsp;&nbsp;|&nbsp;&nbsp; Code banque : <strong>007</strong> &nbsp;&nbsp;|&nbsp;&nbsp; Ville : <strong>780</strong></td>
+    </tr>
+    <tr>
+      <td style="padding:4px 8px;font-weight:bold;font-size:8.5pt;">N° de compte</td>
+      <td style="padding:4px 8px;font-size:8.5pt;font-family:monospace;">0001269000005563 &nbsp;&nbsp;&nbsp; Clé RIB : <strong>18</strong></td>
+    </tr>
+    <tr>
+      <td style="padding:4px 8px;font-weight:bold;font-size:8.5pt;">BIC / SWIFT</td>
+      <td style="padding:4px 8px;font-size:8.5pt;font-family:monospace;"><strong>BCMAMAMC</strong></td>
+    </tr>
+    <tr>
+      <td style="padding:4px 8px;font-weight:bold;font-size:8.5pt;">IBAN</td>
+      <td style="padding:4px 8px;font-size:8.5pt;font-family:monospace;letter-spacing:0.5px;"><strong>MA64 007 780 0001269000005563 18</strong></td>
+    </tr>
   </table>
 </div>
 <div style="font-size:8pt;color:#555;text-align:center;margin-bottom:10px;">Paiement : 50 % à la commande, solde à la livraison. Moyens de paiement : MTN Mobile Money, Airtel Money, virement bancaire, espèces.</div>
@@ -169,7 +189,7 @@ function makeForm(count: number, existing?: Facture): FormState {
       clientCity: existing.client_city || "Casablanca - Maroc",
       clientIce: existing.client_ice || "",
       items: (existing.items || []).length > 0 ? existing.items : [{ id: uid(), designation: "", qte: 1, pu: 0 }],
-      tvaRate: Number(existing.tva_rate) || 20,
+      tvaRate: existing.tva_rate != null ? Number(existing.tva_rate) : 0,
       amountWords: existing.amount_words || "",
       modeReglement: existing.mode_reglement || "Virement bancaire",
       banque: existing.banque || "",
@@ -183,8 +203,8 @@ function makeForm(count: number, existing?: Facture): FormState {
     date: d, echeance: addDays(d, 30), status: "brouillon",
     clientName: "", clientAddress: "", clientCity: "Casablanca - Maroc", clientIce: "",
     items: [{ id: uid(), designation: "", qte: 1, pu: 0 }],
-    tvaRate: 20, amountWords: "",
-    modeReglement: "Virement bancaire", banque: "", rib: "", delai: "30 jours date de facture",
+    tvaRate: 0, amountWords: "",
+    modeReglement: "Virement bancaire", banque: "Attijari Wafa Bank", rib: "MA64 007 780 0001269000005563 18", delai: "30 jours date de facture",
   };
 }
 
@@ -305,7 +325,7 @@ export function FacturesPage() {
           <ul className="space-y-2">
             {factures.map((f) => {
               const ht = calcHT(f.items || []);
-              const tvaAmt = ht * ((Number(f.tva_rate) || 20) / 100);
+              const tvaAmt = ht * ((f.tva_rate != null ? Number(f.tva_rate) : 0) / 100);
               const ttc = ht + tvaAmt;
               return (
                 <li key={f.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-border p-4">

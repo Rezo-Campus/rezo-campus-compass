@@ -89,13 +89,23 @@ function EcoleAttestation() {
   const deleteDoc = useMutation({
     mutationFn: async ({ id, path }: { id: string; path: string }) => {
       await supabase.storage.from("student-documents").remove([path]);
-      const { error } = await supabase.from("official_documents").delete().eq("id", id);
+      const { error, count } = await supabase
+        .from("official_documents")
+        .delete({ count: "exact" })
+        .eq("id", id);
       if (error) throw error;
+      if ((count ?? 0) === 0) throw new Error("Suppression bloquée — permission insuffisante");
+      return id;
     },
-    onSuccess: () => {
+    onSuccess: (deletedId) => {
+      /* Retirer immédiatement de la liste sans attendre le refetch */
+      qc.setQueryData(
+        ["official-docs-ecole", applicationId],
+        (old: { id: string }[] | undefined) => (old ?? []).filter((d) => d.id !== deletedId)
+      );
       toast.success("Document supprimé");
-      qc.invalidateQueries({ queryKey: ["official-docs-ecole", applicationId] });
     },
+    onError: (e: Error) => toast.error("Erreur lors de la suppression", { description: e.message }),
   });
 
   async function uploadOfficialDoc(file: File) {
