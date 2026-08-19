@@ -58,7 +58,7 @@ export function MesEtudiants() {
       if (!ids.length) return [];
       const { data: profs } = await supabase
         .from("profiles")
-        .select("id, full_name, email, phone, photo_url, created_at")
+        .select("id, full_name, email, phone, photo_url, created_at, dossier_number")
         .in("id", ids);
       // Ignore les dossiers orphelins (profil supprimé sans cascade en base)
       return files
@@ -117,7 +117,7 @@ export function MesEtudiants() {
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher un étudiant…"
+              placeholder="Rechercher par nom, email ou N° dossier…"
               value={searchQ}
               onChange={(e) => setSearchQ(e.target.value)}
               className="pl-9"
@@ -137,7 +137,8 @@ export function MesEtudiants() {
                   const q = searchQ.toLowerCase();
                   return (
                     r.profile?.full_name?.toLowerCase().includes(q) ||
-                    r.profile?.email?.toLowerCase().includes(q)
+                    r.profile?.email?.toLowerCase().includes(q) ||
+                    (r.profile as any)?.dossier_number?.toLowerCase().includes(q)
                   );
                 })
                 .map((r) => {
@@ -169,6 +170,11 @@ export function MesEtudiants() {
                           <span className={`font-medium ${hasMissing ? "text-red-700" : ""}`}>
                             {r.profile?.full_name || r.profile?.email}
                           </span>
+                          {(r.profile as any)?.dossier_number && (
+                            <span className="font-mono text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded border border-primary/20">
+                              {(r.profile as any).dossier_number}
+                            </span>
+                          )}
                           <Badge variant="secondary" className="capitalize text-[10px]">
                             {r.status.replace("_", " ")}
                           </Badge>

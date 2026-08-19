@@ -97,7 +97,7 @@ export function ConseillerStudentDetail() {
       const [profileRes, fileRes, docsRes, appsRes, recordsRes] = await Promise.all([
         db
           .from("profiles")
-          .select("id, full_name, email, phone, photo_url, dossier_submitted_at, dossier_can_edit")
+          .select("id, full_name, email, phone, photo_url, dossier_submitted_at, dossier_can_edit, dossier_number, created_at")
           .eq("id", studentId)
           .single(),
         supabase
@@ -339,7 +339,11 @@ export function ConseillerStudentDetail() {
       <PageHeader
         eyebrow="Dossier étudiant"
         title={profile?.full_name || profile?.email || "Étudiant"}
-        description="Vue complète du profil et de l'avancement du dossier."
+        description={
+          (profile as any)?.dossier_number
+            ? `N° dossier : ${(profile as any).dossier_number} — Vue complète du profil et de l'avancement du dossier.`
+            : "Vue complète du profil et de l'avancement du dossier."
+        }
       />
 
       {/* En-tête profil */}
@@ -356,7 +360,14 @@ export function ConseillerStudentDetail() {
           </div>
         )}
         <div className="flex-1 min-w-0">
-          <div className="text-lg font-semibold">{profile?.full_name || "—"}</div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-lg font-semibold">{profile?.full_name || "—"}</span>
+            {(profile as any)?.dossier_number && (
+              <span className="font-mono text-xs font-bold bg-primary text-primary-foreground px-2 py-0.5 rounded">
+                {(profile as any).dossier_number}
+              </span>
+            )}
+          </div>
           <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm text-muted-foreground">
             {profile?.email && (
               <span className="flex items-center gap-1"><Mail className="size-3.5" /> {profile.email}</span>

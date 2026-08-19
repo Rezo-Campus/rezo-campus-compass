@@ -9,7 +9,7 @@ export interface AuthSession {
   user: { id: string; email: string | null } | null;
   role: AppRole | null;
   roles: AppRole[];
-  profile: { full_name: string | null; email: string; blocked_at: string | null; school_id: string | null; photo_url: string | null } | null;
+  profile: { full_name: string | null; email: string; blocked_at: string | null; school_id: string | null; photo_url: string | null; dossier_number?: string | null; created_at?: string | null } | null;
 }
 
 export function useAuth() {
@@ -24,14 +24,15 @@ export function useAuth() {
       const user = session?.user ?? null;
       if (!user) return { user: null, role: null, roles: [], profile: null };
 
+      const db = supabase as any;
       const [{ data: roleRows }, { data: profile }] = await Promise.all([
         supabase
           .from("user_roles")
           .select("role")
           .eq("user_id", user.id),
-        supabase
+        db
           .from("profiles")
-          .select("full_name, email, blocked_at, school_id, photo_url")
+          .select("full_name, email, blocked_at, school_id, photo_url, dossier_number, created_at")
           .eq("id", user.id)
           .maybeSingle(),
       ]);

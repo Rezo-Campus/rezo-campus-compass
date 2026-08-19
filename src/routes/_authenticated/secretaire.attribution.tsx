@@ -19,6 +19,7 @@ type UserRow = {
   full_name: string | null;
   email: string | null;
   created_at: string;
+  dossier_number?: string | null;
 };
 
 function SecretaireAttribution() {
@@ -30,7 +31,7 @@ function SecretaireAttribution() {
     queryFn: async () => {
       const { data, error } = await db
         .from("profiles")
-        .select("id, full_name, email, created_at")
+        .select("id, full_name, email, created_at, dossier_number")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as UserRow[];
@@ -81,7 +82,7 @@ function SecretaireAttribution() {
 
   const q = search.toLowerCase();
   const filtered = users.filter((u) => {
-    if (q && !u.full_name?.toLowerCase().includes(q) && !u.email?.toLowerCase().includes(q)) return false;
+    if (q && !u.full_name?.toLowerCase().includes(q) && !u.email?.toLowerCase().includes(q) && !(u.dossier_number ?? "").toLowerCase().includes(q)) return false;
     const roles = existingRoles.filter((r) => r.user_id === u.id).map((r) => r.role);
     return !roles.some((r) => STAFF_ROLES.includes(r));
   });
@@ -113,7 +114,7 @@ function SecretaireAttribution() {
         <Input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Rechercher par nom ou email..."
+          placeholder="Rechercher par nom, email ou N° dossier…"
           className="max-w-sm"
         />
       </div>
@@ -145,9 +146,16 @@ function SecretaireAttribution() {
                     {initials}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium">
-                      {u.full_name || (
-                        <span className="italic text-muted-foreground">Nom non renseigné</span>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-sm font-medium">
+                        {u.full_name || (
+                          <span className="italic text-muted-foreground">Nom non renseigné</span>
+                        )}
+                      </span>
+                      {u.dossier_number && (
+                        <span className="font-mono text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded border border-primary/20">
+                          {u.dossier_number}
+                        </span>
                       )}
                     </div>
                     <div className="mt-0.5 text-xs text-muted-foreground">{u.email}</div>

@@ -95,7 +95,11 @@ function EtudiantDashboard() {
       <PageHeader
         eyebrow="Espace étudiant"
         title={`Bonjour ${firstName} 👋`}
-        description="Voici un aperçu de l'avancement de votre dossier d'admission."
+        description={
+          auth?.profile?.dossier_number
+            ? `N° dossier : ${auth.profile.dossier_number} — Voici un aperçu de l'avancement de votre dossier d'admission.`
+            : "Voici un aperçu de l'avancement de votre dossier d'admission."
+        }
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

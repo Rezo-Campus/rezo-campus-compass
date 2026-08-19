@@ -44,7 +44,7 @@ function EcoleAttestation() {
       if (error) throw error;
 
       const [profileRes, schoolLogoRes] = await Promise.all([
-        supabase.from("profiles").select("full_name, email, phone, photo_url").eq("id", app.student_id).single(),
+        supabase.from("profiles").select("full_name, email, phone, photo_url, dossier_number").eq("id", app.student_id).single(),
         app.school_id
           ? supabase.from("schools").select("logo_url, website, city, country").eq("id", app.school_id).maybeSingle()
           : Promise.resolve({ data: null }),
@@ -381,7 +381,14 @@ function EcoleAttestation() {
               <tbody>
                 <tr>
                   <td style={{ paddingBottom: 6, color: "#6b7280", width: "38%" }}>Nom complet</td>
-                  <td style={{ paddingBottom: 6, fontWeight: 600 }}>{profile?.full_name ?? "—"}</td>
+                  <td style={{ paddingBottom: 6, fontWeight: 600 }}>
+                    {profile?.full_name ?? "—"}
+                    {(profile as any)?.dossier_number && (
+                      <span style={{ marginLeft: 8, fontFamily: "monospace", fontSize: 11, fontWeight: 700, background: "#0e6b6f", color: "#fff", padding: "2px 6px", borderRadius: 4 }}>
+                        {(profile as any).dossier_number}
+                      </span>
+                    )}
+                  </td>
                 </tr>
                 <tr>
                   <td style={{ paddingBottom: 6, color: "#6b7280" }}>Formation souhaitée</td>

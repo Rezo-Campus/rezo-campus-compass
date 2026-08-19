@@ -101,7 +101,7 @@ function LoginPage() {
           name: fullName || email,
           email: email,
         },
-        EMAILJS_PUBLIC_KEY,
+        { publicKey: EMAILJS_PUBLIC_KEY },
       ).catch(() => { /* ne pas bloquer si l'email échoue */ });
 
       if (signupData.session) {

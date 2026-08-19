@@ -297,8 +297,22 @@ export function AppShell({ nav, children }: { nav: NavItem[]; children: ReactNod
                 {auth?.profile?.full_name || auth?.user?.email}
               </div>
               <div className="mt-0.5 truncate text-[10px] text-white/45">
-                {auth?.user?.email}
+                {role === "etudiant" ? roleLabel : auth?.user?.email}
               </div>
+              {role === "etudiant" && (
+                <div className="mt-1.5 flex flex-col gap-0.5">
+                  {auth?.profile?.dossier_number && (
+                    <span className="font-mono text-[10px] font-bold" style={{ color: C.dot }}>
+                      {auth.profile.dossier_number}
+                    </span>
+                  )}
+                  {auth?.profile?.created_at && (
+                    <span className="text-[10px] text-white/40">
+                      Inscrit le {new Date(auth.profile.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
           <button
@@ -344,23 +358,33 @@ export function AppShell({ nav, children }: { nav: NavItem[]; children: ReactNod
             <QuickActionsMenu role={role} C={C} />
             <NotificationsBell />
 
-            <div className="hidden sm:flex items-center gap-2.5 rounded-xl border border-border bg-muted/30 px-3 py-1.5">
+            <div className="hidden sm:flex items-center gap-3 rounded-xl border border-border bg-muted/30 px-4 py-2">
               <div className="text-right leading-none">
-                <div className="text-[13px] font-semibold text-foreground">
+                <div className="text-[14px] font-semibold text-foreground">
                   {auth?.profile?.full_name || auth?.user?.email}
                 </div>
-                <div className="mt-0.5 text-[11px] text-muted-foreground">{roleLabel}</div>
+                <div className="mt-0.5 text-[12px] text-muted-foreground">{roleLabel}</div>
+                {role === "etudiant" && auth?.profile?.dossier_number && (
+                  <div className="mt-1 font-mono text-[11px] font-bold" style={{ color: C.accent }}>
+                    {auth.profile.dossier_number}
+                  </div>
+                )}
+                {role === "etudiant" && auth?.profile?.created_at && (
+                  <div className="mt-0.5 text-[11px] text-muted-foreground/70">
+                    Inscrit le {new Date(auth.profile.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}
+                  </div>
+                )}
               </div>
               {auth?.profile?.photo_url ? (
                 <img
                   src={auth.profile.photo_url}
                   alt={auth.profile.full_name ?? "Profil"}
-                  className="size-8 rounded-full object-cover shrink-0"
+                  className="size-10 rounded-full object-cover shrink-0"
                   style={{ boxShadow: `0 0 0 2px ${C.accent}60` }}
                 />
               ) : (
                 <div
-                  className="grid size-8 place-items-center rounded-full text-[12px] font-bold text-white shrink-0"
+                  className="grid size-10 place-items-center rounded-full text-[13px] font-bold text-white shrink-0"
                   style={{ background: `linear-gradient(135deg, ${C.gradFrom}, ${C.accent})` }}
                 >
                   {initials}

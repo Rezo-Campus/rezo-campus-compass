@@ -56,7 +56,7 @@ export function Validations() {
       if (!sids.length) return [];
       const { data: profs } = await supabase
         .from("profiles")
-        .select("id, full_name, email, photo_url")
+        .select("id, full_name, email, photo_url, dossier_number")
         .in("id", sids);
       return data.map((d) => ({ ...d, profile: profs?.find((p) => p.id === d.student_id) }));
     },
@@ -109,7 +109,7 @@ export function Validations() {
       const schoolIds = [...new Set(data.map((a) => a.school_id))];
 
       const [profiles, programs, schools] = await Promise.all([
-        supabase.from("profiles").select("id, full_name, email, phone").in("id", studentIds),
+        supabase.from("profiles").select("id, full_name, email, phone, dossier_number").in("id", studentIds),
         supabase.from("school_programs").select("id, name, level, domain").in("id", programIds),
         supabase.from("schools").select("id, name").in("id", schoolIds),
       ]);
@@ -189,7 +189,7 @@ export function Validations() {
       const sids: string[] = Array.from(new Set(data.map((r: { student_id: string }) => r.student_id)));
       const { data: profs } = await supabase
         .from("profiles")
-        .select("id, full_name, email, photo_url")
+        .select("id, full_name, email, photo_url, dossier_number")
         .in("id", sids);
       type Rec = { student_id: string; [k: string]: unknown };
       const grouped = new Map<string, { profile: typeof profs extends (infer P)[] | null | undefined ? P : never; items: Rec[] }>();
@@ -318,7 +318,14 @@ export function Validations() {
                       </div>
                     )}
                     <div>
-                      <div className="font-semibold text-sm">{g.profile?.full_name || g.profile?.email || "—"}</div>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="font-semibold text-sm">{g.profile?.full_name || g.profile?.email || "—"}</span>
+                        {(g.profile as any)?.dossier_number && (
+                          <span className="font-mono text-[10px] font-bold bg-primary text-primary-foreground px-1.5 py-0.5 rounded">
+                            {(g.profile as any).dossier_number}
+                          </span>
+                        )}
+                      </div>
                       <div className="text-xs text-muted-foreground">
                         {g.items.length} document{g.items.length > 1 ? "s" : ""}
                       </div>
@@ -404,9 +411,16 @@ export function Validations() {
                       </div>
                     )}
                     <div>
-                      <div className="font-semibold text-sm">
-                        {(g.profile as { full_name?: string; email?: string } | undefined)?.full_name
-                          || (g.profile as { email?: string } | undefined)?.email || "—"}
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="font-semibold text-sm">
+                          {(g.profile as { full_name?: string; email?: string } | undefined)?.full_name
+                            || (g.profile as { email?: string } | undefined)?.email || "—"}
+                        </span>
+                        {(g.profile as any)?.dossier_number && (
+                          <span className="font-mono text-[10px] font-bold bg-primary text-primary-foreground px-1.5 py-0.5 rounded">
+                            {(g.profile as any).dossier_number}
+                          </span>
+                        )}
                       </div>
                       <div className="text-xs text-muted-foreground">
                         {(g.items as unknown[]).length} diplôme{(g.items as unknown[]).length > 1 ? "s" : ""}
@@ -500,7 +514,14 @@ export function Validations() {
                       <GraduationCap className="size-5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold">{d.student?.full_name || "—"}</div>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="font-semibold">{d.student?.full_name || "—"}</span>
+                        {(d.student as any)?.dossier_number && (
+                          <span className="font-mono text-[10px] font-bold bg-primary text-primary-foreground px-1.5 py-0.5 rounded">
+                            {(d.student as any).dossier_number}
+                          </span>
+                        )}
+                      </div>
                       <div className="truncate text-xs text-muted-foreground">{d.student?.email}</div>
                       <ul className="mt-2 space-y-1.5">
                         {d.apps.map((a) => (

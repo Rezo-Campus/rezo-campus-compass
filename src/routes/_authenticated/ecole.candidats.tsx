@@ -102,7 +102,7 @@ function EcoleCandidats() {
         studentIds.length
           ? supabase
               .from("profiles")
-              .select("id, full_name, email, phone, photo_url")
+              .select("id, full_name, email, phone, photo_url, dossier_number")
               .in("id", studentIds)
           : { data: [] },
         programIds.length
@@ -313,7 +313,14 @@ function EcoleCandidats() {
 
                     {/* Identité + formation */}
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold">{a.profile?.full_name || "—"}</div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-semibold">{a.profile?.full_name || "—"}</span>
+                        {(a.profile as any)?.dossier_number && (
+                          <span className="font-mono text-[10px] font-bold bg-primary text-primary-foreground px-1.5 py-0.5 rounded">
+                            {(a.profile as any).dossier_number}
+                          </span>
+                        )}
+                      </div>
                       <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
                         {a.profile?.email && (
                           <span className="flex items-center gap-1">
