@@ -43,12 +43,15 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const DOC_TYPE_LABELS: Record<string, string> = {
-  identite: "Pièce d'identité / Passeport",
-  diplome: "Diplôme",
-  releve_notes: "Relevé de notes",
+  identite:          "Pièce d'identité",
+  diplome:           "Diplôme",
+  releve_notes:      "Relevé de notes",
   lettre_motivation: "Lettre de motivation",
-  cv: "Curriculum Vitae",
-  autre: "Autre document",
+  cv:                "CV (Facultatif)",
+  photo:             "Photo",
+  acte_naissance:    "Acte de naissance",
+  passeport:         "Passeport",
+  autre:             "Autre document",
 };
 
 const DOC_STATUS_COLORS: Record<string, string> = {

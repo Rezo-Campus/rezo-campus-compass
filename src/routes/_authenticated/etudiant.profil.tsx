@@ -202,8 +202,22 @@ function EtudiantProfil() {
       if (upErr) throw upErr;
       await db.from("profiles").update({ id_document_path: path }).eq("id", uid);
       set("id_document_path", path);
+      // Synchronise aussi dans la table documents pour que le conseiller et l'école le voient
+      try {
+        await (supabase as any).from("documents").delete().eq("student_id", uid).eq("type", "identite");
+        await (supabase as any).from("documents").insert({
+          student_id: uid,
+          name: `Pièce d'identité (${file.name})`,
+          type: "identite",
+          storage_path: path,
+          size_bytes: file.size,
+          mime_type: file.type,
+          status: "valide",
+        });
+      } catch { /* best-effort */ }
       toast.success("Pièce d'identité téléversée");
       qc.invalidateQueries({ queryKey: ["student-profile-v2", uid] });
+      qc.invalidateQueries({ queryKey: ["documents", uid] });
     } catch (e: unknown) {
       toast.error("Erreur", { description: (e as Error).message });
     } finally { setUploadingDoc(false); }

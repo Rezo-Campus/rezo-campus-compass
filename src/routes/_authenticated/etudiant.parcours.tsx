@@ -81,12 +81,14 @@ const DOC_LABELS: Record<string, string> = {
   diplome:           "Diplôme",
   releve_notes:      "Relevé de notes",
   lettre_motivation: "Lettre de motivation",
-  cv:                "CV",
-  photo:             "Photo / Image",
+  cv:                "CV (Facultatif)",
+  photo:             "Photo",
+  acte_naissance:    "Acte de naissance",
+  passeport:         "Passeport",
   autre:             "Autre document",
 };
 
-const UPLOADABLE_TYPES: DocType[] = ["lettre_motivation", "cv", "photo", "autre"];
+const UPLOADABLE_TYPES: string[] = ["photo", "acte_naissance", "cv", "passeport", "autre"];
 
 
 /* ── Types ── */
@@ -174,7 +176,7 @@ function EtudiantParcours() {
 
   /* ── États : documents ── */
   const docInputRef = useRef<HTMLInputElement>(null);
-  const [docType, setDocType]         = useState<DocType>("lettre_motivation");
+  const [docType, setDocType]         = useState<string>("photo");
   const [uploading, setUploading]     = useState(false);
   const [pendingDocDel, setPendingDocDel] = useState<{ id: string; storage_path: string } | null>(null);
 
@@ -341,7 +343,7 @@ function EtudiantParcours() {
         .from("student-documents")
         .upload(path, file, { upsert: false });
       if (upErr) throw upErr;
-      const { error: insErr } = await supabase.from("documents").insert({
+      const { error: insErr } = await (supabase as any).from("documents").insert({
         student_id: uid, name: file.name, type: docType,
         storage_path: path, size_bytes: file.size, mime_type: file.type,
       });
@@ -350,16 +352,22 @@ function EtudiantParcours() {
       qc.invalidateQueries({ queryKey: ["documents", uid] });
       qc.invalidateQueries({ queryKey: ["etudiant-overview", uid] });
 
-      // Notifier les admins du nouveau document (best-effort)
+      // Notifier admins + secrétaires du nouveau document (best-effort)
       void (async () => {
         try {
           const studentName = auth?.profile?.full_name || "Un étudiant";
-          const { data: admins } = await supabase
-            .from("user_roles").select("user_id").eq("role", "admin");
-          const notifs = (admins ?? []).map((a) => ({
-            user_id: a.user_id,
-            title: "Nouveau document",
-            body: `${studentName} a téléversé un nouveau document : ${file.name}`,
+          const [{ data: admins }, { data: secretaires }] = await Promise.all([
+            supabase.from("user_roles").select("user_id").eq("role", "admin"),
+            supabase.from("user_roles").select("user_id").eq("role", "secretaire"),
+          ]);
+          const recipients = [
+            ...(admins ?? []),
+            ...(secretaires ?? []).filter((s) => !(admins ?? []).some((a) => a.user_id === s.user_id)),
+          ];
+          const notifs = recipients.map((r) => ({
+            user_id: r.user_id,
+            title: "Nouveau document étudiant",
+            body: `${studentName} a téléversé un document : ${file.name}`,
             data: { type: "new_document", student_id: uid } as { [k: string]: string },
           }));
           if (notifs.length) await supabase.from("notifications").insert(notifs);
@@ -570,7 +578,7 @@ function EtudiantParcours() {
                     <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
                       Type de document
                     </label>
-                    <Select value={docType} onValueChange={(v) => setDocType(v as DocType)}>
+                    <Select value={docType} onValueChange={(v) => setDocType(v)}>
                       <SelectTrigger className="h-9">
                         <SelectValue />
                       </SelectTrigger>

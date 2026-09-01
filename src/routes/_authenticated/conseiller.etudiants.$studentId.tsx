@@ -30,12 +30,15 @@ export const Route = createFileRoute("/_authenticated/conseiller/etudiants/$stud
 });
 
 const DOC_TYPE_LABELS: Record<string, string> = {
-  identite: "Pièce d'identité",
-  diplome: "Diplôme",
-  releve_notes: "Relevé de notes",
+  identite:          "Pièce d'identité",
+  diplome:           "Diplôme",
+  releve_notes:      "Relevé de notes",
   lettre_motivation: "Lettre de motivation",
-  cv: "Curriculum Vitae",
-  autre: "Autre document",
+  cv:                "CV (Facultatif)",
+  photo:             "Photo",
+  acte_naissance:    "Acte de naissance",
+  passeport:         "Passeport",
+  autre:             "Autre document",
 };
 
 const DIPLOMA_LABELS: Record<string, string> = {
@@ -176,10 +179,10 @@ export function ConseillerStudentDetail() {
 
   const unlockDossier = useMutation({
     mutationFn: async () => {
-      const { error } = await db
-        .from("profiles")
-        .update({ dossier_can_edit: true, dossier_unlocked_by: uid })
-        .eq("id", studentId);
+      const { error } = await supabase.rpc("set_dossier_lock" as any, {
+        p_student_id: studentId,
+        p_can_edit: true,
+      });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -191,10 +194,10 @@ export function ConseillerStudentDetail() {
 
   const lockDossier = useMutation({
     mutationFn: async () => {
-      const { error } = await db
-        .from("profiles")
-        .update({ dossier_can_edit: false })
-        .eq("id", studentId);
+      const { error } = await supabase.rpc("set_dossier_lock" as any, {
+        p_student_id: studentId,
+        p_can_edit: false,
+      });
       if (error) throw error;
     },
     onSuccess: () => {

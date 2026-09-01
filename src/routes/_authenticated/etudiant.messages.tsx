@@ -156,8 +156,8 @@ async function sendMessageNotifications(senderId: string, recipientId: string) {
       data: { type: "new_message", sender_id: senderId },
     });
 
-    // 2. Si étudiant ou école → alerte aux admins (qui, quoi, sans le contenu)
-    const needsAdminAlert = roles.some((r) => ["etudiant", "ecole"].includes(r));
+    // 2. Si étudiant, école ou secrétaire → alerte aux admins (qui, quoi, sans le contenu)
+    const needsAdminAlert = roles.some((r) => ["etudiant", "ecole", "secretaire"].includes(r));
     if (needsAdminAlert) {
       const { data: admins } = await supabase
         .from("user_roles")
@@ -165,12 +165,13 @@ async function sendMessageNotifications(senderId: string, recipientId: string) {
         .eq("role", "admin");
 
       const isEcole = roles.includes("ecole");
+      const isSecretaire = roles.includes("secretaire");
       (admins ?? [])
         .filter((a) => a.user_id !== senderId && a.user_id !== recipientId)
         .forEach((a) =>
           notifs.push({
             user_id: a.user_id,
-            title: isEcole ? "Message d'un établissement" : "Message d'un étudiant",
+            title: isEcole ? "Message d'un établissement" : isSecretaire ? "Message du secrétariat" : "Message d'un étudiant",
             body: `${senderName} a écrit à ${recipientName}`,
             data: { type: "message_alert", sender_id: senderId, recipient_id: recipientId },
           }),
