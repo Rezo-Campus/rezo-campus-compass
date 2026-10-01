@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
-import { Loader2, Plus, Trash2, ClipboardList, Printer } from "lucide-react";
+import { Loader2, Plus, Trash2, ClipboardList, Printer, RefreshCw, ChevronDown, ChevronRight, PenLine } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { BUDGET_ROWS, rowTotal, fmt } from "@/lib/budget-structure";
+import { BUDGET_ROWS, fmt } from "@/lib/budget-structure";
+import type { BudgetRow } from "@/lib/budget-structure";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/comptabilite/rapport-suivi")({
   component: RapportSuivi,
@@ -22,43 +26,71 @@ const DK = "#1a5c3a";
 const LG = "#d4edda";
 const LY = "#fffde7";
 
+/* ── Types ── */
 type ItemVals = { budget: number; realise: number };
 type RapportVals = Record<string, ItemVals>;
 type RapportRecord = {
   id: string; period_start: string; period_end: string;
   vals: RapportVals; comments: string | null; created_at: string;
 };
+type CustomRow = { id: string; label: string; type: "sub" | "item"; parent_id: string; sort_order: number };
 
-function fmtDateShort(iso: string) {
-  return new Date(iso).toLocaleDateString("fr-FR");
-}
+/* ── Date helpers ── */
+function fmtDateShort(iso: string) { return new Date(iso).toLocaleDateString("fr-FR"); }
 function fmtDatePeriod(d: string) {
   return d ? new Date(d + "T12:00:00").toLocaleDateString("fr-FR") : "…………………";
 }
 
-function initRapportVals(): RapportVals {
+/* ── Rows merge ── */
+function buildAllRows(customRows: CustomRow[]): BudgetRow[] {
+  const sections = BUDGET_ROWS.filter((r) => r.type === "section");
+  const result: BudgetRow[] = [];
+  sections.forEach((sec) => {
+    result.push(sec);
+    const builtinSubs = BUDGET_ROWS.filter((r) => r.type === "sub" && r.parentId === sec.id);
+    builtinSubs.forEach((sub) => {
+      result.push(sub);
+      const builtinItems = BUDGET_ROWS.filter((r) => r.type === "item" && r.parentId === sub.id);
+      builtinItems.forEach((item) => result.push(item));
+      customRows.filter((r) => r.type === "item" && r.parent_id === sub.id)
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .forEach((r) => result.push({ id: r.id, label: r.label, type: "item", parentId: r.parent_id }));
+    });
+    customRows.filter((r) => r.type === "sub" && r.parent_id === sec.id)
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .forEach((csub) => {
+        result.push({ id: csub.id, label: csub.label, type: "sub", parentId: csub.parent_id });
+        customRows.filter((r) => r.type === "item" && r.parent_id === csub.id)
+          .sort((a, b) => a.sort_order - b.sort_order)
+          .forEach((r) => result.push({ id: r.id, label: r.label, type: "item", parentId: r.parent_id }));
+      });
+  });
+  return result;
+}
+
+function initVals(allRows: BudgetRow[]): RapportVals {
   const v: RapportVals = {};
-  BUDGET_ROWS.forEach((r) => { if (r.type === "item") v[r.id] = { budget: 0, realise: 0 }; });
+  allRows.forEach((r) => { if (r.type === "item") v[r.id] = { budget: 0, realise: 0 }; });
   return v;
 }
 
-function computeRapport(vals: RapportVals): Record<string, { budget: number; realise: number }> {
+function computeRapport(vals: RapportVals, allRows: BudgetRow[]): Record<string, { budget: number; realise: number }> {
   const r: Record<string, { budget: number; realise: number }> = {};
-  BUDGET_ROWS.forEach((row) => {
+  allRows.forEach((row) => {
     if (row.type === "item") r[row.id] = { budget: Number(vals[row.id]?.budget) || 0, realise: Number(vals[row.id]?.realise) || 0 };
   });
-  BUDGET_ROWS.forEach((row) => {
+  allRows.forEach((row) => {
     if (row.type === "sub") {
-      const items = BUDGET_ROWS.filter((x) => x.type === "item" && x.parentId === row.id);
+      const items = allRows.filter((x) => x.type === "item" && x.parentId === row.id);
       r[row.id] = items.reduce(
         (acc, it) => ({ budget: acc.budget + (r[it.id]?.budget || 0), realise: acc.realise + (r[it.id]?.realise || 0) }),
         { budget: 0, realise: 0 }
       );
     }
   });
-  BUDGET_ROWS.forEach((row) => {
+  allRows.forEach((row) => {
     if (row.type === "section") {
-      const subs = BUDGET_ROWS.filter((x) => x.type === "sub" && x.parentId === row.id);
+      const subs = allRows.filter((x) => x.type === "sub" && x.parentId === row.id);
       r[row.id] = subs.reduce(
         (acc, s) => ({ budget: acc.budget + (r[s.id]?.budget || 0), realise: acc.realise + (r[s.id]?.realise || 0) }),
         { budget: 0, realise: 0 }
@@ -73,12 +105,14 @@ function pct(realise: number, budget: number): string {
   return (realise / budget * 100).toFixed(1) + " %";
 }
 
+/* ── Print ── */
 function buildPrintHTML(
   periodStart: string, periodEnd: string,
   computed: Record<string, { budget: number; realise: number }>,
-  comments: string
+  comments: string,
+  allRows: BudgetRow[],
 ): string {
-  const dataRows = BUDGET_ROWS.map((row) => {
+  const dataRows = allRows.map((row) => {
     const { budget, realise } = computed[row.id] || { budget: 0, realise: 0 };
     const ecart = realise - budget;
     const p = pct(realise, budget);
@@ -144,13 +178,184 @@ function buildPrintHTML(
 </div></body></html>`;
 }
 
+/* ─── Structure panel ─────────────────────────────────────────── */
+function StructurePanel({ customRows, onRefresh }: { customRows: CustomRow[]; onRefresh: () => void }) {
+  const qc = useQueryClient();
+  const [expanded, setExpanded] = useState(false);
+  const [addSub,    setAddSub]    = useState(false);
+  const [addItem,   setAddItem]   = useState(false);
+  const [newLabel,  setNewLabel]  = useState("");
+  const [newParent, setNewParent] = useState("");
+  const [delId,     setDelId]     = useState<string | null>(null);
+
+  const sections = BUDGET_ROWS.filter((r) => r.type === "section");
+  const allSubs  = [
+    ...BUDGET_ROWS.filter((r) => r.type === "sub"),
+    ...customRows.filter((r) => r.type === "sub").map((r) => ({ id: r.id, label: r.label, type: "sub" as const, parentId: r.parent_id })),
+  ];
+
+  const addSubMut = useMutation({
+    mutationFn: async () => {
+      if (!newLabel.trim() || !newParent) throw new Error("Remplis le libellé et la section.");
+      const { error } = await db.from("rapport_structure_custom").insert({ label: newLabel.trim(), type: "sub", parent_id: newParent, sort_order: 100 });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Libellé ajouté"); setAddSub(false); setNewLabel(""); setNewParent("");
+      qc.invalidateQueries({ queryKey: ["rapport-structure-custom"] }); onRefresh();
+    },
+    onError: (e: Error) => toast.error("Erreur", { description: e.message }),
+  });
+
+  const addItemMut = useMutation({
+    mutationFn: async () => {
+      if (!newLabel.trim() || !newParent) throw new Error("Remplis la ligne et le libellé parent.");
+      const { error } = await db.from("rapport_structure_custom").insert({ label: newLabel.trim(), type: "item", parent_id: newParent, sort_order: 100 });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Ligne ajoutée"); setAddItem(false); setNewLabel(""); setNewParent("");
+      qc.invalidateQueries({ queryKey: ["rapport-structure-custom"] }); onRefresh();
+    },
+    onError: (e: Error) => toast.error("Erreur", { description: e.message }),
+  });
+
+  const delMut = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await db.from("rapport_structure_custom").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Supprimé"); setDelId(null);
+      qc.invalidateQueries({ queryKey: ["rapport-structure-custom"] }); onRefresh();
+    },
+    onError: (e: Error) => toast.error("Erreur", { description: e.message }),
+  });
+
+  return (
+    <div className="mt-4 rounded-xl border border-border bg-card">
+      <button
+        className="flex w-full items-center justify-between px-4 py-3 text-sm font-semibold text-foreground hover:bg-muted/30 transition-colors rounded-xl"
+        onClick={() => setExpanded((v) => !v)}
+      >
+        <span className="flex items-center gap-2"><PenLine className="size-4 text-primary" /> Gérer la structure du rapport</span>
+        {expanded ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
+      </button>
+
+      {expanded && (
+        <div className="border-t border-border px-4 pb-4 pt-3 space-y-4">
+          <p className="text-xs text-muted-foreground">
+            Ajoutez ou supprimez des libellés et des lignes personnalisées. Les lignes intégrées ne peuvent pas être supprimées.
+          </p>
+
+          {/* Add sub (libellé) */}
+          {addSub ? (
+            <div className="flex flex-wrap items-end gap-2 rounded-lg bg-muted/30 p-3">
+              <div className="flex-1 min-w-[160px] space-y-1">
+                <Label className="text-xs">Nom du libellé</Label>
+                <Input value={newLabel} onChange={(e) => setNewLabel(e.target.value)} placeholder="Ex : Vente de formations" />
+              </div>
+              <div className="flex-1 min-w-[160px] space-y-1">
+                <Label className="text-xs">Section parent</Label>
+                <Select value={newParent} onValueChange={setNewParent}>
+                  <SelectTrigger><SelectValue placeholder="Choisir…" /></SelectTrigger>
+                  <SelectContent>
+                    {sections.map((s) => <SelectItem key={s.id} value={s.id}>{s.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={() => addSubMut.mutate()} disabled={addSubMut.isPending}>
+                  {addSubMut.isPending && <Loader2 className="mr-1 size-3 animate-spin" />} Ajouter
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => { setAddSub(false); setNewLabel(""); setNewParent(""); }}>Annuler</Button>
+              </div>
+            </div>
+          ) : (
+            <Button size="sm" variant="outline" onClick={() => { setAddItem(false); setAddSub(true); setNewLabel(""); setNewParent(""); }}>
+              <Plus className="mr-1.5 size-3.5" /> Ajouter un libellé (sous-catégorie)
+            </Button>
+          )}
+
+          {/* Add item (ligne) */}
+          {addItem ? (
+            <div className="flex flex-wrap items-end gap-2 rounded-lg bg-muted/30 p-3">
+              <div className="flex-1 min-w-[160px] space-y-1">
+                <Label className="text-xs">Intitulé de la ligne</Label>
+                <Input value={newLabel} onChange={(e) => setNewLabel(e.target.value)} placeholder="Ex : Frais de déplacement terrain" />
+              </div>
+              <div className="flex-1 min-w-[200px] space-y-1">
+                <Label className="text-xs">Libellé parent</Label>
+                <Select value={newParent} onValueChange={setNewParent}>
+                  <SelectTrigger><SelectValue placeholder="Choisir…" /></SelectTrigger>
+                  <SelectContent>
+                    {allSubs.map((s) => <SelectItem key={s.id} value={s.id}>{s.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={() => addItemMut.mutate()} disabled={addItemMut.isPending}>
+                  {addItemMut.isPending && <Loader2 className="mr-1 size-3 animate-spin" />} Ajouter
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => { setAddItem(false); setNewLabel(""); setNewParent(""); }}>Annuler</Button>
+              </div>
+            </div>
+          ) : (
+            <Button size="sm" variant="outline" onClick={() => { setAddSub(false); setAddItem(true); setNewLabel(""); setNewParent(""); }}>
+              <Plus className="mr-1.5 size-3.5" /> Ajouter une ligne budgétaire
+            </Button>
+          )}
+
+          {/* List custom rows */}
+          {customRows.length > 0 && (
+            <div className="space-y-1">
+              <p className="text-xs font-semibold text-muted-foreground">Éléments personnalisés :</p>
+              {customRows.map((r) => {
+                const parentLabel = allSubs.find((s) => s.id === r.parent_id)?.label
+                  ?? BUDGET_ROWS.find((s) => s.id === r.parent_id)?.label
+                  ?? r.parent_id;
+                return (
+                  <div key={r.id} className="flex items-center justify-between rounded-lg border border-border px-3 py-1.5 text-xs">
+                    <span>
+                      <span className="font-medium">{r.label}</span>
+                      <span className="ml-2 text-muted-foreground">({r.type === "sub" ? "Libellé" : "Ligne"} sous «{parentLabel}»)</span>
+                    </span>
+                    <Button size="sm" variant="ghost" className="h-6 px-1.5 text-destructive hover:bg-destructive/10"
+                      onClick={() => setDelId(r.id)} title="Supprimer">
+                      <Trash2 className="size-3" />
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {customRows.length === 0 && !addSub && !addItem && (
+            <p className="text-xs text-muted-foreground italic">Aucune ligne personnalisée.</p>
+          )}
+        </div>
+      )}
+
+      <ConfirmDialog
+        open={delId !== null}
+        onOpenChange={(o) => { if (!o) setDelId(null); }}
+        title="Supprimer cet élément ?"
+        description="Les valeurs saisies pour cette ligne dans tous les rapports ne seront plus affichées."
+        onConfirm={() => { if (delId) delMut.mutate(delId); }}
+        loading={delMut.isPending}
+      />
+    </div>
+  );
+}
+
 /* ─── Editor ─────────────────────────────────────────────────── */
 function RapportEditor({
   initialPeriodStart, initialPeriodEnd, initialVals, initialComments,
+  rapportId, allRows,
   onSave, onCancel, saving,
 }: {
   initialPeriodStart: string; initialPeriodEnd: string;
   initialVals: RapportVals; initialComments: string;
+  rapportId?: string; allRows: BudgetRow[];
   onSave: (ps: string, pe: string, vals: RapportVals, comments: string) => void;
   onCancel: () => void; saving: boolean;
 }) {
@@ -158,15 +363,46 @@ function RapportEditor({
   const [periodEnd, setPeriodEnd] = useState(initialPeriodEnd);
   const [vals, setVals] = useState<RapportVals>(initialVals);
   const [comments, setComments] = useState(initialComments);
-  const computed = useMemo(() => computeRapport(vals), [vals]);
+  const [syncing, setSyncing] = useState(false);
+  const computed = useMemo(() => computeRapport(vals, allRows), [vals, allRows]);
 
   const setField = (id: string, field: "budget" | "realise", raw: string) => {
     const n = parseFloat(raw) || 0;
     setVals((prev) => ({ ...prev, [id]: { ...prev[id], [field]: n } }));
   };
 
+  const syncFromTransactions = async () => {
+    if (!rapportId) return;
+    setSyncing(true);
+    try {
+      const { data: txns, error } = await db.from("transactions")
+        .select("rapport_row_id, amount")
+        .eq("rapport_id", rapportId)
+        .not("rapport_row_id", "is", null);
+      if (error) throw error;
+      const grouped: Record<string, number> = {};
+      (txns ?? []).forEach((t: { rapport_row_id: string; amount: number }) => {
+        grouped[t.rapport_row_id] = (grouped[t.rapport_row_id] || 0) + Number(t.amount);
+      });
+      setVals((prev) => {
+        const next = { ...prev };
+        Object.entries(grouped).forEach(([rowId, total]) => {
+          if (!next[rowId]) next[rowId] = { budget: 0, realise: 0 };
+          next[rowId] = { ...next[rowId], realise: total };
+        });
+        return next;
+      });
+      const count = Object.keys(grouped).length;
+      toast.success(`Synchronisation effectuée — ${count} ligne${count > 1 ? "s" : ""} mise${count > 1 ? "s" : ""} à jour`);
+    } catch (e: unknown) {
+      toast.error("Erreur de synchronisation", { description: (e as Error).message });
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   const doPrint = () => {
-    const html = buildPrintHTML(periodStart, periodEnd, computed, comments);
+    const html = buildPrintHTML(periodStart, periodEnd, computed, comments, allRows);
     const w = window.open("", "_blank");
     if (!w) { alert("Autorisez les pop-ups pour imprimer."); return; }
     w.document.write(html);
@@ -190,7 +426,13 @@ function RapportEditor({
           <Label className="text-xs text-muted-foreground">au</Label>
           <Input type="date" value={periodEnd} onChange={(e) => setPeriodEnd(e.target.value)} className="mt-1 w-40" />
         </div>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          {rapportId && (
+            <Button variant="outline" onClick={syncFromTransactions} disabled={syncing} title="Importer les montants réalisés depuis les transactions liées à ce rapport">
+              {syncing ? <Loader2 className="mr-2 size-4 animate-spin" /> : <RefreshCw className="mr-2 size-4" />}
+              Sync transactions
+            </Button>
+          )}
           <Button variant="outline" onClick={doPrint}><Printer className="mr-2 size-4" /> Imprimer</Button>
           <Button variant="outline" onClick={onCancel}>Annuler</Button>
           <Button onClick={() => onSave(periodStart, periodEnd, vals, comments)} disabled={saving}>
@@ -211,7 +453,7 @@ function RapportEditor({
             </tr>
           </thead>
           <tbody>
-            {BUDGET_ROWS.map((row) => {
+            {allRows.map((row) => {
               const { budget, realise } = computed[row.id] || { budget: 0, realise: 0 };
               const ecart = realise - budget;
               const isSection = row.type === "section";
@@ -291,6 +533,19 @@ function RapportSuivi() {
     },
   });
 
+  const { data: customRows = [], refetch: refetchCustom } = useQuery({
+    queryKey: ["rapport-structure-custom"],
+    queryFn: async () => {
+      try {
+        const { data, error } = await db.from("rapport_structure_custom").select("*").order("sort_order");
+        if (error) return [];
+        return (data ?? []) as CustomRow[];
+      } catch { return []; }
+    },
+  });
+
+  const allRows = useMemo(() => buildAllRows(customRows), [customRows]);
+
   const editing = view !== "list" && view !== "new" ? rapports.find((r) => r.id === view) : null;
 
   const save = useMutation({
@@ -322,8 +577,8 @@ function RapportSuivi() {
   });
 
   function doPrint(r: RapportRecord) {
-    const computed = computeRapport(r.vals || initRapportVals());
-    const html = buildPrintHTML(r.period_start, r.period_end, computed, r.comments || "");
+    const computed = computeRapport(r.vals || initVals(allRows), allRows);
+    const html = buildPrintHTML(r.period_start, r.period_end, computed, r.comments || "", allRows);
     const w = window.open("", "_blank");
     if (!w) { alert("Autorisez les pop-ups pour imprimer."); return; }
     w.document.write(html);
@@ -343,8 +598,10 @@ function RapportSuivi() {
         <RapportEditor
           initialPeriodStart={editing ? editing.period_start : `${curYear}-01-01`}
           initialPeriodEnd={editing ? editing.period_end : `${curYear}-12-31`}
-          initialVals={editing ? (editing.vals || initRapportVals()) : initRapportVals()}
+          initialVals={editing ? (editing.vals || initVals(allRows)) : initVals(allRows)}
           initialComments={editing ? (editing.comments || "") : ""}
+          rapportId={editing?.id}
+          allRows={allRows}
           saving={save.isPending}
           onCancel={() => setView("list")}
           onSave={(ps, pe, vals, comments) => save.mutate({ ps, pe, vals, comments, id: editing?.id })}
@@ -373,7 +630,7 @@ function RapportSuivi() {
         ) : (
           <ul className="space-y-2">
             {rapports.map((r) => {
-              const computed = computeRapport(r.vals || initRapportVals());
+              const computed = computeRapport(r.vals || initVals(allRows), allRows);
               const prodC = computed["produits"] || { budget: 0, realise: 0 };
               const charC = computed["charges"] || { budget: 0, realise: 0 };
               const resR = prodC.realise - charC.realise;
@@ -407,6 +664,8 @@ function RapportSuivi() {
           </ul>
         )}
       </Panel>
+
+      <StructurePanel customRows={customRows} onRefresh={() => qc.invalidateQueries({ queryKey: ["rapport-structure-custom"] })} />
 
       <ConfirmDialog
         open={pendingDeleteId !== null}
