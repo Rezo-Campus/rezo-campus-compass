@@ -1,0 +1,1 @@
+import{j as t}from"./index-BfRw8DMm.js";import{A as e}from"./AgendaView-9J4hIhe3.js";import"./pen-DrkYKWd_.js";import"./bell-C5UrjimK.js";const p=()=>t.jsx(e,{department:"projets",canEdit:!0,title:"Agenda Management de Projet"});export{p as component};
