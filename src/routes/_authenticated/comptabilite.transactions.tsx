@@ -214,8 +214,9 @@ export function Transactions() {
   const qc = useQueryClient();
   const uid = auth?.user?.id;
   const role = auth?.role;
-  const isSecretaire = role === "secretaire" || role === "admin";
+  const isSecretaire = role === "secretaire";
   const isAdmin = role === "admin";
+  const canWrite = role === "admin" || role === "comptable";
 
   /* Dialog transaction */
   const [open, setOpen] = useState(false);
@@ -432,9 +433,11 @@ export function Transactions() {
           </span>
         </div>
 
-        <Button onClick={() => { setForm(emptyForm); setEditingId(null); setOpen(true); }}>
-          <Plus className="mr-2 size-4" /> Ajouter
-        </Button>
+        {canWrite && (
+          <Button onClick={() => { setForm(emptyForm); setEditingId(null); setOpen(true); }}>
+            <Plus className="mr-2 size-4" /> Ajouter
+          </Button>
+        )}
       </div>
 
       {/* List */}
@@ -510,13 +513,17 @@ export function Transactions() {
                     <Button size="sm" variant="outline" className="h-7" onClick={() => doPrintReceipt(t)} title="Imprimer le reçu">
                       <Printer className="mr-1 size-3.5" /> Reçu
                     </Button>
-                    <Button size="sm" variant="ghost" className="h-7" onClick={() => openEdit(t)} title="Modifier">
-                      <Pencil className="size-4" />
-                    </Button>
-                    <Button size="sm" variant="ghost" className="h-7 text-destructive hover:bg-destructive/10"
-                      onClick={() => setPendingDeleteId(t.id)} title="Supprimer">
-                      <Trash2 className="size-4" />
-                    </Button>
+                    {canWrite && (
+                      <>
+                        <Button size="sm" variant="ghost" className="h-7" onClick={() => openEdit(t)} title="Modifier">
+                          <Pencil className="size-4" />
+                        </Button>
+                        <Button size="sm" variant="ghost" className="h-7 text-destructive hover:bg-destructive/10"
+                          onClick={() => setPendingDeleteId(t.id)} title="Supprimer">
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </li>
               );
