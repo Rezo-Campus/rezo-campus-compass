@@ -1,0 +1,1 @@
+import{j as t}from"./index-BgyspQ8h.js";import{A as e}from"./AgendaView-DDWUkooq.js";import"./bell-C-y2tcz3.js";const i=()=>t.jsx(e,{department:"marketing",canEdit:!0,title:"Agenda Marketing"});export{i as component};
