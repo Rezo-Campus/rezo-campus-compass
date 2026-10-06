@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Loader2, Plus, Pencil, Trash2, MapPin, Clock, CalendarDays } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
@@ -70,6 +70,17 @@ export function MeetingsCalendar() {
     },
   });
 
+  /* Sync temps-réel — toutes les modifications visibles immédiatement */
+  useEffect(() => {
+    const channel = supabase
+      .channel("meetings-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "meetings" }, () => {
+        qc.invalidateQueries({ queryKey: ["meetings"] });
+      })
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [qc]);
+
   function resetAndClose() {
     setFormOpen(false);
     setEditingId(null);
@@ -121,9 +132,32 @@ export function MeetingsCalendar() {
       }
     },
     onSuccess: () => {
-      toast.success(editingId ? "Réunion modifiée" : "Réunion planifiée");
+      const meetingTitle = form.title;
+      const meetingDate = form.scheduled_at;
+      const meetingLocation = form.location;
+      const wasEditing = !!editingId;
+      toast.success(wasEditing ? "Réunion modifiée" : "Réunion planifiée");
       resetAndClose();
       qc.invalidateQueries({ queryKey: ["meetings"] });
+      // Notifier tous les collaborateurs internes (best-effort)
+      (async () => {
+        try {
+          const db = supabase as any;
+          const { data: internalUsers } = await db
+            .from("user_roles")
+            .select("user_id")
+            .in("role", ["admin", "conseiller", "rh", "chef_projet", "commercial", "comptable", "secretaire", "aadf"]);
+          const notifs = (internalUsers ?? [])
+            .filter((u: any) => u.user_id !== auth?.user?.id)
+            .map((u: any) => ({
+              user_id: u.user_id,
+              title: wasEditing ? `Réunion modifiée : ${meetingTitle}` : `Nouvelle réunion : ${meetingTitle}`,
+              body: `Prévue le ${new Date(meetingDate).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" })}${meetingLocation ? ` · ${meetingLocation}` : ""}`,
+              data: { type: "meeting" },
+            }));
+          if (notifs.length) await supabase.from("notifications").insert(notifs);
+        } catch { /* best-effort */ }
+      })();
     },
     onError: (e: Error) => toast.error("Erreur", { description: e.message }),
   });

@@ -156,9 +156,9 @@ async function sendMessageNotifications(senderId: string, recipientId: string) {
       data: { type: "new_message", sender_id: senderId },
     });
 
-    // 2. Si étudiant, école ou secrétaire → alerte aux admins (qui, quoi, sans le contenu)
-    const needsAdminAlert = roles.some((r) => ["etudiant", "ecole", "secretaire"].includes(r));
-    if (needsAdminAlert) {
+    // 2. Si l'expéditeur n'est pas admin → alerte aux admins pour tous les échanges internes
+    const isAdmin = roles.includes("admin");
+    if (!isAdmin) {
       const { data: admins } = await supabase
         .from("user_roles")
         .select("user_id")
@@ -166,12 +166,29 @@ async function sendMessageNotifications(senderId: string, recipientId: string) {
 
       const isEcole = roles.includes("ecole");
       const isSecretaire = roles.includes("secretaire");
+      const isConseiller = roles.includes("conseiller");
+      const isRh = roles.includes("rh");
+      const isChefProjet = roles.includes("chef_projet");
+      const isCommercial = roles.includes("commercial");
+      const isComptable = roles.includes("comptable");
+      const isAadf = roles.includes("aadf");
+
+      const senderLabel = isEcole ? "un établissement"
+        : isSecretaire ? "le secrétariat"
+        : isConseiller ? "un conseiller"
+        : isRh ? "les RH"
+        : isChefProjet ? "un chef de projet"
+        : isCommercial ? "le commercial"
+        : isComptable ? "la comptabilité"
+        : isAadf ? "l'AADF"
+        : "un étudiant";
+
       (admins ?? [])
         .filter((a) => a.user_id !== senderId && a.user_id !== recipientId)
         .forEach((a) =>
           notifs.push({
             user_id: a.user_id,
-            title: isEcole ? "Message d'un établissement" : isSecretaire ? "Message du secrétariat" : "Message d'un étudiant",
+            title: `Message de ${senderLabel}`,
             body: `${senderName} a écrit à ${recipientName}`,
             data: { type: "message_alert", sender_id: senderId, recipient_id: recipientId },
           }),

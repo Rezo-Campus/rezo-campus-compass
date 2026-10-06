@@ -209,7 +209,7 @@ function doPrintReceipt(t: Txn) {
 }
 
 /* ─── Component principal ─── */
-function Transactions() {
+export function Transactions() {
   const { data: auth } = useAuth();
   const qc = useQueryClient();
   const uid = auth?.user?.id;
