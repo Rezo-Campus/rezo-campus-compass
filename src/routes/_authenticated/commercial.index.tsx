@@ -37,14 +37,21 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 function fmt(n: number) {
-  return n.toLocaleString("fr-FR", { style: "currency", currency: "XOF", maximumFractionDigits: 0 });
+  return n.toLocaleString("fr-FR", {
+    style: "currency",
+    currency: "XOF",
+    maximumFractionDigits: 0,
+  });
 }
 
 function CommercialDashboard() {
   const { data: leads = [] } = useQuery({
     queryKey: ["commercial-leads"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("commercial_leads").select("*").order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("commercial_leads")
+        .select("*")
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -68,16 +75,31 @@ function CommercialDashboard() {
   return (
     <>
       <PageHeader
-        eyebrow="Marketing & Commercial"
+        eyebrow="Marketing & Communication"
         title="Tableau de bord"
-        description="Suivi des opportunités, partenariats et activités commerciales."
+        description="Suivi des campagnes, contacts, partenariats et activités de communication."
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Total activités" value={String(total)} icon={Target} />
-        <StatCard label="En cours" value={String(prospection + enNegociation)} icon={Clock} hint="Prospection + négociation" />
-        <StatCard label="Gagnés" value={String(gagnes)} icon={CheckCircle2} hint={valeurGagnes > 0 ? fmt(valeurGagnes) : undefined} />
-        <StatCard label="Valeur pipeline" value={fmt(valeurPipeline)} icon={TrendingUp} hint="Hors perdus/annulés" />
+        <StatCard
+          label="En cours"
+          value={String(prospection + enNegociation)}
+          icon={Clock}
+          hint="Prospection + négociation"
+        />
+        <StatCard
+          label="Gagnés"
+          value={String(gagnes)}
+          icon={CheckCircle2}
+          hint={valeurGagnes > 0 ? fmt(valeurGagnes) : undefined}
+        />
+        <StatCard
+          label="Valeur pipeline"
+          value={fmt(valeurPipeline)}
+          icon={TrendingUp}
+          hint="Hors perdus/annulés"
+        />
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
@@ -90,12 +112,21 @@ function CommercialDashboard() {
               {Object.entries(STATUS_LABELS).map(([status, label]) => {
                 const count = leads.filter((l) => l.status === status).length;
                 if (count === 0) return null;
-                const val = leads.filter((l) => l.status === status).reduce((s, l) => s + (l.value ?? 0), 0);
+                const val = leads
+                  .filter((l) => l.status === status)
+                  .reduce((s, l) => s + (l.value ?? 0), 0);
                 return (
                   <li key={status} className="flex items-center gap-3">
-                    <span className={`w-32 shrink-0 rounded-full px-2 py-0.5 text-center text-[10px] font-medium ${STATUS_COLORS[status]}`}>{label}</span>
+                    <span
+                      className={`w-32 shrink-0 rounded-full px-2 py-0.5 text-center text-[10px] font-medium ${STATUS_COLORS[status]}`}
+                    >
+                      {label}
+                    </span>
                     <div className="flex-1 overflow-hidden rounded-full bg-muted h-2">
-                      <div className="h-full rounded-full bg-primary" style={{ width: `${(count / total) * 100}%` }} />
+                      <div
+                        className="h-full rounded-full bg-primary"
+                        style={{ width: `${(count / total) * 100}%` }}
+                      />
                     </div>
                     <span className="shrink-0 text-sm font-semibold">{count}</span>
                     {val > 0 && <span className="text-xs text-muted-foreground">{fmt(val)}</span>}
@@ -107,9 +138,14 @@ function CommercialDashboard() {
         </Panel>
 
         {/* Activités récentes */}
-        <Panel title="Activités récentes" action={
-          <Link to="/commercial/activites" className="text-xs text-primary hover:underline">Voir tout →</Link>
-        }>
+        <Panel
+          title="Activités récentes"
+          action={
+            <Link to="/commercial/activites" className="text-xs text-primary hover:underline">
+              Voir tout →
+            </Link>
+          }
+        >
           {recent.length === 0 ? (
             <p className="text-sm text-muted-foreground">Aucune activité enregistrée.</p>
           ) : (
@@ -121,20 +157,29 @@ function CommercialDashboard() {
                     <div className="mt-0.5 flex flex-wrap gap-2 text-xs text-muted-foreground">
                       <span>{TYPE_LABELS[l.type] ?? l.type}</span>
                       {l.contact_name && <span>· {l.contact_name}</span>}
-                      {l.scheduled_at && <span>· {new Date(l.scheduled_at).toLocaleDateString("fr-FR")}</span>}
+                      {l.scheduled_at && (
+                        <span>· {new Date(l.scheduled_at).toLocaleDateString("fr-FR")}</span>
+                      )}
                     </div>
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-1">
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[l.status]}`}>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[l.status]}`}
+                    >
                       {STATUS_LABELS[l.status]}
                     </span>
-                    {l.value && <span className="text-xs font-semibold text-primary">{fmt(l.value)}</span>}
+                    {l.value && (
+                      <span className="text-xs font-semibold text-primary">{fmt(l.value)}</span>
+                    )}
                   </div>
                 </li>
               ))}
             </ul>
           )}
-          <Link to="/commercial/activites" className="mt-3 block text-center text-xs text-primary hover:underline">
+          <Link
+            to="/commercial/activites"
+            className="mt-3 block text-center text-xs text-primary hover:underline"
+          >
             Gérer les activités →
           </Link>
         </Panel>
@@ -153,7 +198,10 @@ function CommercialDashboard() {
                     <span className="text-muted-foreground">{label}</span>
                     <div className="flex items-center gap-2">
                       <div className="w-24 overflow-hidden rounded-full bg-muted h-1.5">
-                        <div className="h-full rounded-full bg-primary" style={{ width: `${(count / total) * 100}%` }} />
+                        <div
+                          className="h-full rounded-full bg-primary"
+                          style={{ width: `${(count / total) * 100}%` }}
+                        />
                       </div>
                       <span className="font-semibold">{count}</span>
                     </div>
@@ -168,10 +216,18 @@ function CommercialDashboard() {
         <Panel title="Actions rapides">
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: "Nouveau partenariat", type: "partenariat", desc: "Contacter une organisation" },
+              {
+                label: "Nouveau partenariat",
+                type: "partenariat",
+                desc: "Contacter une organisation",
+              },
               { label: "Organiser un forum", type: "forum", desc: "Événement ou salon" },
               { label: "Visite terrain", type: "visite", desc: "Présenter nos services" },
-              { label: "Solution numérique", type: "solution_numerique", desc: "Proposer à une entreprise" },
+              {
+                label: "Solution numérique",
+                type: "solution_numerique",
+                desc: "Proposer à une entreprise",
+              },
             ].map((item) => (
               <Link
                 key={item.type}

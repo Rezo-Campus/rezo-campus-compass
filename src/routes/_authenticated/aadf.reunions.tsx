@@ -1,9 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import {
-  Loader2, Plus, CalendarDays, Users, MapPin, Clock, Trash2,
-} from "lucide-react";
+import { Loader2, Plus, CalendarDays, Users, MapPin, Clock, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
 import { Button } from "@/components/ui/button";
@@ -11,10 +9,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,13 +32,13 @@ export const Route = createFileRoute("/_authenticated/aadf/reunions")({
 const db = supabase as any;
 
 const DEPT_OPTIONS = [
-  { value: "commercial",   label: "Marketing & Commerce" },
-  { value: "rh",           label: "RH" },
-  { value: "projets",      label: "Management de Projet" },
+  { value: "commercial", label: "Marketing & Communication" },
+  { value: "rh", label: "RH" },
+  { value: "projets", label: "Management de Projet" },
   { value: "comptabilite", label: "Finance" },
-  { value: "secretaire",   label: "Secrétariat" },
-  { value: "aadf",         label: "AADF" },
-  { value: "admin",        label: "Administration" },
+  { value: "secretaire", label: "Secrétariat" },
+  { value: "aadf", label: "AADF" },
+  { value: "admin", label: "Administration" },
 ];
 
 function AadfReunions() {
@@ -83,7 +89,14 @@ function AadfReunions() {
       toast.success("Réunion planifiée");
       qc.invalidateQueries({ queryKey: ["aadf-reunions"] });
       setShowNew(false);
-      setForm({ title: "", description: "", date: "", time: "", location: "", departments: "aadf" });
+      setForm({
+        title: "",
+        description: "",
+        date: "",
+        time: "",
+        location: "",
+        departments: "aadf",
+      });
     },
     onError: (e: Error) => toast.error("Erreur", { description: e.message }),
   });
@@ -127,10 +140,15 @@ function AadfReunions() {
         ) : (
           <ul className="space-y-2">
             {reunions.map((r: any) => (
-              <li key={r.id} className="flex items-start gap-4 rounded-xl border border-border bg-card p-4">
+              <li
+                key={r.id}
+                className="flex items-start gap-4 rounded-xl border border-border bg-card p-4"
+              >
                 <div className="flex size-12 shrink-0 flex-col items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <span className="text-[10px] font-semibold uppercase">
-                    {new Date(r.start_date + "T12:00:00").toLocaleDateString("fr-FR", { month: "short" })}
+                    {new Date(r.start_date + "T12:00:00").toLocaleDateString("fr-FR", {
+                      month: "short",
+                    })}
                   </span>
                   <span className="text-lg font-bold leading-none">
                     {new Date(r.start_date + "T12:00:00").getDate()}
@@ -138,10 +156,16 @@ function AadfReunions() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-semibold">{r.title}</div>
-                  {r.description && <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">{r.description}</p>}
+                  {r.description && (
+                    <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">
+                      {r.description}
+                    </p>
+                  )}
                   <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                     {r.location && (
-                      <span className="flex items-center gap-1"><MapPin className="size-3" /> {r.location}</span>
+                      <span className="flex items-center gap-1">
+                        <MapPin className="size-3" /> {r.location}
+                      </span>
                     )}
                     <span className="flex items-center gap-1">
                       <Clock className="size-3" />
@@ -149,8 +173,12 @@ function AadfReunions() {
                     </span>
                   </div>
                 </div>
-                <Button size="icon" variant="ghost" className="size-8 shrink-0 text-muted-foreground hover:text-destructive"
-                  onClick={() => deleteReunion.mutate(r.id)}>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="size-8 shrink-0 text-muted-foreground hover:text-destructive"
+                  onClick={() => deleteReunion.mutate(r.id)}
+                >
                   <Trash2 className="size-4" />
                 </Button>
               </li>
@@ -159,7 +187,12 @@ function AadfReunions() {
         )}
       </Panel>
 
-      <Dialog open={showNew} onOpenChange={(o) => { if (!o) setShowNew(false); }}>
+      <Dialog
+        open={showNew}
+        onOpenChange={(o) => {
+          if (!o) setShowNew(false);
+        }}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Nouvelle réunion</DialogTitle>
@@ -167,30 +200,59 @@ function AadfReunions() {
           <div className="space-y-3 py-2">
             <div>
               <Label className="text-xs text-muted-foreground">Titre *</Label>
-              <Input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} className="mt-1" />
+              <Input
+                value={form.title}
+                onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+                className="mt-1"
+              />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label className="text-xs text-muted-foreground">Date *</Label>
-                <Input type="date" value={form.date} onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))} className="mt-1" />
+                <Input
+                  type="date"
+                  value={form.date}
+                  onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
+                  className="mt-1"
+                />
               </div>
               <div>
                 <Label className="text-xs text-muted-foreground">Heure</Label>
-                <Input type="time" value={form.time} onChange={(e) => setForm((f) => ({ ...f, time: e.target.value }))} className="mt-1" />
+                <Input
+                  type="time"
+                  value={form.time}
+                  onChange={(e) => setForm((f) => ({ ...f, time: e.target.value }))}
+                  className="mt-1"
+                />
               </div>
             </div>
             <div>
               <Label className="text-xs text-muted-foreground">Lieu</Label>
-              <Input value={form.location} onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))} placeholder="Salle, lien visio..." className="mt-1" />
+              <Input
+                value={form.location}
+                onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
+                placeholder="Salle, lien visio..."
+                className="mt-1"
+              />
             </div>
             <div>
               <Label className="text-xs text-muted-foreground">Description</Label>
-              <Textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} className="mt-1" rows={3} />
+              <Textarea
+                value={form.description}
+                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                className="mt-1"
+                rows={3}
+              />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowNew(false)}>Annuler</Button>
-            <Button disabled={!form.title.trim() || !form.date || createReunion.isPending} onClick={() => createReunion.mutate()}>
+            <Button variant="outline" onClick={() => setShowNew(false)}>
+              Annuler
+            </Button>
+            <Button
+              disabled={!form.title.trim() || !form.date || createReunion.isPending}
+              onClick={() => createReunion.mutate()}
+            >
               {createReunion.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
               Planifier
             </Button>

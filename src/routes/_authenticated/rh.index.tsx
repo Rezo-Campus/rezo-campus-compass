@@ -10,13 +10,13 @@ export const Route = createFileRoute("/_authenticated/rh/")({
 
 const DEPT_LABELS: Record<string, string> = {
   "Sites & Logiciels": "Sites & Logiciels",
-  "Automatisation": "Automatisation",
+  Automatisation: "Automatisation",
   "Accompagnement étudiant": "Accompagnement étudiant",
-  "Marketing & Commercial": "Marketing & Commercial",
-  "Comptabilité": "Comptabilité",
+  "Marketing & Communication": "Marketing & Communication",
+  Comptabilité: "Comptabilité",
   "Projets IT": "Projets IT",
   "Ressources Humaines": "Ressources Humaines",
-  "Général": "Général",
+  Général: "Général",
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -94,17 +94,23 @@ function RhDashboard() {
                   <div className="min-w-0">
                     <div className="text-sm font-medium truncate">{p.full_name}</div>
                     <div className="mt-0.5 text-xs text-muted-foreground">
-                      {p.department}{p.last_diploma ? ` · ${p.last_diploma}` : ""}
+                      {p.department}
+                      {p.last_diploma ? ` · ${p.last_diploma}` : ""}
                     </div>
                   </div>
-                  <span className={`ml-3 shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[p.status]}`}>
+                  <span
+                    className={`ml-3 shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[p.status]}`}
+                  >
                     {STATUS_LABELS[p.status]}
                   </span>
                 </li>
               ))}
             </ul>
           )}
-          <Link to="/rh/personnel" className="mt-3 block text-center text-xs text-primary hover:underline">
+          <Link
+            to="/rh/personnel"
+            className="mt-3 block text-center text-xs text-primary hover:underline"
+          >
             Gérer le personnel →
           </Link>
         </Panel>

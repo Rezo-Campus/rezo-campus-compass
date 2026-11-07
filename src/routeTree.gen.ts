@@ -107,6 +107,7 @@ import { Route as AuthenticatedCommercialRendezVousClientsRouteImport } from './
 import { Route as AuthenticatedCommercialProfilRouteImport } from './routes/_authenticated/commercial.profil'
 import { Route as AuthenticatedCommercialMarketingRouteImport } from './routes/_authenticated/commercial.marketing'
 import { Route as AuthenticatedCommercialFacturationRouteImport } from './routes/_authenticated/commercial.facturation'
+import { Route as AuthenticatedCommercialCalendrierEditorialRouteImport } from './routes/_authenticated/commercial.calendrier-editorial'
 import { Route as AuthenticatedCommercialAnalysesRouteImport } from './routes/_authenticated/commercial.analyses'
 import { Route as AuthenticatedCommercialAgendaMarketingRouteImport } from './routes/_authenticated/commercial.agenda-marketing'
 import { Route as AuthenticatedCommercialAgendaRouteImport } from './routes/_authenticated/commercial.agenda'
@@ -714,6 +715,12 @@ const AuthenticatedCommercialFacturationRoute =
     path: '/facturation',
     getParentRoute: () => AuthenticatedCommercialRoute,
   } as any)
+const AuthenticatedCommercialCalendrierEditorialRoute =
+  AuthenticatedCommercialCalendrierEditorialRouteImport.update({
+    id: '/calendrier-editorial',
+    path: '/calendrier-editorial',
+    getParentRoute: () => AuthenticatedCommercialRoute,
+  } as any)
 const AuthenticatedCommercialAnalysesRoute =
   AuthenticatedCommercialAnalysesRouteImport.update({
     id: '/analyses',
@@ -1009,6 +1016,7 @@ export interface FileRoutesByFullPath {
   '/commercial/agenda': typeof AuthenticatedCommercialAgendaRoute
   '/commercial/agenda-marketing': typeof AuthenticatedCommercialAgendaMarketingRoute
   '/commercial/analyses': typeof AuthenticatedCommercialAnalysesRoute
+  '/commercial/calendrier-editorial': typeof AuthenticatedCommercialCalendrierEditorialRoute
   '/commercial/facturation': typeof AuthenticatedCommercialFacturationRouteWithChildren
   '/commercial/marketing': typeof AuthenticatedCommercialMarketingRoute
   '/commercial/profil': typeof AuthenticatedCommercialProfilRoute
@@ -1140,6 +1148,7 @@ export interface FileRoutesByTo {
   '/commercial/agenda': typeof AuthenticatedCommercialAgendaRoute
   '/commercial/agenda-marketing': typeof AuthenticatedCommercialAgendaMarketingRoute
   '/commercial/analyses': typeof AuthenticatedCommercialAnalysesRoute
+  '/commercial/calendrier-editorial': typeof AuthenticatedCommercialCalendrierEditorialRoute
   '/commercial/marketing': typeof AuthenticatedCommercialMarketingRoute
   '/commercial/profil': typeof AuthenticatedCommercialProfilRoute
   '/commercial/rendez-vous-clients': typeof AuthenticatedCommercialRendezVousClientsRoute
@@ -1276,6 +1285,7 @@ export interface FileRoutesById {
   '/_authenticated/commercial/agenda': typeof AuthenticatedCommercialAgendaRoute
   '/_authenticated/commercial/agenda-marketing': typeof AuthenticatedCommercialAgendaMarketingRoute
   '/_authenticated/commercial/analyses': typeof AuthenticatedCommercialAnalysesRoute
+  '/_authenticated/commercial/calendrier-editorial': typeof AuthenticatedCommercialCalendrierEditorialRoute
   '/_authenticated/commercial/facturation': typeof AuthenticatedCommercialFacturationRouteWithChildren
   '/_authenticated/commercial/marketing': typeof AuthenticatedCommercialMarketingRoute
   '/_authenticated/commercial/profil': typeof AuthenticatedCommercialProfilRoute
@@ -1420,6 +1430,7 @@ export interface FileRouteTypes {
     | '/commercial/agenda'
     | '/commercial/agenda-marketing'
     | '/commercial/analyses'
+    | '/commercial/calendrier-editorial'
     | '/commercial/facturation'
     | '/commercial/marketing'
     | '/commercial/profil'
@@ -1551,6 +1562,7 @@ export interface FileRouteTypes {
     | '/commercial/agenda'
     | '/commercial/agenda-marketing'
     | '/commercial/analyses'
+    | '/commercial/calendrier-editorial'
     | '/commercial/marketing'
     | '/commercial/profil'
     | '/commercial/rendez-vous-clients'
@@ -1686,6 +1698,7 @@ export interface FileRouteTypes {
     | '/_authenticated/commercial/agenda'
     | '/_authenticated/commercial/agenda-marketing'
     | '/_authenticated/commercial/analyses'
+    | '/_authenticated/commercial/calendrier-editorial'
     | '/_authenticated/commercial/facturation'
     | '/_authenticated/commercial/marketing'
     | '/_authenticated/commercial/profil'
@@ -2487,6 +2500,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCommercialFacturationRouteImport
       parentRoute: typeof AuthenticatedCommercialRoute
     }
+    '/_authenticated/commercial/calendrier-editorial': {
+      id: '/_authenticated/commercial/calendrier-editorial'
+      path: '/calendrier-editorial'
+      fullPath: '/commercial/calendrier-editorial'
+      preLoaderRoute: typeof AuthenticatedCommercialCalendrierEditorialRouteImport
+      parentRoute: typeof AuthenticatedCommercialRoute
+    }
     '/_authenticated/commercial/analyses': {
       id: '/_authenticated/commercial/analyses'
       path: '/analyses'
@@ -2892,6 +2912,7 @@ interface AuthenticatedCommercialRouteChildren {
   AuthenticatedCommercialAgendaRoute: typeof AuthenticatedCommercialAgendaRoute
   AuthenticatedCommercialAgendaMarketingRoute: typeof AuthenticatedCommercialAgendaMarketingRoute
   AuthenticatedCommercialAnalysesRoute: typeof AuthenticatedCommercialAnalysesRoute
+  AuthenticatedCommercialCalendrierEditorialRoute: typeof AuthenticatedCommercialCalendrierEditorialRoute
   AuthenticatedCommercialFacturationRoute: typeof AuthenticatedCommercialFacturationRouteWithChildren
   AuthenticatedCommercialMarketingRoute: typeof AuthenticatedCommercialMarketingRoute
   AuthenticatedCommercialProfilRoute: typeof AuthenticatedCommercialProfilRoute
@@ -2909,6 +2930,8 @@ const AuthenticatedCommercialRouteChildren: AuthenticatedCommercialRouteChildren
     AuthenticatedCommercialAgendaMarketingRoute:
       AuthenticatedCommercialAgendaMarketingRoute,
     AuthenticatedCommercialAnalysesRoute: AuthenticatedCommercialAnalysesRoute,
+    AuthenticatedCommercialCalendrierEditorialRoute:
+      AuthenticatedCommercialCalendrierEditorialRoute,
     AuthenticatedCommercialFacturationRoute:
       AuthenticatedCommercialFacturationRouteWithChildren,
     AuthenticatedCommercialMarketingRoute:

@@ -1,9 +1,25 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
-  LogOut, Users, BookOpen, Calculator, FolderOpen, BarChart3,
-  ShieldCheck, UserCheck, School, Briefcase, Layers,
-  CalendarDays, CalendarClock, Receipt, Calendar, ArrowLeftRight,
-  ClipboardList, TrendingUp, FileSignature, MoreHorizontal,
+  LogOut,
+  Users,
+  BookOpen,
+  Calculator,
+  FolderOpen,
+  BarChart3,
+  ShieldCheck,
+  UserCheck,
+  School,
+  Briefcase,
+  Layers,
+  CalendarDays,
+  CalendarClock,
+  Receipt,
+  Calendar,
+  ArrowLeftRight,
+  ClipboardList,
+  TrendingUp,
+  FileSignature,
+  MoreHorizontal,
 } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
 import { useRef, useEffect, useState } from "react";
@@ -18,93 +34,171 @@ export interface NavItem {
 }
 
 export const ROLE_LABEL: Record<AppRole, string> = {
-  etudiant:    "Étudiant",
-  conseiller:  "Conseiller",
-  admin:       "Administrateur",
-  comptable:   "Comptable",
+  etudiant: "Étudiant",
+  conseiller: "Conseiller",
+  admin: "Administrateur",
+  comptable: "Comptable",
   chef_projet: "Chef de projet",
-  commercial:  "Commercial",
-  rh:          "Ressources Humaines",
-  ecole:       "Établissement",
-  secretaire:  "Secrétaire Particulière",
-  aadf:        "AADF",
+  commercial: "Mkt & Communication",
+  rh: "Ressources Humaines",
+  ecole: "Établissement",
+  secretaire: "Secrétaire Particulière",
+  aadf: "AADF",
 };
 
 /* ── Identité visuelle par rôle ── */
-const ROLE_COLORS: Record<AppRole, {
-  gradFrom: string; gradTo: string;
-  accent: string;   dot: string;
-  mobileActive: string;
-}> = {
-  etudiant:    { gradFrom: "#0c4a6e", gradTo: "#0f172a", accent: "#0ea5e9", dot: "#38bdf8",  mobileActive: "#0284c7" },
-  conseiller:  { gradFrom: "#064e3b", gradTo: "#0f172a", accent: "#10b981", dot: "#34d399",  mobileActive: "#059669" },
-  admin:       { gradFrom: "#3b0764", gradTo: "#0f172a", accent: "#a855f7", dot: "#c084fc",  mobileActive: "#9333ea" },
-  ecole:       { gradFrom: "#78350f", gradTo: "#0f172a", accent: "#f59e0b", dot: "#fcd34d",  mobileActive: "#d97706" },
-  comptable:   { gradFrom: "#1e293b", gradTo: "#0f172a", accent: "#64748b", dot: "#94a3b8",  mobileActive: "#475569" },
-  chef_projet: { gradFrom: "#1e1b4b", gradTo: "#0f172a", accent: "#6366f1", dot: "#818cf8",  mobileActive: "#4f46e5" },
-  commercial:  { gradFrom: "#431407", gradTo: "#0f172a", accent: "#f97316", dot: "#fdba74",  mobileActive: "#ea580c" },
-  rh:          { gradFrom: "#4c0519", gradTo: "#0f172a", accent: "#f43f5e", dot: "#fda4af",  mobileActive: "#e11d48" },
-  secretaire:  { gradFrom: "#083344", gradTo: "#0f172a", accent: "#06b6d4", dot: "#67e8f9",  mobileActive: "#0891b2" },
-  aadf:        { gradFrom: "#042f2e", gradTo: "#0f172a", accent: "#14b8a6", dot: "#2dd4bf",  mobileActive: "#0d9488" },
+const ROLE_COLORS: Record<
+  AppRole,
+  {
+    gradFrom: string;
+    gradTo: string;
+    accent: string;
+    dot: string;
+    mobileActive: string;
+  }
+> = {
+  etudiant: {
+    gradFrom: "#0c4a6e",
+    gradTo: "#0f172a",
+    accent: "#0ea5e9",
+    dot: "#38bdf8",
+    mobileActive: "#0284c7",
+  },
+  conseiller: {
+    gradFrom: "#064e3b",
+    gradTo: "#0f172a",
+    accent: "#10b981",
+    dot: "#34d399",
+    mobileActive: "#059669",
+  },
+  admin: {
+    gradFrom: "#3b0764",
+    gradTo: "#0f172a",
+    accent: "#a855f7",
+    dot: "#c084fc",
+    mobileActive: "#9333ea",
+  },
+  ecole: {
+    gradFrom: "#78350f",
+    gradTo: "#0f172a",
+    accent: "#f59e0b",
+    dot: "#fcd34d",
+    mobileActive: "#d97706",
+  },
+  comptable: {
+    gradFrom: "#1e293b",
+    gradTo: "#0f172a",
+    accent: "#64748b",
+    dot: "#94a3b8",
+    mobileActive: "#475569",
+  },
+  chef_projet: {
+    gradFrom: "#1e1b4b",
+    gradTo: "#0f172a",
+    accent: "#6366f1",
+    dot: "#818cf8",
+    mobileActive: "#4f46e5",
+  },
+  commercial: {
+    gradFrom: "#431407",
+    gradTo: "#0f172a",
+    accent: "#f97316",
+    dot: "#fdba74",
+    mobileActive: "#ea580c",
+  },
+  rh: {
+    gradFrom: "#4c0519",
+    gradTo: "#0f172a",
+    accent: "#f43f5e",
+    dot: "#fda4af",
+    mobileActive: "#e11d48",
+  },
+  secretaire: {
+    gradFrom: "#083344",
+    gradTo: "#0f172a",
+    accent: "#06b6d4",
+    dot: "#67e8f9",
+    mobileActive: "#0891b2",
+  },
+  aadf: {
+    gradFrom: "#042f2e",
+    gradTo: "#0f172a",
+    accent: "#14b8a6",
+    dot: "#2dd4bf",
+    mobileActive: "#0d9488",
+  },
 };
 
 const SECTION_LINKS: {
-  role: AppRole; label: string; to: string;
+  role: AppRole;
+  label: string;
+  to: string;
   icon: ComponentType<{ className?: string }>;
 }[] = [
-  { role: "admin",       label: "Administration",       to: "/admin",        icon: ShieldCheck },
-  { role: "conseiller",  label: "Conseiller",            to: "/conseiller",   icon: Users },
-  { role: "etudiant",    label: "Étudiant",              to: "/etudiant",     icon: BookOpen },
-  { role: "comptable",   label: "Comptabilité",          to: "/comptabilite", icon: Calculator },
-  { role: "chef_projet", label: "Projets",               to: "/projets",      icon: FolderOpen },
-  { role: "commercial",  label: "Commercial",            to: "/commercial",   icon: BarChart3 },
-  { role: "rh",          label: "Ressources Humaines",   to: "/rh",           icon: UserCheck },
-  { role: "ecole",       label: "Espace École",          to: "/ecole",        icon: School },
-  { role: "secretaire",  label: "Secrétariat",           to: "/secretaire",   icon: Briefcase },
-  { role: "aadf",        label: "AADF",                  to: "/aadf",         icon: Layers },
+  { role: "admin", label: "Administration", to: "/admin", icon: ShieldCheck },
+  { role: "conseiller", label: "Conseiller", to: "/conseiller", icon: Users },
+  { role: "etudiant", label: "Étudiant", to: "/etudiant", icon: BookOpen },
+  { role: "comptable", label: "Comptabilité", to: "/comptabilite", icon: Calculator },
+  { role: "chef_projet", label: "Projets", to: "/projets", icon: FolderOpen },
+  { role: "commercial", label: "Mkt & Com.", to: "/commercial", icon: BarChart3 },
+  { role: "rh", label: "Ressources Humaines", to: "/rh", icon: UserCheck },
+  { role: "ecole", label: "Espace École", to: "/ecole", icon: School },
+  { role: "secretaire", label: "Secrétariat", to: "/secretaire", icon: Briefcase },
+  { role: "aadf", label: "AADF", to: "/aadf", icon: Layers },
 ];
 
 /* ── Accès rapides par rôle (menu 3-points dans le topbar) ── */
-const ROLE_QUICK_ACTIONS: Partial<Record<AppRole, {
-  label: string; to: string; icon: ComponentType<{ className?: string }>;
-}[]>> = {
-  secretaire:  [
-    { label: "Agenda",       to: "/secretaire/agenda",         icon: Calendar },
-    { label: "Rendez-vous",  to: "/secretaire/rendez-vous",    icon: CalendarClock },
-    { label: "Réunions",     to: "/secretaire/reunions",       icon: CalendarDays },
-    { label: "Facturation",  to: "/secretaire/facturation",    icon: Receipt },
+const ROLE_QUICK_ACTIONS: Partial<
+  Record<
+    AppRole,
+    {
+      label: string;
+      to: string;
+      icon: ComponentType<{ className?: string }>;
+    }[]
+  >
+> = {
+  secretaire: [
+    { label: "Agenda", to: "/secretaire/agenda", icon: Calendar },
+    { label: "Rendez-vous", to: "/secretaire/rendez-vous", icon: CalendarClock },
+    { label: "Réunions", to: "/secretaire/reunions", icon: CalendarDays },
+    { label: "Facturation", to: "/secretaire/facturation", icon: Receipt },
   ],
-  comptable: [
-    { label: "Réunions", to: "/comptabilite/reunions", icon: CalendarDays },
-  ],
+  comptable: [{ label: "Réunions", to: "/comptabilite/reunions", icon: CalendarDays }],
   rh: [
-    { label: "Agenda",     to: "/rh/agenda",     icon: Calendar },
-    { label: "Contrats",   to: "/rh/contrats",   icon: FileSignature },
+    { label: "Agenda", to: "/rh/agenda", icon: Calendar },
+    { label: "Contrats", to: "/rh/contrats", icon: FileSignature },
     { label: "Entretiens", to: "/rh/entretiens", icon: UserCheck },
-    { label: "Réunions",   to: "/rh/reunions",   icon: CalendarDays },
+    { label: "Réunions", to: "/rh/reunions", icon: CalendarDays },
   ],
   commercial: [
-    { label: "Agenda",    to: "/commercial/agenda",              icon: Calendar },
-    { label: "Marketing", to: "/commercial/marketing",           icon: TrendingUp },
-    { label: "RDV",       to: "/commercial/rendez-vous-clients", icon: CalendarClock },
-    { label: "Réunions",  to: "/commercial/reunions",            icon: CalendarDays },
+    { label: "Agenda", to: "/commercial/agenda", icon: Calendar },
+    { label: "Marketing", to: "/commercial/marketing", icon: TrendingUp },
+    { label: "RDV", to: "/commercial/rendez-vous-clients", icon: CalendarClock },
+    { label: "Réunions", to: "/commercial/reunions", icon: CalendarDays },
   ],
   chef_projet: [
-    { label: "Agenda",       to: "/projets/agenda",      icon: Calendar },
-    { label: "Projets",      to: "/projets/liste",        icon: FolderOpen },
-    { label: "Analytiques",  to: "/projets/analytiques",  icon: TrendingUp },
-    { label: "Réunions",     to: "/projets/reunions",     icon: CalendarDays },
+    { label: "Agenda", to: "/projets/agenda", icon: Calendar },
+    { label: "Projets", to: "/projets/liste", icon: FolderOpen },
+    { label: "Analytiques", to: "/projets/analytiques", icon: TrendingUp },
+    { label: "Réunions", to: "/projets/reunions", icon: CalendarDays },
   ],
   admin: [
     { label: "Utilisateurs", to: "/admin/utilisateurs", icon: Users },
-    { label: "Dossiers",     to: "/admin/dossiers",      icon: FolderOpen },
-    { label: "Réunions",     to: "/admin/reunions",      icon: CalendarDays },
-    { label: "Facturation",  to: "/admin/facturation",   icon: Receipt },
+    { label: "Dossiers", to: "/admin/dossiers", icon: FolderOpen },
+    { label: "Réunions", to: "/admin/reunions", icon: CalendarDays },
+    { label: "Facturation", to: "/admin/facturation", icon: Receipt },
   ],
 };
 
 /* ── Menu 3-points accès rapides ── */
-function QuickActionsMenu({ role, C }: { role: AppRole | undefined; C: typeof ROLE_COLORS[AppRole] }) {
+function QuickActionsMenu({
+  role,
+  C,
+}: {
+  role: AppRole | undefined;
+  C: (typeof ROLE_COLORS)[AppRole];
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const actions = role ? (ROLE_QUICK_ACTIONS[role] ?? []) : [];
@@ -143,7 +237,10 @@ function QuickActionsMenu({ role, C }: { role: AppRole | undefined; C: typeof RO
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-foreground transition hover:bg-muted/60"
               >
-                <span className="grid size-7 place-items-center rounded-lg" style={{ background: `${C.accent}18`, color: C.accent }}>
+                <span
+                  className="grid size-7 place-items-center rounded-lg"
+                  style={{ background: `${C.accent}18`, color: C.accent }}
+                >
                   <a.icon className="size-3.5" />
                 </span>
                 {a.label}
@@ -157,9 +254,9 @@ function QuickActionsMenu({ role, C }: { role: AppRole | undefined; C: typeof RO
 }
 
 export function AppShell({ nav, children }: { nav: NavItem[]; children: ReactNode }) {
-  const navigate   = useNavigate();
+  const navigate = useNavigate();
   const { data: auth } = useAuth();
-  const pathname   = useRouterState({ select: (s) => s.location.pathname });
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const onLogout = async () => {
     await supabase.auth.signOut();
@@ -167,14 +264,18 @@ export function AppShell({ nav, children }: { nav: NavItem[]; children: ReactNod
   };
 
   const initials = (auth?.profile?.full_name || auth?.user?.email || "?")
-    .split(/\s+/).map((s) => s[0]).slice(0, 2).join("").toUpperCase();
+    .split(/\s+/)
+    .map((s) => s[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
   const otherSections = SECTION_LINKS.filter(
     (s) => auth?.roles?.includes(s.role) && !pathname.startsWith(s.to),
   );
 
-  const role      = auth?.role as AppRole | undefined;
-  const C         = role ? ROLE_COLORS[role] : ROLE_COLORS.etudiant;
+  const role = auth?.role as AppRole | undefined;
+  const C = role ? ROLE_COLORS[role] : ROLE_COLORS.etudiant;
   const roleLabel = role ? ROLE_LABEL[role] : "—";
 
   const currentPage = nav.find(
@@ -183,13 +284,11 @@ export function AppShell({ nav, children }: { nav: NavItem[]; children: ReactNod
 
   return (
     <div className="flex min-h-screen bg-background print:block print:min-h-0">
-
       {/* ══════════════ SIDEBAR DESKTOP ══════════════ */}
       <aside
         className="hidden w-64 shrink-0 flex-col md:flex print:hidden"
         style={{ background: `linear-gradient(170deg, ${C.gradFrom} 0%, ${C.gradTo} 100%)` }}
       >
-
         {/* Logo */}
         <div className="flex h-[68px] items-center gap-3 px-5 border-b border-white/10">
           <Link to="/app" className="flex items-center gap-3 min-w-0">
@@ -232,9 +331,7 @@ export function AppShell({ nav, children }: { nav: NavItem[]; children: ReactNod
                 key={item.to}
                 to={item.to}
                 className={`flex items-center gap-3 rounded-xl text-sm font-medium transition-all duration-150 ${
-                  active
-                    ? "text-white"
-                    : "text-white/58 hover:bg-white/10 hover:text-white/90"
+                  active ? "text-white" : "text-white/58 hover:bg-white/10 hover:text-white/90"
                 }`}
                 style={
                   active
@@ -276,7 +373,10 @@ export function AppShell({ nav, children }: { nav: NavItem[]; children: ReactNod
 
         {/* User card */}
         <div className="border-t border-white/10 p-3">
-          <div className="flex items-center gap-3 rounded-xl px-3 py-2.5" style={{ background: "rgba(255,255,255,0.06)" }}>
+          <div
+            className="flex items-center gap-3 rounded-xl px-3 py-2.5"
+            style={{ background: "rgba(255,255,255,0.06)" }}
+          >
             {auth?.profile?.photo_url ? (
               <img
                 src={auth.profile.photo_url}
@@ -308,7 +408,12 @@ export function AppShell({ nav, children }: { nav: NavItem[]; children: ReactNod
                   )}
                   {auth?.profile?.created_at && (
                     <span className="text-[10px] text-white/40">
-                      Inscrit le {new Date(auth.profile.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}
+                      Inscrit le{" "}
+                      {new Date(auth.profile.created_at).toLocaleDateString("fr-FR", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
                     </span>
                   )}
                 </div>
@@ -327,10 +432,8 @@ export function AppShell({ nav, children }: { nav: NavItem[]; children: ReactNod
 
       {/* ══════════════ MAIN AREA ══════════════ */}
       <div className="flex min-w-0 flex-1 flex-col print:w-full print:flex-none">
-
         {/* ── Topbar ── */}
         <header className="sticky top-0 z-30 flex h-[68px] items-center justify-between border-b border-border bg-card/90 px-5 backdrop-blur-sm print:hidden">
-
           {/* Left — mobile logo + breadcrumb */}
           <div className="flex items-center gap-3 min-w-0">
             {/* Mobile: logo inline */}
@@ -371,7 +474,12 @@ export function AppShell({ nav, children }: { nav: NavItem[]; children: ReactNod
                 )}
                 {role === "etudiant" && auth?.profile?.created_at && (
                   <div className="mt-0.5 text-[11px] text-muted-foreground/70">
-                    Inscrit le {new Date(auth.profile.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}
+                    Inscrit le{" "}
+                    {new Date(auth.profile.created_at).toLocaleDateString("fr-FR", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
                   </div>
                 )}
               </div>
@@ -403,9 +511,15 @@ export function AppShell({ nav, children }: { nav: NavItem[]; children: ReactNod
                 key={item.to}
                 to={item.to}
                 className={`flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium transition ${
-                  active ? "text-white shadow-sm" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  active
+                    ? "text-white shadow-sm"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 }`}
-                style={active ? { background: `linear-gradient(135deg, ${C.gradFrom}, ${C.accent})` } : undefined}
+                style={
+                  active
+                    ? { background: `linear-gradient(135deg, ${C.gradFrom}, ${C.accent})` }
+                    : undefined
+                }
               >
                 <item.icon className="size-3.5 shrink-0" />
                 {item.label}

@@ -14,7 +14,12 @@ export const BUDGET_ROWS: BudgetRow[] = [
   { id: "pi4", label: "Vente de matériel informatique", type: "item", parentId: "pi" },
   { id: "ae", label: "Accompagnement des étudiants", type: "sub", parentId: "produits" },
   { id: "ae1", label: "Frais de dossier et orientation", type: "item", parentId: "ae" },
-  { id: "ae2", label: "Pack installation (accueil, logement, démarches)", type: "item", parentId: "ae" },
+  {
+    id: "ae2",
+    label: "Pack installation (accueil, logement, démarches)",
+    type: "item",
+    parentId: "ae",
+  },
   { id: "ae3", label: "Commissions écoles partenaires", type: "item", parentId: "ae" },
   { id: "ri", label: "Rezo Immo", type: "sub", parentId: "produits" },
   { id: "ri1", label: "Commissions et abonnements annonces", type: "item", parentId: "ri" },
@@ -37,7 +42,7 @@ export const BUDGET_ROWS: BudgetRow[] = [
   { id: "ct2", label: "Noms de domaine", type: "item", parentId: "ct" },
   { id: "ct3", label: "Licences et abonnements logiciels", type: "item", parentId: "ct" },
   { id: "ct4", label: "Téléphonie et internet", type: "item", parentId: "ct" },
-  { id: "mk", label: "Marketing et commercial", type: "sub", parentId: "charges" },
+  { id: "mk", label: "Marketing & Communication", type: "sub", parentId: "charges" },
   { id: "mk1", label: "Publicité en ligne", type: "item", parentId: "mk" },
   { id: "mk2", label: "Impression (affiches, flyers, one-pagers)", type: "item", parentId: "mk" },
   { id: "mk3", label: "Location de salle (séances d'information)", type: "item", parentId: "mk" },
@@ -63,27 +68,60 @@ export const BUDGET_ROWS: BudgetRow[] = [
   { id: "div2", label: "Imprévus", type: "item", parentId: "div" },
 ];
 
-export const MONTHS_SHORT = ["Janv.", "Févr.", "Mars", "Avr.", "Mai", "Juin", "Juil.", "Août", "Sept.", "Oct.", "Nov.", "Déc."];
-export const MONTHS_FULL = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+export const MONTHS_SHORT = [
+  "Janv.",
+  "Févr.",
+  "Mars",
+  "Avr.",
+  "Mai",
+  "Juin",
+  "Juil.",
+  "Août",
+  "Sept.",
+  "Oct.",
+  "Nov.",
+  "Déc.",
+];
+export const MONTHS_FULL = [
+  "Janvier",
+  "Février",
+  "Mars",
+  "Avril",
+  "Mai",
+  "Juin",
+  "Juillet",
+  "Août",
+  "Septembre",
+  "Octobre",
+  "Novembre",
+  "Décembre",
+];
 
 export type Vals = Record<string, number[]>;
 
 export function initVals(): Vals {
   const v: Vals = {};
-  BUDGET_ROWS.forEach((r) => { if (r.type === "item") v[r.id] = Array(12).fill(0); });
+  BUDGET_ROWS.forEach((r) => {
+    if (r.type === "item") v[r.id] = Array(12).fill(0);
+  });
   return v;
 }
 
 export function computeAll(vals: Vals): Vals {
   const r: Vals = {};
   BUDGET_ROWS.forEach((row) => {
-    if (row.type === "item") r[row.id] = (vals[row.id] || Array(12).fill(0)).map((v) => Number(v) || 0);
+    if (row.type === "item")
+      r[row.id] = (vals[row.id] || Array(12).fill(0)).map((v) => Number(v) || 0);
   });
   BUDGET_ROWS.forEach((row) => {
     if (row.type === "sub") {
       const items = BUDGET_ROWS.filter((x) => x.type === "item" && x.parentId === row.id);
       const tot = Array(12).fill(0);
-      items.forEach((it) => r[it.id]?.forEach((v, i) => { tot[i] += v; }));
+      items.forEach((it) =>
+        r[it.id]?.forEach((v, i) => {
+          tot[i] += v;
+        }),
+      );
       r[row.id] = tot;
     }
   });
@@ -91,7 +129,11 @@ export function computeAll(vals: Vals): Vals {
     if (row.type === "section") {
       const subs = BUDGET_ROWS.filter((x) => x.type === "sub" && x.parentId === row.id);
       const tot = Array(12).fill(0);
-      subs.forEach((sub) => r[sub.id]?.forEach((v, i) => { tot[i] += v; }));
+      subs.forEach((sub) =>
+        r[sub.id]?.forEach((v, i) => {
+          tot[i] += v;
+        }),
+      );
       r[row.id] = tot;
     }
   });

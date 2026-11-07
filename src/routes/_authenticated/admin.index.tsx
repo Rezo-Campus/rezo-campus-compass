@@ -2,9 +2,21 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import type { ComponentType } from "react";
 import {
-  GraduationCap, Users, FolderOpen, FileCheck2,
-  MessageSquare, CalendarDays, AlertCircle, CheckCircle2, Clock,
-  DollarSign, TrendingUp, TrendingDown, BarChart3, Kanban, UserCheck,
+  GraduationCap,
+  Users,
+  FolderOpen,
+  FileCheck2,
+  MessageSquare,
+  CalendarDays,
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  DollarSign,
+  TrendingUp,
+  TrendingDown,
+  BarChart3,
+  Kanban,
+  UserCheck,
 } from "lucide-react";
 import { PageHeader, Panel, StatCard } from "@/components/dashboard-bits";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,16 +31,31 @@ function AdminDashboard() {
     queryFn: async () => {
       const [students, advisors, pendingDocs, upcomingRdv, unreadMsgs, openFiles] =
         await Promise.all([
-          supabase.from("user_roles").select("user_id", { count: "exact", head: true }).eq("role", "etudiant"),
-          supabase.from("user_roles").select("user_id", { count: "exact", head: true }).eq("role", "conseiller"),
-          supabase.from("documents").select("id", { count: "exact", head: true }).eq("status", "en_attente"),
+          supabase
+            .from("user_roles")
+            .select("user_id", { count: "exact", head: true })
+            .eq("role", "etudiant"),
+          supabase
+            .from("user_roles")
+            .select("user_id", { count: "exact", head: true })
+            .eq("role", "conseiller"),
+          supabase
+            .from("documents")
+            .select("id", { count: "exact", head: true })
+            .eq("status", "en_attente"),
           supabase
             .from("appointments")
             .select("id", { count: "exact", head: true })
             .eq("status", "programme")
             .gte("scheduled_at", new Date().toISOString()),
-          supabase.from("messages").select("id", { count: "exact", head: true }).is("read_at", null),
-          supabase.from("student_files").select("id", { count: "exact", head: true }).neq("status", "archive"),
+          supabase
+            .from("messages")
+            .select("id", { count: "exact", head: true })
+            .is("read_at", null),
+          supabase
+            .from("student_files")
+            .select("id", { count: "exact", head: true })
+            .neq("status", "archive"),
         ]);
       return {
         students: students.count ?? 0,
@@ -45,26 +72,18 @@ function AdminDashboard() {
   const { data: deptStats } = useQuery({
     queryKey: ["admin-dept-overview"],
     queryFn: async () => {
-      const firstOfMonth = new Date(
-        new Date().getFullYear(),
-        new Date().getMonth(),
-        1,
-      )
+      const firstOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
         .toISOString()
         .slice(0, 10);
 
       const [txResult, projResult, leadResult, rhResult] = await Promise.allSettled([
-        supabase
-          .from("transactions")
-          .select("type, amount")
-          .gte("date", firstOfMonth),
+        supabase.from("transactions").select("type, amount").gte("date", firstOfMonth),
         supabase.from("projects").select("status"),
         supabase.from("commercial_leads").select("status, value"),
         supabase.from("personnel").select("status"),
       ]);
 
-      const txData =
-        txResult.status === "fulfilled" ? (txResult.value.data ?? []) : [];
+      const txData = txResult.status === "fulfilled" ? (txResult.value.data ?? []) : [];
       const recettes = txData
         .filter((t) => t.type === "recette")
         .reduce((s, t) => s + (t.amount ?? 0), 0);
@@ -72,25 +91,17 @@ function AdminDashboard() {
         .filter((t) => t.type === "depense")
         .reduce((s, t) => s + (t.amount ?? 0), 0);
 
-      const projData =
-        projResult.status === "fulfilled" ? (projResult.value.data ?? []) : [];
+      const projData = projResult.status === "fulfilled" ? (projResult.value.data ?? []) : [];
       const projEnCours = projData.filter((p) => p.status === "en_cours").length;
       const projPlanifie = projData.filter((p) => p.status === "planifie").length;
       const projLivre = projData.filter((p) => p.status === "livre").length;
 
-      const leadData =
-        leadResult.status === "fulfilled" ? (leadResult.value.data ?? []) : [];
-      const pipeline = leadData.filter((l) =>
-        ["prospection", "en_negociation"].includes(l.status),
-      );
+      const leadData = leadResult.status === "fulfilled" ? (leadResult.value.data ?? []) : [];
+      const pipeline = leadData.filter((l) => ["prospection", "en_negociation"].includes(l.status));
       const gagnes = leadData.filter((l) => l.status === "gagne").length;
-      const valeurPipeline = pipeline.reduce(
-        (s, l) => s + (l.value ?? 0),
-        0,
-      );
+      const valeurPipeline = pipeline.reduce((s, l) => s + (l.value ?? 0), 0);
 
-      const rhData =
-        rhResult.status === "fulfilled" ? (rhResult.value.data ?? []) : [];
+      const rhData = rhResult.status === "fulfilled" ? (rhResult.value.data ?? []) : [];
       const rhTotal = rhData.length;
       const rhActifs = rhData.filter((p) => p.status === "actif").length;
       const rhConge = rhData.filter((p) => p.status === "conge").length;
@@ -122,7 +133,10 @@ function AdminDashboard() {
         .limit(6);
       if (!files?.length) return [];
       const ids = files.map((f) => f.student_id);
-      const { data: profs } = await supabase.from("profiles").select("id, full_name, email").in("id", ids);
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id, full_name, email")
+        .in("id", ids);
       return files.map((f) => ({ ...f, profile: profs?.find((p) => p.id === f.student_id) }));
     },
   });
@@ -138,7 +152,10 @@ function AdminDashboard() {
         .limit(5);
       if (!docs?.length) return [];
       const ids = [...new Set(docs.map((d) => d.student_id))];
-      const { data: profs } = await supabase.from("profiles").select("id, full_name, email").in("id", ids);
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id, full_name, email")
+        .in("id", ids);
       return docs.map((d) => ({ ...d, profile: profs?.find((p) => p.id === d.student_id) }));
     },
   });
@@ -154,8 +171,13 @@ function AdminDashboard() {
         .order("scheduled_at")
         .limit(5);
       if (!data?.length) return [];
-      const ids = [...new Set([...data.map((r) => r.student_id), ...data.map((r) => r.advisor_id)])];
-      const { data: profs } = await supabase.from("profiles").select("id, full_name, email").in("id", ids);
+      const ids = [
+        ...new Set([...data.map((r) => r.student_id), ...data.map((r) => r.advisor_id)]),
+      ];
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id, full_name, email")
+        .in("id", ids);
       return data.map((r) => ({
         ...r,
         student: profs?.find((p) => p.id === r.student_id),
@@ -179,10 +201,22 @@ function AdminDashboard() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <StatCard label="Étudiants" value={String(stats?.students ?? 0)} icon={GraduationCap} />
         <StatCard label="Conseillers" value={String(stats?.advisors ?? 0)} icon={Users} />
-        <StatCard label="Dossiers ouverts" value={String(stats?.openFiles ?? 0)} icon={FolderOpen} />
-        <StatCard label="Docs en attente" value={String(stats?.pendingDocs ?? 0)} icon={FileCheck2} />
+        <StatCard
+          label="Dossiers ouverts"
+          value={String(stats?.openFiles ?? 0)}
+          icon={FolderOpen}
+        />
+        <StatCard
+          label="Docs en attente"
+          value={String(stats?.pendingDocs ?? 0)}
+          icon={FileCheck2}
+        />
         <StatCard label="RDV à venir" value={String(stats?.upcomingRdv ?? 0)} icon={CalendarDays} />
-        <StatCard label="Msgs non lus" value={String(stats?.unreadMsgs ?? 0)} icon={MessageSquare} />
+        <StatCard
+          label="Msgs non lus"
+          value={String(stats?.unreadMsgs ?? 0)}
+          icon={MessageSquare}
+        />
       </div>
 
       {/* ── Aperçu des 4 départements ── */}
@@ -190,16 +224,12 @@ function AdminDashboard() {
         Aperçu des départements
       </h2>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-
         {/* Comptabilité */}
         <Panel
           title="Comptabilité"
           description="Finances du mois en cours"
           action={
-            <Link
-              to="/comptabilite"
-              className="text-xs text-primary hover:underline"
-            >
+            <Link to="/comptabilite" className="text-xs text-primary hover:underline">
               Ouvrir →
             </Link>
           }
@@ -221,11 +251,7 @@ function AdminDashboard() {
               label="Solde"
               value={`${fmt(deptStats?.solde ?? 0)} F`}
               icon={DollarSign}
-              color={
-                (deptStats?.solde ?? 0) >= 0
-                  ? "text-primary"
-                  : "text-red-600"
-              }
+              color={(deptStats?.solde ?? 0) >= 0 ? "text-primary" : "text-red-600"}
             />
           </div>
         </Panel>
@@ -241,11 +267,7 @@ function AdminDashboard() {
           }
         >
           <div className="grid grid-cols-3 gap-3">
-            <MiniStat
-              label="En cours"
-              value={String(deptStats?.projEnCours ?? 0)}
-              icon={Kanban}
-            />
+            <MiniStat label="En cours" value={String(deptStats?.projEnCours ?? 0)} icon={Kanban} />
             <MiniStat
               label="Planifiés"
               value={String(deptStats?.projPlanifie ?? 0)}
@@ -262,23 +284,16 @@ function AdminDashboard() {
 
         {/* Commercial */}
         <Panel
-          title="Marketing & Commercial"
-          description="Pipeline et opportunités"
+          title="Marketing & Communication"
+          description="Campagnes, contacts et communication"
           action={
-            <Link
-              to="/commercial"
-              className="text-xs text-primary hover:underline"
-            >
+            <Link to="/commercial" className="text-xs text-primary hover:underline">
               Ouvrir →
             </Link>
           }
         >
           <div className="grid grid-cols-3 gap-3">
-            <MiniStat
-              label="Pipeline"
-              value={String(deptStats?.pipeline ?? 0)}
-              icon={BarChart3}
-            />
+            <MiniStat label="Pipeline" value={String(deptStats?.pipeline ?? 0)} icon={BarChart3} />
             <MiniStat
               label="Gagnés"
               value={String(deptStats?.gagnes ?? 0)}
@@ -305,11 +320,7 @@ function AdminDashboard() {
           }
         >
           <div className="grid grid-cols-3 gap-3">
-            <MiniStat
-              label="Effectif"
-              value={String(deptStats?.rhTotal ?? 0)}
-              icon={UserCheck}
-            />
+            <MiniStat label="Effectif" value={String(deptStats?.rhTotal ?? 0)} icon={UserCheck} />
             <MiniStat
               label="Actifs"
               value={String(deptStats?.rhActifs ?? 0)}
@@ -329,7 +340,10 @@ function AdminDashboard() {
       {/* ── Détails orientation ── */}
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
         {/* Dossiers récents */}
-        <Panel title="Dossiers récents" description="Dernières activités sur les dossiers étudiants.">
+        <Panel
+          title="Dossiers récents"
+          description="Dernières activités sur les dossiers étudiants."
+        >
           {recentFiles.length === 0 ? (
             <p className="text-sm text-muted-foreground">Aucun dossier.</p>
           ) : (
@@ -337,12 +351,17 @@ function AdminDashboard() {
               {recentFiles.map((f) => (
                 <li key={f.student_id} className="flex items-center justify-between py-3">
                   <div>
-                    <div className="text-sm font-medium">{f.profile?.full_name || f.profile?.email || "—"}</div>
+                    <div className="text-sm font-medium">
+                      {f.profile?.full_name || f.profile?.email || "—"}
+                    </div>
                     <div className="text-xs text-muted-foreground">{f.profile?.email}</div>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="h-1.5 w-16 overflow-hidden rounded-full bg-muted">
-                      <div className="h-full rounded-full bg-primary" style={{ width: `${f.progress}%` }} />
+                      <div
+                        className="h-full rounded-full bg-primary"
+                        style={{ width: `${f.progress}%` }}
+                      />
                     </div>
                     <span className="text-xs text-muted-foreground">{f.progress}%</span>
                     <StatusFileBadge status={f.status} />
@@ -351,13 +370,19 @@ function AdminDashboard() {
               ))}
             </ul>
           )}
-          <Link to="/admin/dossiers" className="mt-3 block text-center text-xs text-primary hover:underline">
+          <Link
+            to="/admin/dossiers"
+            className="mt-3 block text-center text-xs text-primary hover:underline"
+          >
             Voir tous les dossiers →
           </Link>
         </Panel>
 
         {/* Documents en attente */}
-        <Panel title="Documents à valider" description="Documents récents nécessitant une révision.">
+        <Panel
+          title="Documents à valider"
+          description="Documents récents nécessitant une révision."
+        >
           {recentDocs.length === 0 ? (
             <div className="flex items-center gap-2 rounded-xl border border-dashed border-border p-6 text-sm text-muted-foreground">
               <CheckCircle2 className="size-4 text-green-500" /> Tous les documents sont traités.
@@ -368,7 +393,9 @@ function AdminDashboard() {
                 <li key={d.id} className="flex items-center justify-between py-3">
                   <div>
                     <div className="text-sm font-medium">{d.name}</div>
-                    <div className="text-xs text-muted-foreground">{d.profile?.full_name || d.profile?.email}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {d.profile?.full_name || d.profile?.email}
+                    </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground">
@@ -380,7 +407,10 @@ function AdminDashboard() {
               ))}
             </ul>
           )}
-          <Link to="/admin/validations" className="mt-3 block text-center text-xs text-primary hover:underline">
+          <Link
+            to="/admin/validations"
+            className="mt-3 block text-center text-xs text-primary hover:underline"
+          >
             Accéder aux validations →
           </Link>
         </Panel>
@@ -394,7 +424,9 @@ function AdminDashboard() {
               {recentRdv.map((r) => (
                 <li key={r.id} className="flex items-center justify-between py-3">
                   <div>
-                    <div className="text-sm font-medium">{r.student?.full_name || r.student?.email || "—"}</div>
+                    <div className="text-sm font-medium">
+                      {r.student?.full_name || r.student?.email || "—"}
+                    </div>
                     <div className="text-xs text-muted-foreground">
                       Conseiller : {r.advisor?.full_name || r.advisor?.email || "—"}
                     </div>
@@ -403,16 +435,24 @@ function AdminDashboard() {
                     <div className="flex items-center gap-1 text-xs font-medium">
                       <Clock className="size-3 text-muted-foreground" />
                       {new Date(r.scheduled_at).toLocaleDateString("fr-FR", {
-                        day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit",
+                        day: "2-digit",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
                       })}
                     </div>
-                    {r.location && <div className="text-xs text-muted-foreground">{r.location}</div>}
+                    {r.location && (
+                      <div className="text-xs text-muted-foreground">{r.location}</div>
+                    )}
                   </div>
                 </li>
               ))}
             </ul>
           )}
-          <Link to="/admin/rendez-vous" className="mt-3 block text-center text-xs text-primary hover:underline">
+          <Link
+            to="/admin/rendez-vous"
+            className="mt-3 block text-center text-xs text-primary hover:underline"
+          >
             Gérer les rendez-vous →
           </Link>
         </Panel>
@@ -421,13 +461,38 @@ function AdminDashboard() {
         <Panel title="Accès rapides">
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: "Gérer les accès", to: "/admin/utilisateurs", icon: Users, desc: "Attribuer les rôles" },
-              { label: "Tous les dossiers", to: "/admin/dossiers", icon: FolderOpen, desc: "Assigner conseillers" },
-              { label: "Comptabilité", to: "/comptabilite", icon: DollarSign, desc: "Recettes & dépenses" },
+              {
+                label: "Gérer les accès",
+                to: "/admin/utilisateurs",
+                icon: Users,
+                desc: "Attribuer les rôles",
+              },
+              {
+                label: "Tous les dossiers",
+                to: "/admin/dossiers",
+                icon: FolderOpen,
+                desc: "Assigner conseillers",
+              },
+              {
+                label: "Comptabilité",
+                to: "/comptabilite",
+                icon: DollarSign,
+                desc: "Recettes & dépenses",
+              },
               { label: "Projets", to: "/projets", icon: Kanban, desc: "Suivi des projets" },
               { label: "Commercial", to: "/commercial", icon: BarChart3, desc: "Pipeline & leads" },
-              { label: "Ressources Humaines", to: "/rh", icon: UserCheck, desc: "Gestion du personnel" },
-              { label: "Validations", to: "/admin/validations", icon: FileCheck2, desc: "Réviser documents" },
+              {
+                label: "Ressources Humaines",
+                to: "/rh",
+                icon: UserCheck,
+                desc: "Gestion du personnel",
+              },
+              {
+                label: "Validations",
+                to: "/admin/validations",
+                icon: FileCheck2,
+                desc: "Réviser documents",
+              },
             ].map((item) => (
               <Link
                 key={item.to}
@@ -476,7 +541,9 @@ function StatusFileBadge({ status }: { status: string }) {
     archive: "bg-gray-100 text-gray-600",
   };
   return (
-    <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium capitalize ${map[status] ?? "bg-muted text-muted-foreground"}`}>
+    <span
+      className={`rounded-full px-2 py-0.5 text-[10px] font-medium capitalize ${map[status] ?? "bg-muted text-muted-foreground"}`}
+    >
       {status.replace("_", " ")}
     </span>
   );

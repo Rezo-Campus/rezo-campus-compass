@@ -1,8 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
-  ArrowLeftRight, ClipboardList, Clock, CheckCircle2, AlertTriangle,
-  CalendarDays, ArrowRight,
+  ArrowLeftRight,
+  ClipboardList,
+  Clock,
+  CheckCircle2,
+  AlertTriangle,
+  CalendarDays,
+  ArrowRight,
 } from "lucide-react";
 import { PageHeader, Panel, StatCard } from "@/components/dashboard-bits";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,13 +19,13 @@ export const Route = createFileRoute("/_authenticated/aadf/")({
 const db = supabase as any;
 
 const DEPT_LABELS: Record<string, string> = {
-  commercial:   "Marketing & Commerce",
-  marketing:    "Marketing",
-  rh:           "Ressources Humaines",
-  projets:      "Management de Projet",
+  commercial: "Marketing & Communication",
+  marketing: "Marketing",
+  rh: "Ressources Humaines",
+  projets: "Management de Projet",
   comptabilite: "Finance & Comptabilité",
-  secretaire:   "Secrétariat",
-  admin:        "Administration",
+  secretaire: "Secrétariat",
+  admin: "Administration",
 };
 
 function AadfDashboard() {
@@ -69,10 +74,10 @@ function AadfDashboard() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="En attente"   value={String(pending)}     icon={Clock}         />
-        <StatCard label="Enregistrés"  value={String(registered)}  icon={ClipboardList} />
-        <StatCard label="Transmis"     value={String(transmitted)} icon={ArrowLeftRight}/>
-        <StatCard label="Traités"      value={String(processed)}   icon={CheckCircle2}  />
+        <StatCard label="En attente" value={String(pending)} icon={Clock} />
+        <StatCard label="Enregistrés" value={String(registered)} icon={ClipboardList} />
+        <StatCard label="Transmis" value={String(transmitted)} icon={ArrowLeftRight} />
+        <StatCard label="Traités" value={String(processed)} icon={CheckCircle2} />
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
@@ -91,12 +96,17 @@ function AadfDashboard() {
             <ul className="divide-y divide-border">
               {recentTransmissions.map((t: any) => (
                 <li key={t.id} className="flex items-start gap-3 py-3">
-                  <div className={`mt-0.5 grid size-7 shrink-0 place-items-center rounded-full text-[10px] font-bold ${
-                    t.status === "soumis"     ? "bg-amber-100 text-amber-700" :
-                    t.status === "enregistre" ? "bg-blue-100 text-blue-700" :
-                    t.status === "transmis"   ? "bg-indigo-100 text-indigo-700" :
-                    "bg-green-100 text-green-700"
-                  }`}>
+                  <div
+                    className={`mt-0.5 grid size-7 shrink-0 place-items-center rounded-full text-[10px] font-bold ${
+                      t.status === "soumis"
+                        ? "bg-amber-100 text-amber-700"
+                        : t.status === "enregistre"
+                          ? "bg-blue-100 text-blue-700"
+                          : t.status === "transmis"
+                            ? "bg-indigo-100 text-indigo-700"
+                            : "bg-green-100 text-green-700"
+                    }`}
+                  >
                     <ArrowLeftRight className="size-3.5" />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -107,12 +117,22 @@ function AadfDashboard() {
                       {DEPT_LABELS[t.target_department] ?? t.target_department}
                     </div>
                   </div>
-                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                    t.status === "soumis" ? "bg-amber-100 text-amber-700" :
-                    t.status === "traite" ? "bg-green-100 text-green-700" :
-                    "bg-blue-100 text-blue-700"
-                  }`}>
-                    {t.status === "soumis" ? "En attente" : t.status === "enregistre" ? "Enregistré" : t.status === "transmis" ? "Transmis" : "Traité"}
+                  <span
+                    className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                      t.status === "soumis"
+                        ? "bg-amber-100 text-amber-700"
+                        : t.status === "traite"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-blue-100 text-blue-700"
+                    }`}
+                  >
+                    {t.status === "soumis"
+                      ? "En attente"
+                      : t.status === "enregistre"
+                        ? "Enregistré"
+                        : t.status === "transmis"
+                          ? "Transmis"
+                          : "Traité"}
                   </span>
                 </li>
               ))}
@@ -135,19 +155,26 @@ function AadfDashboard() {
           ) : (
             <ul className="space-y-2">
               {tasks.map((t: any) => (
-                <li key={t.id} className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50/50 px-3 py-2">
+                <li
+                  key={t.id}
+                  className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50/50 px-3 py-2"
+                >
                   <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-600" />
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium truncate">{t.title}</div>
                     <div className="text-xs text-muted-foreground">
-                      {DEPT_LABELS[t.department] ?? t.department} · Prévu le {new Date(t.start_date + "T12:00:00").toLocaleDateString("fr-FR")}
+                      {DEPT_LABELS[t.department] ?? t.department} · Prévu le{" "}
+                      {new Date(t.start_date + "T12:00:00").toLocaleDateString("fr-FR")}
                     </div>
                   </div>
                 </li>
               ))}
             </ul>
           )}
-          <Link to="/aadf/taches" className="mt-3 flex items-center gap-1 text-xs text-primary hover:underline">
+          <Link
+            to="/aadf/taches"
+            className="mt-3 flex items-center gap-1 text-xs text-primary hover:underline"
+          >
             Voir les tâches de tous les départements <ArrowRight className="size-3" />
           </Link>
         </Panel>
@@ -165,7 +192,12 @@ function AadfDashboard() {
         >
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <CalendarDays className="size-4" />
-            {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+            {new Date().toLocaleDateString("fr-FR", {
+              weekday: "long",
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
           </div>
         </Panel>
       </div>

@@ -60,16 +60,40 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 type Lead = {
-  id: string; type: string; title: string; description: string | null;
-  contact_name: string | null; contact_email: string | null; contact_phone: string | null;
-  status: string; value: number | null; scheduled_at: string | null;
-  notes: string | null; created_at: string; updated_at: string;
+  id: string;
+  type: string;
+  title: string;
+  description: string | null;
+  contact_name: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  status: string;
+  value: number | null;
+  scheduled_at: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
-const emptyForm = { type: "prospection", title: "", description: "", contact_name: "", contact_email: "", contact_phone: "", status: "prospection", value: "", scheduled_at: "", notes: "" };
+const emptyForm = {
+  type: "prospection",
+  title: "",
+  description: "",
+  contact_name: "",
+  contact_email: "",
+  contact_phone: "",
+  status: "prospection",
+  value: "",
+  scheduled_at: "",
+  notes: "",
+};
 
 function fmt(n: number) {
-  return n.toLocaleString("fr-FR", { style: "currency", currency: "XOF", maximumFractionDigits: 0 });
+  return n.toLocaleString("fr-FR", {
+    style: "currency",
+    currency: "XOF",
+    maximumFractionDigits: 0,
+  });
 }
 
 function CommercialActivites() {
@@ -85,7 +109,10 @@ function CommercialActivites() {
   const { data: leads = [], isLoading } = useQuery({
     queryKey: ["commercial-leads"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("commercial_leads").select("*").order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("commercial_leads")
+        .select("*")
+        .order("created_at", { ascending: false });
       if (error) throw error;
       return data as Lead[];
     },
@@ -108,7 +135,10 @@ function CommercialActivites() {
         created_by: auth?.user?.id ?? null,
       };
       if (editingId) {
-        const { error } = await supabase.from("commercial_leads").update(payload).eq("id", editingId);
+        const { error } = await supabase
+          .from("commercial_leads")
+          .update(payload)
+          .eq("id", editingId);
         if (error) throw error;
       } else {
         const { error } = await supabase.from("commercial_leads").insert(payload);
@@ -139,9 +169,13 @@ function CommercialActivites() {
 
   const openEdit = (l: Lead) => {
     setForm({
-      type: l.type, title: l.title, description: l.description ?? "",
-      contact_name: l.contact_name ?? "", contact_email: l.contact_email ?? "",
-      contact_phone: l.contact_phone ?? "", status: l.status,
+      type: l.type,
+      title: l.title,
+      description: l.description ?? "",
+      contact_name: l.contact_name ?? "",
+      contact_email: l.contact_email ?? "",
+      contact_phone: l.contact_phone ?? "",
+      status: l.status,
       value: l.value ? String(l.value) : "",
       scheduled_at: l.scheduled_at ? new Date(l.scheduled_at).toISOString().slice(0, 16) : "",
       notes: l.notes ?? "",
@@ -159,87 +193,173 @@ function CommercialActivites() {
   return (
     <>
       <PageHeader
-        eyebrow="Marketing & Commercial"
-        title="Activités commerciales"
+        eyebrow="Marketing & Communication"
+        title="Contacts & Leads"
         description="Suivez vos opportunités, partenariats, visites et solutions proposées."
       />
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-[160px]">
+            <SelectValue />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="tous">Tous statuts</SelectItem>
-            {STATUSES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+            {STATUSES.map((s) => (
+              <SelectItem key={s.value} value={s.value}>
+                {s.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <Select value={filterType} onValueChange={setFilterType}>
-          <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="tous">Tous types</SelectItem>
-            {TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+            {TYPES.map((t) => (
+              <SelectItem key={t.value} value={t.value}>
+                {t.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <div className="ml-auto">
-          <Dialog open={open} onOpenChange={(v) => { if (!v) { setOpen(false); setEditingId(null); setForm(emptyForm); } else setOpen(true); }}>
+          <Dialog
+            open={open}
+            onOpenChange={(v) => {
+              if (!v) {
+                setOpen(false);
+                setEditingId(null);
+                setForm(emptyForm);
+              } else setOpen(true);
+            }}
+          >
             <DialogTrigger asChild>
-              <Button><Plus className="mr-2 size-4" /> Nouvelle activité</Button>
+              <Button>
+                <Plus className="mr-2 size-4" /> Nouvelle activité
+              </Button>
             </DialogTrigger>
             <DialogContent className="max-w-lg">
               <DialogHeader>
-                <DialogTitle>{editingId ? "Modifier l'activité" : "Nouvelle activité commerciale"}</DialogTitle>
+                <DialogTitle>
+                  {editingId ? "Modifier l'activité" : "Nouvelle activité commerciale"}
+                </DialogTitle>
               </DialogHeader>
-              <form onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(); }} className="space-y-4">
+              <form
+                onSubmit={(e: FormEvent) => {
+                  e.preventDefault();
+                  save.mutate();
+                }}
+                className="space-y-4"
+              >
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label>Type</Label>
-                    <Select value={form.type} onValueChange={(v) => setForm((f) => ({ ...f, type: v }))}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>{TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
+                    <Select
+                      value={form.type}
+                      onValueChange={(v) => setForm((f) => ({ ...f, type: v }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {TYPES.map((t) => (
+                          <SelectItem key={t.value} value={t.value}>
+                            {t.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-1.5">
                     <Label>Statut</Label>
-                    <Select value={form.status} onValueChange={(v) => setForm((f) => ({ ...f, status: v }))}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>{STATUSES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}</SelectContent>
+                    <Select
+                      value={form.status}
+                      onValueChange={(v) => setForm((f) => ({ ...f, status: v }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {STATUSES.map((s) => (
+                          <SelectItem key={s.value} value={s.value}>
+                            {s.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
                     </Select>
                   </div>
                 </div>
                 <div className="space-y-1.5">
                   <Label>Titre *</Label>
-                  <Input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} placeholder="Nom de l'opportunité ou activité" required />
+                  <Input
+                    value={form.title}
+                    onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+                    placeholder="Nom de l'opportunité ou activité"
+                    required
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label>Description</Label>
-                  <Textarea rows={2} value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} placeholder="Contexte, objectif…" />
+                  <Textarea
+                    rows={2}
+                    value={form.description}
+                    onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                    placeholder="Contexte, objectif…"
+                  />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label>Contact (nom)</Label>
-                    <Input value={form.contact_name} onChange={(e) => setForm((f) => ({ ...f, contact_name: e.target.value }))} />
+                    <Input
+                      value={form.contact_name}
+                      onChange={(e) => setForm((f) => ({ ...f, contact_name: e.target.value }))}
+                    />
                   </div>
                   <div className="space-y-1.5">
                     <Label>Téléphone</Label>
-                    <Input value={form.contact_phone} onChange={(e) => setForm((f) => ({ ...f, contact_phone: e.target.value }))} />
+                    <Input
+                      value={form.contact_phone}
+                      onChange={(e) => setForm((f) => ({ ...f, contact_phone: e.target.value }))}
+                    />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label>Email contact</Label>
-                    <Input type="email" value={form.contact_email} onChange={(e) => setForm((f) => ({ ...f, contact_email: e.target.value }))} />
+                    <Input
+                      type="email"
+                      value={form.contact_email}
+                      onChange={(e) => setForm((f) => ({ ...f, contact_email: e.target.value }))}
+                    />
                   </div>
                   <div className="space-y-1.5">
                     <Label>Valeur estimée (FCFA)</Label>
-                    <Input type="number" min={0} value={form.value} onChange={(e) => setForm((f) => ({ ...f, value: e.target.value }))} />
+                    <Input
+                      type="number"
+                      min={0}
+                      value={form.value}
+                      onChange={(e) => setForm((f) => ({ ...f, value: e.target.value }))}
+                    />
                   </div>
                 </div>
                 <div className="space-y-1.5">
                   <Label>Date / Heure prévue</Label>
-                  <Input type="datetime-local" value={form.scheduled_at} onChange={(e) => setForm((f) => ({ ...f, scheduled_at: e.target.value }))} />
+                  <Input
+                    type="datetime-local"
+                    value={form.scheduled_at}
+                    onChange={(e) => setForm((f) => ({ ...f, scheduled_at: e.target.value }))}
+                  />
                 </div>
                 <div className="space-y-1.5">
                   <Label>Notes</Label>
-                  <Textarea rows={2} value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} />
+                  <Textarea
+                    rows={2}
+                    value={form.notes}
+                    onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+                  />
                 </div>
                 <Button type="submit" className="w-full" disabled={save.isPending}>
                   {save.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
@@ -265,7 +385,9 @@ function CommercialActivites() {
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-medium text-sm">{l.title}</span>
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[l.status]}`}>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[l.status]}`}
+                    >
                       {STATUSES.find((s) => s.value === l.status)?.label}
                     </span>
                     <Badge variant="outline" className="text-xs">
@@ -276,14 +398,38 @@ function CommercialActivites() {
                     {l.contact_name && <span>{l.contact_name}</span>}
                     {l.contact_phone && <span>{l.contact_phone}</span>}
                     {l.contact_email && <span>{l.contact_email}</span>}
-                    {l.scheduled_at && <span>· {new Date(l.scheduled_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}</span>}
-                    {l.value && <span className="font-semibold text-primary">· {fmt(l.value)}</span>}
+                    {l.scheduled_at && (
+                      <span>
+                        ·{" "}
+                        {new Date(l.scheduled_at).toLocaleDateString("fr-FR", {
+                          day: "2-digit",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    )}
+                    {l.value && (
+                      <span className="font-semibold text-primary">· {fmt(l.value)}</span>
+                    )}
                   </div>
-                  {l.notes && <p className="mt-1 text-xs text-muted-foreground italic">{l.notes}</p>}
+                  {l.notes && (
+                    <p className="mt-1 text-xs text-muted-foreground italic">{l.notes}</p>
+                  )}
                 </div>
                 <div className="flex shrink-0 gap-1">
-                  <Button size="sm" variant="ghost" onClick={() => openEdit(l)} title="Modifier"><Pencil className="size-4" /></Button>
-                  <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10" onClick={() => setPendingDeleteId(l.id)} title="Supprimer"><Trash2 className="size-4" /></Button>
+                  <Button size="sm" variant="ghost" onClick={() => openEdit(l)} title="Modifier">
+                    <Pencil className="size-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-destructive hover:bg-destructive/10"
+                    onClick={() => setPendingDeleteId(l.id)}
+                    title="Supprimer"
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
                 </div>
               </li>
             ))}
@@ -293,7 +439,9 @@ function CommercialActivites() {
 
       <ConfirmDialog
         open={pendingDeleteId !== null}
-        onOpenChange={(o) => { if (!o) setPendingDeleteId(null); }}
+        onOpenChange={(o) => {
+          if (!o) setPendingDeleteId(null);
+        }}
         title="Supprimer cette activité ?"
         description="Cette action est irréversible. L'activité commerciale sera définitivement supprimée."
         onConfirm={() => {

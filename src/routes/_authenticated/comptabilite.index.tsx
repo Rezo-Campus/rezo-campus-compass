@@ -13,12 +13,16 @@ const BRANCH_LABELS: Record<string, string> = {
   sites_logiciels: "Sites & Logiciels",
   automatisation: "Automatisation",
   accompagnement: "Accompagnement étudiant",
-  marketing: "Marketing & Commercial",
+  marketing: "Marketing & Communication",
   general: "Général",
 };
 
 function fmt(n: number) {
-  return n.toLocaleString("fr-FR", { style: "currency", currency: "XOF", maximumFractionDigits: 0 });
+  return n.toLocaleString("fr-FR", {
+    style: "currency",
+    currency: "XOF",
+    maximumFractionDigits: 0,
+  });
 }
 
 function ComptabiliteDashboard() {
@@ -60,16 +64,28 @@ function ComptabiliteDashboard() {
     },
   });
 
-  const recettesMois = (monthData ?? []).filter((t) => t.type === "recette").reduce((s, t) => s + t.amount, 0);
-  const depensesMois = (monthData ?? []).filter((t) => t.type === "depense").reduce((s, t) => s + t.amount, 0);
+  const recettesMois = (monthData ?? [])
+    .filter((t) => t.type === "recette")
+    .reduce((s, t) => s + t.amount, 0);
+  const depensesMois = (monthData ?? [])
+    .filter((t) => t.type === "depense")
+    .reduce((s, t) => s + t.amount, 0);
   const soldeMois = recettesMois - depensesMois;
-  const recettesAn = (yearData ?? []).filter((t) => t.type === "recette").reduce((s, t) => s + t.amount, 0);
+  const recettesAn = (yearData ?? [])
+    .filter((t) => t.type === "recette")
+    .reduce((s, t) => s + t.amount, 0);
 
-  const branchStats = Object.keys(BRANCH_LABELS).map((b) => {
-    const rec = (yearData ?? []).filter((t) => t.branch === b && t.type === "recette").reduce((s, t) => s + t.amount, 0);
-    const dep = (yearData ?? []).filter((t) => t.branch === b && t.type === "depense").reduce((s, t) => s + t.amount, 0);
-    return { branch: b, recettes: rec, depenses: dep, solde: rec - dep };
-  }).filter((b) => b.recettes > 0 || b.depenses > 0);
+  const branchStats = Object.keys(BRANCH_LABELS)
+    .map((b) => {
+      const rec = (yearData ?? [])
+        .filter((t) => t.branch === b && t.type === "recette")
+        .reduce((s, t) => s + t.amount, 0);
+      const dep = (yearData ?? [])
+        .filter((t) => t.branch === b && t.type === "depense")
+        .reduce((s, t) => s + t.amount, 0);
+      return { branch: b, recettes: rec, depenses: dep, solde: rec - dep };
+    })
+    .filter((b) => b.recettes > 0 || b.depenses > 0);
 
   const maxVal = Math.max(...branchStats.map((b) => b.recettes), 1);
 
@@ -115,34 +131,41 @@ function ComptabiliteDashboard() {
             <p className="text-sm text-muted-foreground">Aucune donnée disponible.</p>
           ) : (
             <ul className="space-y-3">
-              {branchStats.sort((a, b) => b.recettes - a.recettes).map((b) => (
-                <li key={b.branch}>
-                  <div className="mb-1 flex items-center justify-between text-sm">
-                    <span className="font-medium">{BRANCH_LABELS[b.branch] ?? b.branch}</span>
-                    <span className={b.solde >= 0 ? "text-green-600" : "text-red-500"}>{fmt(b.solde)}</span>
-                  </div>
-                  <div className="flex h-2 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full rounded-full bg-primary transition-all"
-                      style={{ width: `${(b.recettes / maxVal) * 100}%` }}
-                    />
-                  </div>
-                  <div className="mt-0.5 flex justify-between text-[10px] text-muted-foreground">
-                    <span>Recettes : {fmt(b.recettes)}</span>
-                    <span>Dépenses : {fmt(b.depenses)}</span>
-                  </div>
-                </li>
-              ))}
+              {branchStats
+                .sort((a, b) => b.recettes - a.recettes)
+                .map((b) => (
+                  <li key={b.branch}>
+                    <div className="mb-1 flex items-center justify-between text-sm">
+                      <span className="font-medium">{BRANCH_LABELS[b.branch] ?? b.branch}</span>
+                      <span className={b.solde >= 0 ? "text-green-600" : "text-red-500"}>
+                        {fmt(b.solde)}
+                      </span>
+                    </div>
+                    <div className="flex h-2 overflow-hidden rounded-full bg-muted">
+                      <div
+                        className="h-full rounded-full bg-primary transition-all"
+                        style={{ width: `${(b.recettes / maxVal) * 100}%` }}
+                      />
+                    </div>
+                    <div className="mt-0.5 flex justify-between text-[10px] text-muted-foreground">
+                      <span>Recettes : {fmt(b.recettes)}</span>
+                      <span>Dépenses : {fmt(b.depenses)}</span>
+                    </div>
+                  </li>
+                ))}
             </ul>
           )}
         </Panel>
 
         {/* Dernières transactions */}
-        <Panel title="Dernières transactions" action={
-          <Link to="/comptabilite/transactions" className="text-xs text-primary hover:underline">
-            Voir tout →
-          </Link>
-        }>
+        <Panel
+          title="Dernières transactions"
+          action={
+            <Link to="/comptabilite/transactions" className="text-xs text-primary hover:underline">
+              Voir tout →
+            </Link>
+          }
+        >
           {recent.length === 0 ? (
             <p className="text-sm text-muted-foreground">Aucune transaction enregistrée.</p>
           ) : (
@@ -150,24 +173,37 @@ function ComptabiliteDashboard() {
               {recent.map((t) => (
                 <li key={t.id} className="flex items-center justify-between py-2.5">
                   <div className="flex items-center gap-2">
-                    <div className={`grid size-7 place-items-center rounded-lg ${t.type === "recette" ? "bg-green-100 text-green-600" : "bg-red-100 text-red-500"}`}>
-                      {t.type === "recette" ? <TrendingUp className="size-3.5" /> : <TrendingDown className="size-3.5" />}
+                    <div
+                      className={`grid size-7 place-items-center rounded-lg ${t.type === "recette" ? "bg-green-100 text-green-600" : "bg-red-100 text-red-500"}`}
+                    >
+                      {t.type === "recette" ? (
+                        <TrendingUp className="size-3.5" />
+                      ) : (
+                        <TrendingDown className="size-3.5" />
+                      )}
                     </div>
                     <div>
                       <div className="text-sm font-medium">{t.description || t.category}</div>
                       <div className="text-xs text-muted-foreground">
-                        {BRANCH_LABELS[t.branch] ?? t.branch} · {new Date(t.date).toLocaleDateString("fr-FR")}
+                        {BRANCH_LABELS[t.branch] ?? t.branch} ·{" "}
+                        {new Date(t.date).toLocaleDateString("fr-FR")}
                       </div>
                     </div>
                   </div>
-                  <span className={`text-sm font-semibold ${t.type === "recette" ? "text-green-600" : "text-red-500"}`}>
-                    {t.type === "recette" ? "+" : "-"}{fmt(t.amount)}
+                  <span
+                    className={`text-sm font-semibold ${t.type === "recette" ? "text-green-600" : "text-red-500"}`}
+                  >
+                    {t.type === "recette" ? "+" : "-"}
+                    {fmt(t.amount)}
                   </span>
                 </li>
               ))}
             </ul>
           )}
-          <Link to="/comptabilite/transactions" className="mt-3 flex items-center justify-center gap-1.5 text-xs text-primary hover:underline">
+          <Link
+            to="/comptabilite/transactions"
+            className="mt-3 flex items-center justify-center gap-1.5 text-xs text-primary hover:underline"
+          >
             <ArrowUpDown className="size-3" /> Gérer les transactions
           </Link>
         </Panel>

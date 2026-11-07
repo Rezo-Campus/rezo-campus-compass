@@ -45,7 +45,7 @@ const DEPARTMENTS = [
   "Sites & Logiciels",
   "Automatisation",
   "Accompagnement étudiant",
-  "Marketing & Commercial",
+  "Marketing & Communication",
   "Comptabilité",
   "Projets IT",
   "Ressources Humaines",
@@ -238,9 +238,17 @@ function RhPersonnel() {
       />
 
       <div className="mb-4 flex justify-end">
-        <Dialog open={open} onOpenChange={(v) => { if (!v) closeDialog(); else setOpen(true); }}>
+        <Dialog
+          open={open}
+          onOpenChange={(v) => {
+            if (!v) closeDialog();
+            else setOpen(true);
+          }}
+        >
           <DialogTrigger asChild>
-            <Button><Plus className="mr-2 size-4" /> Enregistrer un agent</Button>
+            <Button>
+              <Plus className="mr-2 size-4" /> Enregistrer un agent
+            </Button>
           </DialogTrigger>
           <DialogContent className="max-h-[90vh] overflow-y-auto max-w-2xl">
             <DialogHeader>
@@ -249,7 +257,10 @@ function RhPersonnel() {
               </DialogTitle>
             </DialogHeader>
             <form
-              onSubmit={(e: FormEvent) => { e.preventDefault(); save.mutate(); }}
+              onSubmit={(e: FormEvent) => {
+                e.preventDefault();
+                save.mutate();
+              }}
               className="space-y-4"
             >
               {/* Informations personnelles */}
@@ -323,10 +334,14 @@ function RhPersonnel() {
                       value={form.department}
                       onValueChange={(v) => setForm((f) => ({ ...f, department: v }))}
                     >
-                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
                       <SelectContent>
                         {DEPARTMENTS.map((d) => (
-                          <SelectItem key={d} value={d}>{d}</SelectItem>
+                          <SelectItem key={d} value={d}>
+                            {d}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -337,10 +352,14 @@ function RhPersonnel() {
                       value={form.status}
                       onValueChange={(v) => setForm((f) => ({ ...f, status: v }))}
                     >
-                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
                       <SelectContent>
                         {STATUSES.map((s) => (
-                          <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
+                          <SelectItem key={s.value} value={s.value}>
+                            {s.label}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -383,7 +402,9 @@ function RhPersonnel() {
                 <div className="space-y-1">
                   <Label htmlFor="cv-upload">
                     {existingCvPath ? "Remplacer le CV" : "Joindre un CV"}
-                    <span className="ml-1 text-muted-foreground font-normal">(PDF, DOC — max 1,5 Mo)</span>
+                    <span className="ml-1 text-muted-foreground font-normal">
+                      (PDF, DOC — max 1,5 Mo)
+                    </span>
                   </Label>
                   <Input
                     id="cv-upload"
@@ -451,10 +472,7 @@ function RhPersonnel() {
                     {p.last_diploma ?? "—"}
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      variant="secondary"
-                      className={`text-xs ${STATUS_COLORS[p.status]}`}
-                    >
+                    <Badge variant="secondary" className={`text-xs ${STATUS_COLORS[p.status]}`}>
                       {STATUSES.find((s) => s.value === p.status)?.label ?? p.status}
                     </Badge>
                   </TableCell>
@@ -502,7 +520,9 @@ function RhPersonnel() {
 
       <ConfirmDialog
         open={pendingDelete !== null}
-        onOpenChange={(o) => { if (!o) setPendingDelete(null); }}
+        onOpenChange={(o) => {
+          if (!o) setPendingDelete(null);
+        }}
         title="Supprimer ce membre ?"
         description="Cette action est irréversible. Le dossier du personnel sera définitivement supprimé."
         onConfirm={() => {
