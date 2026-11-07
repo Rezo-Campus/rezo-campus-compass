@@ -57,6 +57,7 @@ import { Route as AuthenticatedRhPersonnelRouteImport } from './routes/_authenti
 import { Route as AuthenticatedRhFacturationRouteImport } from './routes/_authenticated/rh.facturation'
 import { Route as AuthenticatedRhEntretiensRouteImport } from './routes/_authenticated/rh.entretiens'
 import { Route as AuthenticatedRhContratsRouteImport } from './routes/_authenticated/rh.contrats'
+import { Route as AuthenticatedRhBulletinsPaieRouteImport } from './routes/_authenticated/rh.bulletins-paie'
 import { Route as AuthenticatedRhAgendaRouteImport } from './routes/_authenticated/rh.agenda'
 import { Route as AuthenticatedProjetsTransmissionRouteImport } from './routes/_authenticated/projets.transmission'
 import { Route as AuthenticatedProjetsTachesRouteImport } from './routes/_authenticated/projets.taches'
@@ -96,6 +97,7 @@ import { Route as AuthenticatedComptabiliteRapportSuiviRouteImport } from './rou
 import { Route as AuthenticatedComptabiliteProfilRouteImport } from './routes/_authenticated/comptabilite.profil'
 import { Route as AuthenticatedComptabiliteFacturesRouteImport } from './routes/_authenticated/comptabilite.factures'
 import { Route as AuthenticatedComptabiliteFacturationRouteImport } from './routes/_authenticated/comptabilite.facturation'
+import { Route as AuthenticatedComptabiliteBulletinsPaieRouteImport } from './routes/_authenticated/comptabilite.bulletins-paie'
 import { Route as AuthenticatedComptabiliteBudgetPrevisionnelRouteImport } from './routes/_authenticated/comptabilite.budget-previsionnel'
 import { Route as AuthenticatedComptabiliteBudgetRouteImport } from './routes/_authenticated/comptabilite.budget'
 import { Route as AuthenticatedComptabiliteAgendaRouteImport } from './routes/_authenticated/comptabilite.agenda'
@@ -413,6 +415,12 @@ const AuthenticatedRhContratsRoute = AuthenticatedRhContratsRouteImport.update({
   path: '/contrats',
   getParentRoute: () => AuthenticatedRhRoute,
 } as any)
+const AuthenticatedRhBulletinsPaieRoute =
+  AuthenticatedRhBulletinsPaieRouteImport.update({
+    id: '/bulletins-paie',
+    path: '/bulletins-paie',
+    getParentRoute: () => AuthenticatedRhRoute,
+  } as any)
 const AuthenticatedRhAgendaRoute = AuthenticatedRhAgendaRouteImport.update({
   id: '/agenda',
   path: '/agenda',
@@ -644,6 +652,12 @@ const AuthenticatedComptabiliteFacturationRoute =
   AuthenticatedComptabiliteFacturationRouteImport.update({
     id: '/facturation',
     path: '/facturation',
+    getParentRoute: () => AuthenticatedComptabiliteRoute,
+  } as any)
+const AuthenticatedComptabiliteBulletinsPaieRoute =
+  AuthenticatedComptabiliteBulletinsPaieRouteImport.update({
+    id: '/bulletins-paie',
+    path: '/bulletins-paie',
     getParentRoute: () => AuthenticatedComptabiliteRoute,
   } as any)
 const AuthenticatedComptabiliteBudgetPrevisionnelRoute =
@@ -1004,6 +1018,7 @@ export interface FileRoutesByFullPath {
   '/comptabilite/agenda': typeof AuthenticatedComptabiliteAgendaRoute
   '/comptabilite/budget': typeof AuthenticatedComptabiliteBudgetRoute
   '/comptabilite/budget-previsionnel': typeof AuthenticatedComptabiliteBudgetPrevisionnelRoute
+  '/comptabilite/bulletins-paie': typeof AuthenticatedComptabiliteBulletinsPaieRoute
   '/comptabilite/facturation': typeof AuthenticatedComptabiliteFacturationRouteWithChildren
   '/comptabilite/factures': typeof AuthenticatedComptabiliteFacturesRoute
   '/comptabilite/profil': typeof AuthenticatedComptabiliteProfilRoute
@@ -1043,6 +1058,7 @@ export interface FileRoutesByFullPath {
   '/projets/taches': typeof AuthenticatedProjetsTachesRoute
   '/projets/transmission': typeof AuthenticatedProjetsTransmissionRoute
   '/rh/agenda': typeof AuthenticatedRhAgendaRoute
+  '/rh/bulletins-paie': typeof AuthenticatedRhBulletinsPaieRoute
   '/rh/contrats': typeof AuthenticatedRhContratsRoute
   '/rh/entretiens': typeof AuthenticatedRhEntretiensRoute
   '/rh/facturation': typeof AuthenticatedRhFacturationRouteWithChildren
@@ -1132,6 +1148,7 @@ export interface FileRoutesByTo {
   '/comptabilite/agenda': typeof AuthenticatedComptabiliteAgendaRoute
   '/comptabilite/budget': typeof AuthenticatedComptabiliteBudgetRoute
   '/comptabilite/budget-previsionnel': typeof AuthenticatedComptabiliteBudgetPrevisionnelRoute
+  '/comptabilite/bulletins-paie': typeof AuthenticatedComptabiliteBulletinsPaieRoute
   '/comptabilite/factures': typeof AuthenticatedComptabiliteFacturesRoute
   '/comptabilite/profil': typeof AuthenticatedComptabiliteProfilRoute
   '/comptabilite/rapport-suivi': typeof AuthenticatedComptabiliteRapportSuiviRoute
@@ -1167,6 +1184,7 @@ export interface FileRoutesByTo {
   '/projets/taches': typeof AuthenticatedProjetsTachesRoute
   '/projets/transmission': typeof AuthenticatedProjetsTransmissionRoute
   '/rh/agenda': typeof AuthenticatedRhAgendaRoute
+  '/rh/bulletins-paie': typeof AuthenticatedRhBulletinsPaieRoute
   '/rh/contrats': typeof AuthenticatedRhContratsRoute
   '/rh/entretiens': typeof AuthenticatedRhEntretiensRoute
   '/rh/personnel': typeof AuthenticatedRhPersonnelRoute
@@ -1267,6 +1285,7 @@ export interface FileRoutesById {
   '/_authenticated/comptabilite/agenda': typeof AuthenticatedComptabiliteAgendaRoute
   '/_authenticated/comptabilite/budget': typeof AuthenticatedComptabiliteBudgetRoute
   '/_authenticated/comptabilite/budget-previsionnel': typeof AuthenticatedComptabiliteBudgetPrevisionnelRoute
+  '/_authenticated/comptabilite/bulletins-paie': typeof AuthenticatedComptabiliteBulletinsPaieRoute
   '/_authenticated/comptabilite/facturation': typeof AuthenticatedComptabiliteFacturationRouteWithChildren
   '/_authenticated/comptabilite/factures': typeof AuthenticatedComptabiliteFacturesRoute
   '/_authenticated/comptabilite/profil': typeof AuthenticatedComptabiliteProfilRoute
@@ -1306,6 +1325,7 @@ export interface FileRoutesById {
   '/_authenticated/projets/taches': typeof AuthenticatedProjetsTachesRoute
   '/_authenticated/projets/transmission': typeof AuthenticatedProjetsTransmissionRoute
   '/_authenticated/rh/agenda': typeof AuthenticatedRhAgendaRoute
+  '/_authenticated/rh/bulletins-paie': typeof AuthenticatedRhBulletinsPaieRoute
   '/_authenticated/rh/contrats': typeof AuthenticatedRhContratsRoute
   '/_authenticated/rh/entretiens': typeof AuthenticatedRhEntretiensRoute
   '/_authenticated/rh/facturation': typeof AuthenticatedRhFacturationRouteWithChildren
@@ -1409,6 +1429,7 @@ export interface FileRouteTypes {
     | '/comptabilite/agenda'
     | '/comptabilite/budget'
     | '/comptabilite/budget-previsionnel'
+    | '/comptabilite/bulletins-paie'
     | '/comptabilite/facturation'
     | '/comptabilite/factures'
     | '/comptabilite/profil'
@@ -1448,6 +1469,7 @@ export interface FileRouteTypes {
     | '/projets/taches'
     | '/projets/transmission'
     | '/rh/agenda'
+    | '/rh/bulletins-paie'
     | '/rh/contrats'
     | '/rh/entretiens'
     | '/rh/facturation'
@@ -1537,6 +1559,7 @@ export interface FileRouteTypes {
     | '/comptabilite/agenda'
     | '/comptabilite/budget'
     | '/comptabilite/budget-previsionnel'
+    | '/comptabilite/bulletins-paie'
     | '/comptabilite/factures'
     | '/comptabilite/profil'
     | '/comptabilite/rapport-suivi'
@@ -1572,6 +1595,7 @@ export interface FileRouteTypes {
     | '/projets/taches'
     | '/projets/transmission'
     | '/rh/agenda'
+    | '/rh/bulletins-paie'
     | '/rh/contrats'
     | '/rh/entretiens'
     | '/rh/personnel'
@@ -1671,6 +1695,7 @@ export interface FileRouteTypes {
     | '/_authenticated/comptabilite/agenda'
     | '/_authenticated/comptabilite/budget'
     | '/_authenticated/comptabilite/budget-previsionnel'
+    | '/_authenticated/comptabilite/bulletins-paie'
     | '/_authenticated/comptabilite/facturation'
     | '/_authenticated/comptabilite/factures'
     | '/_authenticated/comptabilite/profil'
@@ -1710,6 +1735,7 @@ export interface FileRouteTypes {
     | '/_authenticated/projets/taches'
     | '/_authenticated/projets/transmission'
     | '/_authenticated/rh/agenda'
+    | '/_authenticated/rh/bulletins-paie'
     | '/_authenticated/rh/contrats'
     | '/_authenticated/rh/entretiens'
     | '/_authenticated/rh/facturation'
@@ -2111,6 +2137,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRhContratsRouteImport
       parentRoute: typeof AuthenticatedRhRoute
     }
+    '/_authenticated/rh/bulletins-paie': {
+      id: '/_authenticated/rh/bulletins-paie'
+      path: '/bulletins-paie'
+      fullPath: '/rh/bulletins-paie'
+      preLoaderRoute: typeof AuthenticatedRhBulletinsPaieRouteImport
+      parentRoute: typeof AuthenticatedRhRoute
+    }
     '/_authenticated/rh/agenda': {
       id: '/_authenticated/rh/agenda'
       path: '/agenda'
@@ -2382,6 +2415,13 @@ declare module '@tanstack/react-router' {
       path: '/facturation'
       fullPath: '/comptabilite/facturation'
       preLoaderRoute: typeof AuthenticatedComptabiliteFacturationRouteImport
+      parentRoute: typeof AuthenticatedComptabiliteRoute
+    }
+    '/_authenticated/comptabilite/bulletins-paie': {
+      id: '/_authenticated/comptabilite/bulletins-paie'
+      path: '/bulletins-paie'
+      fullPath: '/comptabilite/bulletins-paie'
+      preLoaderRoute: typeof AuthenticatedComptabiliteBulletinsPaieRouteImport
       parentRoute: typeof AuthenticatedComptabiliteRoute
     }
     '/_authenticated/comptabilite/budget-previsionnel': {
@@ -2909,6 +2949,7 @@ interface AuthenticatedComptabiliteRouteChildren {
   AuthenticatedComptabiliteAgendaRoute: typeof AuthenticatedComptabiliteAgendaRoute
   AuthenticatedComptabiliteBudgetRoute: typeof AuthenticatedComptabiliteBudgetRoute
   AuthenticatedComptabiliteBudgetPrevisionnelRoute: typeof AuthenticatedComptabiliteBudgetPrevisionnelRoute
+  AuthenticatedComptabiliteBulletinsPaieRoute: typeof AuthenticatedComptabiliteBulletinsPaieRoute
   AuthenticatedComptabiliteFacturationRoute: typeof AuthenticatedComptabiliteFacturationRouteWithChildren
   AuthenticatedComptabiliteFacturesRoute: typeof AuthenticatedComptabiliteFacturesRoute
   AuthenticatedComptabiliteProfilRoute: typeof AuthenticatedComptabiliteProfilRoute
@@ -2926,6 +2967,8 @@ const AuthenticatedComptabiliteRouteChildren: AuthenticatedComptabiliteRouteChil
     AuthenticatedComptabiliteBudgetRoute: AuthenticatedComptabiliteBudgetRoute,
     AuthenticatedComptabiliteBudgetPrevisionnelRoute:
       AuthenticatedComptabiliteBudgetPrevisionnelRoute,
+    AuthenticatedComptabiliteBulletinsPaieRoute:
+      AuthenticatedComptabiliteBulletinsPaieRoute,
     AuthenticatedComptabiliteFacturationRoute:
       AuthenticatedComptabiliteFacturationRouteWithChildren,
     AuthenticatedComptabiliteFacturesRoute:
@@ -3149,6 +3192,7 @@ const AuthenticatedRhFacturationRouteWithChildren =
 
 interface AuthenticatedRhRouteChildren {
   AuthenticatedRhAgendaRoute: typeof AuthenticatedRhAgendaRoute
+  AuthenticatedRhBulletinsPaieRoute: typeof AuthenticatedRhBulletinsPaieRoute
   AuthenticatedRhContratsRoute: typeof AuthenticatedRhContratsRoute
   AuthenticatedRhEntretiensRoute: typeof AuthenticatedRhEntretiensRoute
   AuthenticatedRhFacturationRoute: typeof AuthenticatedRhFacturationRouteWithChildren
@@ -3162,6 +3206,7 @@ interface AuthenticatedRhRouteChildren {
 
 const AuthenticatedRhRouteChildren: AuthenticatedRhRouteChildren = {
   AuthenticatedRhAgendaRoute: AuthenticatedRhAgendaRoute,
+  AuthenticatedRhBulletinsPaieRoute: AuthenticatedRhBulletinsPaieRoute,
   AuthenticatedRhContratsRoute: AuthenticatedRhContratsRoute,
   AuthenticatedRhEntretiensRoute: AuthenticatedRhEntretiensRoute,
   AuthenticatedRhFacturationRoute: AuthenticatedRhFacturationRouteWithChildren,
