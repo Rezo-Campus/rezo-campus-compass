@@ -1,1 +1,0 @@
-import{j as t}from"./index-CfNNvrui.js";import{A as e}from"./AgendaView-D4_3xWBS.js";import"./bell-DUC5MaVP.js";const m=()=>t.jsx(e,{department:"projets",canEdit:!0,title:"Tâches — Management de Projet"});export{m as component};
