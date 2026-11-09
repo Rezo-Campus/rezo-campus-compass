@@ -1,17 +1,30 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { LayoutDashboard, ArrowLeftRight, ClipboardList, Calendar, CalendarDays, MessageSquare, FileText, UserCircle } from "lucide-react";
+import {
+  LayoutDashboard,
+  ArrowLeftRight,
+  ClipboardList,
+  Calendar,
+  CalendarDays,
+  MessageSquare,
+  FileText,
+  UserCircle,
+  Banknote,
+  Mail,
+} from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { RoleGuard } from "@/components/RoleGuard";
 
 const NAV = [
-  { label: "Tableau de bord", to: "/aadf",              icon: LayoutDashboard },
-  { label: "Transmissions",   to: "/aadf/transmissions", icon: ArrowLeftRight },
-  { label: "Tâches",          to: "/aadf/taches",        icon: ClipboardList },
-  { label: "Agenda",          to: "/aadf/agenda",        icon: Calendar },
-  { label: "Réunions",        to: "/aadf/reunions",      icon: CalendarDays },
-  { label: "Protocoles",      to: "/aadf/protocoles",    icon: FileText },
-  { label: "Messagerie",      to: "/aadf/messages",      icon: MessageSquare },
-  { label: "Mon Profil",     to: "/aadf/profil",        icon: UserCircle },
+  { label: "Tableau de bord", to: "/aadf", icon: LayoutDashboard },
+  { label: "Transmissions AADF", to: "/aadf/transmissions", icon: ArrowLeftRight },
+  { label: "Transmissions internes", to: "/aadf/courriers", icon: Mail },
+  { label: "Mes bulletins de paie", to: "/aadf/bulletins-paie", icon: Banknote },
+  { label: "Tâches", to: "/aadf/taches", icon: ClipboardList },
+  { label: "Agenda", to: "/aadf/agenda", icon: Calendar },
+  { label: "Réunions", to: "/aadf/reunions", icon: CalendarDays },
+  { label: "Protocoles", to: "/aadf/protocoles", icon: FileText },
+  { label: "Messagerie", to: "/aadf/messages", icon: MessageSquare },
+  { label: "Mon Profil", to: "/aadf/profil", icon: UserCircle },
 ];
 
 export const Route = createFileRoute("/_authenticated/aadf")({

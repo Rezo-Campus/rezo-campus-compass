@@ -47,6 +47,7 @@ import { Route as AuthenticatedSecretaireFacturationRouteImport } from './routes
 import { Route as AuthenticatedSecretaireEtudiantsRouteImport } from './routes/_authenticated/secretaire.etudiants'
 import { Route as AuthenticatedSecretaireCourriersRouteImport } from './routes/_authenticated/secretaire.courriers'
 import { Route as AuthenticatedSecretaireClientsRouteImport } from './routes/_authenticated/secretaire.clients'
+import { Route as AuthenticatedSecretaireBulletinsPaieRouteImport } from './routes/_authenticated/secretaire.bulletins-paie'
 import { Route as AuthenticatedSecretaireAttributionRouteImport } from './routes/_authenticated/secretaire.attribution'
 import { Route as AuthenticatedSecretaireAgendaRouteImport } from './routes/_authenticated/secretaire.agenda'
 import { Route as AuthenticatedRhReunionsRouteImport } from './routes/_authenticated/rh.reunions'
@@ -56,6 +57,7 @@ import { Route as AuthenticatedRhProfilRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedRhPersonnelRouteImport } from './routes/_authenticated/rh.personnel'
 import { Route as AuthenticatedRhFacturationRouteImport } from './routes/_authenticated/rh.facturation'
 import { Route as AuthenticatedRhEntretiensRouteImport } from './routes/_authenticated/rh.entretiens'
+import { Route as AuthenticatedRhCourriersRouteImport } from './routes/_authenticated/rh.courriers'
 import { Route as AuthenticatedRhContratsRouteImport } from './routes/_authenticated/rh.contrats'
 import { Route as AuthenticatedRhBulletinsPaieRouteImport } from './routes/_authenticated/rh.bulletins-paie'
 import { Route as AuthenticatedRhAgendaRouteImport } from './routes/_authenticated/rh.agenda'
@@ -97,6 +99,7 @@ import { Route as AuthenticatedComptabiliteRapportSuiviRouteImport } from './rou
 import { Route as AuthenticatedComptabiliteProfilRouteImport } from './routes/_authenticated/comptabilite.profil'
 import { Route as AuthenticatedComptabiliteFacturesRouteImport } from './routes/_authenticated/comptabilite.factures'
 import { Route as AuthenticatedComptabiliteFacturationRouteImport } from './routes/_authenticated/comptabilite.facturation'
+import { Route as AuthenticatedComptabiliteCourriersRouteImport } from './routes/_authenticated/comptabilite.courriers'
 import { Route as AuthenticatedComptabiliteBulletinsPaieRouteImport } from './routes/_authenticated/comptabilite.bulletins-paie'
 import { Route as AuthenticatedComptabiliteBudgetPrevisionnelRouteImport } from './routes/_authenticated/comptabilite.budget-previsionnel'
 import { Route as AuthenticatedComptabiliteBudgetRouteImport } from './routes/_authenticated/comptabilite.budget'
@@ -107,7 +110,9 @@ import { Route as AuthenticatedCommercialRendezVousClientsRouteImport } from './
 import { Route as AuthenticatedCommercialProfilRouteImport } from './routes/_authenticated/commercial.profil'
 import { Route as AuthenticatedCommercialMarketingRouteImport } from './routes/_authenticated/commercial.marketing'
 import { Route as AuthenticatedCommercialFacturationRouteImport } from './routes/_authenticated/commercial.facturation'
+import { Route as AuthenticatedCommercialCourriersRouteImport } from './routes/_authenticated/commercial.courriers'
 import { Route as AuthenticatedCommercialCalendrierEditorialRouteImport } from './routes/_authenticated/commercial.calendrier-editorial'
+import { Route as AuthenticatedCommercialBulletinsPaieRouteImport } from './routes/_authenticated/commercial.bulletins-paie'
 import { Route as AuthenticatedCommercialAnalysesRouteImport } from './routes/_authenticated/commercial.analyses'
 import { Route as AuthenticatedCommercialAgendaMarketingRouteImport } from './routes/_authenticated/commercial.agenda-marketing'
 import { Route as AuthenticatedCommercialAgendaRouteImport } from './routes/_authenticated/commercial.agenda'
@@ -122,6 +127,7 @@ import { Route as AuthenticatedAdminMessagesRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminFacturationRouteImport } from './routes/_authenticated/admin.facturation'
 import { Route as AuthenticatedAdminEcolesRouteImport } from './routes/_authenticated/admin.ecoles'
 import { Route as AuthenticatedAdminDossiersRouteImport } from './routes/_authenticated/admin.dossiers'
+import { Route as AuthenticatedAdminCourriersRouteImport } from './routes/_authenticated/admin.courriers'
 import { Route as AuthenticatedAdminAgendaRouteImport } from './routes/_authenticated/admin.agenda'
 import { Route as AuthenticatedAadfTransmissionsRouteImport } from './routes/_authenticated/aadf.transmissions'
 import { Route as AuthenticatedAadfTachesRouteImport } from './routes/_authenticated/aadf.taches'
@@ -129,6 +135,8 @@ import { Route as AuthenticatedAadfReunionsRouteImport } from './routes/_authent
 import { Route as AuthenticatedAadfProtocolesRouteImport } from './routes/_authenticated/aadf.protocoles'
 import { Route as AuthenticatedAadfProfilRouteImport } from './routes/_authenticated/aadf.profil'
 import { Route as AuthenticatedAadfMessagesRouteImport } from './routes/_authenticated/aadf.messages'
+import { Route as AuthenticatedAadfCourriersRouteImport } from './routes/_authenticated/aadf.courriers'
+import { Route as AuthenticatedAadfBulletinsPaieRouteImport } from './routes/_authenticated/aadf.bulletins-paie'
 import { Route as AuthenticatedAadfAgendaRouteImport } from './routes/_authenticated/aadf.agenda'
 import { Route as AuthenticatedSecretaireFacturationIndexRouteImport } from './routes/_authenticated/secretaire.facturation.index'
 import { Route as AuthenticatedSecretaireEtudiantsIndexRouteImport } from './routes/_authenticated/secretaire.etudiants.index'
@@ -359,6 +367,12 @@ const AuthenticatedSecretaireClientsRoute =
     path: '/clients',
     getParentRoute: () => AuthenticatedSecretaireRoute,
   } as any)
+const AuthenticatedSecretaireBulletinsPaieRoute =
+  AuthenticatedSecretaireBulletinsPaieRouteImport.update({
+    id: '/bulletins-paie',
+    path: '/bulletins-paie',
+    getParentRoute: () => AuthenticatedSecretaireRoute,
+  } as any)
 const AuthenticatedSecretaireAttributionRoute =
   AuthenticatedSecretaireAttributionRouteImport.update({
     id: '/attribution',
@@ -409,6 +423,12 @@ const AuthenticatedRhEntretiensRoute =
   AuthenticatedRhEntretiensRouteImport.update({
     id: '/entretiens',
     path: '/entretiens',
+    getParentRoute: () => AuthenticatedRhRoute,
+  } as any)
+const AuthenticatedRhCourriersRoute =
+  AuthenticatedRhCourriersRouteImport.update({
+    id: '/courriers',
+    path: '/courriers',
     getParentRoute: () => AuthenticatedRhRoute,
   } as any)
 const AuthenticatedRhContratsRoute = AuthenticatedRhContratsRouteImport.update({
@@ -655,6 +675,12 @@ const AuthenticatedComptabiliteFacturationRoute =
     path: '/facturation',
     getParentRoute: () => AuthenticatedComptabiliteRoute,
   } as any)
+const AuthenticatedComptabiliteCourriersRoute =
+  AuthenticatedComptabiliteCourriersRouteImport.update({
+    id: '/courriers',
+    path: '/courriers',
+    getParentRoute: () => AuthenticatedComptabiliteRoute,
+  } as any)
 const AuthenticatedComptabiliteBulletinsPaieRoute =
   AuthenticatedComptabiliteBulletinsPaieRouteImport.update({
     id: '/bulletins-paie',
@@ -715,10 +741,22 @@ const AuthenticatedCommercialFacturationRoute =
     path: '/facturation',
     getParentRoute: () => AuthenticatedCommercialRoute,
   } as any)
+const AuthenticatedCommercialCourriersRoute =
+  AuthenticatedCommercialCourriersRouteImport.update({
+    id: '/courriers',
+    path: '/courriers',
+    getParentRoute: () => AuthenticatedCommercialRoute,
+  } as any)
 const AuthenticatedCommercialCalendrierEditorialRoute =
   AuthenticatedCommercialCalendrierEditorialRouteImport.update({
     id: '/calendrier-editorial',
     path: '/calendrier-editorial',
+    getParentRoute: () => AuthenticatedCommercialRoute,
+  } as any)
+const AuthenticatedCommercialBulletinsPaieRoute =
+  AuthenticatedCommercialBulletinsPaieRouteImport.update({
+    id: '/bulletins-paie',
+    path: '/bulletins-paie',
     getParentRoute: () => AuthenticatedCommercialRoute,
   } as any)
 const AuthenticatedCommercialAnalysesRoute =
@@ -805,6 +843,12 @@ const AuthenticatedAdminDossiersRoute =
     path: '/dossiers',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminCourriersRoute =
+  AuthenticatedAdminCourriersRouteImport.update({
+    id: '/courriers',
+    path: '/courriers',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminAgendaRoute =
   AuthenticatedAdminAgendaRouteImport.update({
     id: '/agenda',
@@ -843,6 +887,18 @@ const AuthenticatedAadfMessagesRoute =
   AuthenticatedAadfMessagesRouteImport.update({
     id: '/messages',
     path: '/messages',
+    getParentRoute: () => AuthenticatedAadfRoute,
+  } as any)
+const AuthenticatedAadfCourriersRoute =
+  AuthenticatedAadfCourriersRouteImport.update({
+    id: '/courriers',
+    path: '/courriers',
+    getParentRoute: () => AuthenticatedAadfRoute,
+  } as any)
+const AuthenticatedAadfBulletinsPaieRoute =
+  AuthenticatedAadfBulletinsPaieRouteImport.update({
+    id: '/bulletins-paie',
+    path: '/bulletins-paie',
     getParentRoute: () => AuthenticatedAadfRoute,
   } as any)
 const AuthenticatedAadfAgendaRoute = AuthenticatedAadfAgendaRouteImport.update({
@@ -995,6 +1051,8 @@ export interface FileRoutesByFullPath {
   '/secretaire': typeof AuthenticatedSecretaireRouteWithChildren
   '/entretien/$sessionId': typeof EntretienSessionIdRoute
   '/aadf/agenda': typeof AuthenticatedAadfAgendaRoute
+  '/aadf/bulletins-paie': typeof AuthenticatedAadfBulletinsPaieRoute
+  '/aadf/courriers': typeof AuthenticatedAadfCourriersRoute
   '/aadf/messages': typeof AuthenticatedAadfMessagesRoute
   '/aadf/profil': typeof AuthenticatedAadfProfilRoute
   '/aadf/protocoles': typeof AuthenticatedAadfProtocolesRoute
@@ -1002,6 +1060,7 @@ export interface FileRoutesByFullPath {
   '/aadf/taches': typeof AuthenticatedAadfTachesRoute
   '/aadf/transmissions': typeof AuthenticatedAadfTransmissionsRoute
   '/admin/agenda': typeof AuthenticatedAdminAgendaRoute
+  '/admin/courriers': typeof AuthenticatedAdminCourriersRoute
   '/admin/dossiers': typeof AuthenticatedAdminDossiersRoute
   '/admin/ecoles': typeof AuthenticatedAdminEcolesRoute
   '/admin/facturation': typeof AuthenticatedAdminFacturationRouteWithChildren
@@ -1016,7 +1075,9 @@ export interface FileRoutesByFullPath {
   '/commercial/agenda': typeof AuthenticatedCommercialAgendaRoute
   '/commercial/agenda-marketing': typeof AuthenticatedCommercialAgendaMarketingRoute
   '/commercial/analyses': typeof AuthenticatedCommercialAnalysesRoute
+  '/commercial/bulletins-paie': typeof AuthenticatedCommercialBulletinsPaieRoute
   '/commercial/calendrier-editorial': typeof AuthenticatedCommercialCalendrierEditorialRoute
+  '/commercial/courriers': typeof AuthenticatedCommercialCourriersRoute
   '/commercial/facturation': typeof AuthenticatedCommercialFacturationRouteWithChildren
   '/commercial/marketing': typeof AuthenticatedCommercialMarketingRoute
   '/commercial/profil': typeof AuthenticatedCommercialProfilRoute
@@ -1027,6 +1088,7 @@ export interface FileRoutesByFullPath {
   '/comptabilite/budget': typeof AuthenticatedComptabiliteBudgetRoute
   '/comptabilite/budget-previsionnel': typeof AuthenticatedComptabiliteBudgetPrevisionnelRoute
   '/comptabilite/bulletins-paie': typeof AuthenticatedComptabiliteBulletinsPaieRoute
+  '/comptabilite/courriers': typeof AuthenticatedComptabiliteCourriersRoute
   '/comptabilite/facturation': typeof AuthenticatedComptabiliteFacturationRouteWithChildren
   '/comptabilite/factures': typeof AuthenticatedComptabiliteFacturesRoute
   '/comptabilite/profil': typeof AuthenticatedComptabiliteProfilRoute
@@ -1068,6 +1130,7 @@ export interface FileRoutesByFullPath {
   '/rh/agenda': typeof AuthenticatedRhAgendaRoute
   '/rh/bulletins-paie': typeof AuthenticatedRhBulletinsPaieRoute
   '/rh/contrats': typeof AuthenticatedRhContratsRoute
+  '/rh/courriers': typeof AuthenticatedRhCourriersRoute
   '/rh/entretiens': typeof AuthenticatedRhEntretiensRoute
   '/rh/facturation': typeof AuthenticatedRhFacturationRouteWithChildren
   '/rh/personnel': typeof AuthenticatedRhPersonnelRoute
@@ -1077,6 +1140,7 @@ export interface FileRoutesByFullPath {
   '/rh/reunions': typeof AuthenticatedRhReunionsRoute
   '/secretaire/agenda': typeof AuthenticatedSecretaireAgendaRoute
   '/secretaire/attribution': typeof AuthenticatedSecretaireAttributionRoute
+  '/secretaire/bulletins-paie': typeof AuthenticatedSecretaireBulletinsPaieRoute
   '/secretaire/clients': typeof AuthenticatedSecretaireClientsRoute
   '/secretaire/courriers': typeof AuthenticatedSecretaireCourriersRoute
   '/secretaire/etudiants': typeof AuthenticatedSecretaireEtudiantsRouteWithChildren
@@ -1128,6 +1192,8 @@ export interface FileRoutesByTo {
   '/app': typeof AuthenticatedAppRoute
   '/entretien/$sessionId': typeof EntretienSessionIdRoute
   '/aadf/agenda': typeof AuthenticatedAadfAgendaRoute
+  '/aadf/bulletins-paie': typeof AuthenticatedAadfBulletinsPaieRoute
+  '/aadf/courriers': typeof AuthenticatedAadfCourriersRoute
   '/aadf/messages': typeof AuthenticatedAadfMessagesRoute
   '/aadf/profil': typeof AuthenticatedAadfProfilRoute
   '/aadf/protocoles': typeof AuthenticatedAadfProtocolesRoute
@@ -1135,6 +1201,7 @@ export interface FileRoutesByTo {
   '/aadf/taches': typeof AuthenticatedAadfTachesRoute
   '/aadf/transmissions': typeof AuthenticatedAadfTransmissionsRoute
   '/admin/agenda': typeof AuthenticatedAdminAgendaRoute
+  '/admin/courriers': typeof AuthenticatedAdminCourriersRoute
   '/admin/dossiers': typeof AuthenticatedAdminDossiersRoute
   '/admin/ecoles': typeof AuthenticatedAdminEcolesRoute
   '/admin/messages': typeof AuthenticatedAdminMessagesRoute
@@ -1148,7 +1215,9 @@ export interface FileRoutesByTo {
   '/commercial/agenda': typeof AuthenticatedCommercialAgendaRoute
   '/commercial/agenda-marketing': typeof AuthenticatedCommercialAgendaMarketingRoute
   '/commercial/analyses': typeof AuthenticatedCommercialAnalysesRoute
+  '/commercial/bulletins-paie': typeof AuthenticatedCommercialBulletinsPaieRoute
   '/commercial/calendrier-editorial': typeof AuthenticatedCommercialCalendrierEditorialRoute
+  '/commercial/courriers': typeof AuthenticatedCommercialCourriersRoute
   '/commercial/marketing': typeof AuthenticatedCommercialMarketingRoute
   '/commercial/profil': typeof AuthenticatedCommercialProfilRoute
   '/commercial/rendez-vous-clients': typeof AuthenticatedCommercialRendezVousClientsRoute
@@ -1158,6 +1227,7 @@ export interface FileRoutesByTo {
   '/comptabilite/budget': typeof AuthenticatedComptabiliteBudgetRoute
   '/comptabilite/budget-previsionnel': typeof AuthenticatedComptabiliteBudgetPrevisionnelRoute
   '/comptabilite/bulletins-paie': typeof AuthenticatedComptabiliteBulletinsPaieRoute
+  '/comptabilite/courriers': typeof AuthenticatedComptabiliteCourriersRoute
   '/comptabilite/factures': typeof AuthenticatedComptabiliteFacturesRoute
   '/comptabilite/profil': typeof AuthenticatedComptabiliteProfilRoute
   '/comptabilite/rapport-suivi': typeof AuthenticatedComptabiliteRapportSuiviRoute
@@ -1195,6 +1265,7 @@ export interface FileRoutesByTo {
   '/rh/agenda': typeof AuthenticatedRhAgendaRoute
   '/rh/bulletins-paie': typeof AuthenticatedRhBulletinsPaieRoute
   '/rh/contrats': typeof AuthenticatedRhContratsRoute
+  '/rh/courriers': typeof AuthenticatedRhCourriersRoute
   '/rh/entretiens': typeof AuthenticatedRhEntretiensRoute
   '/rh/personnel': typeof AuthenticatedRhPersonnelRoute
   '/rh/profil': typeof AuthenticatedRhProfilRoute
@@ -1203,6 +1274,7 @@ export interface FileRoutesByTo {
   '/rh/reunions': typeof AuthenticatedRhReunionsRoute
   '/secretaire/agenda': typeof AuthenticatedSecretaireAgendaRoute
   '/secretaire/attribution': typeof AuthenticatedSecretaireAttributionRoute
+  '/secretaire/bulletins-paie': typeof AuthenticatedSecretaireBulletinsPaieRoute
   '/secretaire/clients': typeof AuthenticatedSecretaireClientsRoute
   '/secretaire/courriers': typeof AuthenticatedSecretaireCourriersRoute
   '/secretaire/messages': typeof AuthenticatedSecretaireMessagesRoute
@@ -1264,6 +1336,8 @@ export interface FileRoutesById {
   '/_authenticated/secretaire': typeof AuthenticatedSecretaireRouteWithChildren
   '/entretien/$sessionId': typeof EntretienSessionIdRoute
   '/_authenticated/aadf/agenda': typeof AuthenticatedAadfAgendaRoute
+  '/_authenticated/aadf/bulletins-paie': typeof AuthenticatedAadfBulletinsPaieRoute
+  '/_authenticated/aadf/courriers': typeof AuthenticatedAadfCourriersRoute
   '/_authenticated/aadf/messages': typeof AuthenticatedAadfMessagesRoute
   '/_authenticated/aadf/profil': typeof AuthenticatedAadfProfilRoute
   '/_authenticated/aadf/protocoles': typeof AuthenticatedAadfProtocolesRoute
@@ -1271,6 +1345,7 @@ export interface FileRoutesById {
   '/_authenticated/aadf/taches': typeof AuthenticatedAadfTachesRoute
   '/_authenticated/aadf/transmissions': typeof AuthenticatedAadfTransmissionsRoute
   '/_authenticated/admin/agenda': typeof AuthenticatedAdminAgendaRoute
+  '/_authenticated/admin/courriers': typeof AuthenticatedAdminCourriersRoute
   '/_authenticated/admin/dossiers': typeof AuthenticatedAdminDossiersRoute
   '/_authenticated/admin/ecoles': typeof AuthenticatedAdminEcolesRoute
   '/_authenticated/admin/facturation': typeof AuthenticatedAdminFacturationRouteWithChildren
@@ -1285,7 +1360,9 @@ export interface FileRoutesById {
   '/_authenticated/commercial/agenda': typeof AuthenticatedCommercialAgendaRoute
   '/_authenticated/commercial/agenda-marketing': typeof AuthenticatedCommercialAgendaMarketingRoute
   '/_authenticated/commercial/analyses': typeof AuthenticatedCommercialAnalysesRoute
+  '/_authenticated/commercial/bulletins-paie': typeof AuthenticatedCommercialBulletinsPaieRoute
   '/_authenticated/commercial/calendrier-editorial': typeof AuthenticatedCommercialCalendrierEditorialRoute
+  '/_authenticated/commercial/courriers': typeof AuthenticatedCommercialCourriersRoute
   '/_authenticated/commercial/facturation': typeof AuthenticatedCommercialFacturationRouteWithChildren
   '/_authenticated/commercial/marketing': typeof AuthenticatedCommercialMarketingRoute
   '/_authenticated/commercial/profil': typeof AuthenticatedCommercialProfilRoute
@@ -1296,6 +1373,7 @@ export interface FileRoutesById {
   '/_authenticated/comptabilite/budget': typeof AuthenticatedComptabiliteBudgetRoute
   '/_authenticated/comptabilite/budget-previsionnel': typeof AuthenticatedComptabiliteBudgetPrevisionnelRoute
   '/_authenticated/comptabilite/bulletins-paie': typeof AuthenticatedComptabiliteBulletinsPaieRoute
+  '/_authenticated/comptabilite/courriers': typeof AuthenticatedComptabiliteCourriersRoute
   '/_authenticated/comptabilite/facturation': typeof AuthenticatedComptabiliteFacturationRouteWithChildren
   '/_authenticated/comptabilite/factures': typeof AuthenticatedComptabiliteFacturesRoute
   '/_authenticated/comptabilite/profil': typeof AuthenticatedComptabiliteProfilRoute
@@ -1337,6 +1415,7 @@ export interface FileRoutesById {
   '/_authenticated/rh/agenda': typeof AuthenticatedRhAgendaRoute
   '/_authenticated/rh/bulletins-paie': typeof AuthenticatedRhBulletinsPaieRoute
   '/_authenticated/rh/contrats': typeof AuthenticatedRhContratsRoute
+  '/_authenticated/rh/courriers': typeof AuthenticatedRhCourriersRoute
   '/_authenticated/rh/entretiens': typeof AuthenticatedRhEntretiensRoute
   '/_authenticated/rh/facturation': typeof AuthenticatedRhFacturationRouteWithChildren
   '/_authenticated/rh/personnel': typeof AuthenticatedRhPersonnelRoute
@@ -1346,6 +1425,7 @@ export interface FileRoutesById {
   '/_authenticated/rh/reunions': typeof AuthenticatedRhReunionsRoute
   '/_authenticated/secretaire/agenda': typeof AuthenticatedSecretaireAgendaRoute
   '/_authenticated/secretaire/attribution': typeof AuthenticatedSecretaireAttributionRoute
+  '/_authenticated/secretaire/bulletins-paie': typeof AuthenticatedSecretaireBulletinsPaieRoute
   '/_authenticated/secretaire/clients': typeof AuthenticatedSecretaireClientsRoute
   '/_authenticated/secretaire/courriers': typeof AuthenticatedSecretaireCourriersRoute
   '/_authenticated/secretaire/etudiants': typeof AuthenticatedSecretaireEtudiantsRouteWithChildren
@@ -1409,6 +1489,8 @@ export interface FileRouteTypes {
     | '/secretaire'
     | '/entretien/$sessionId'
     | '/aadf/agenda'
+    | '/aadf/bulletins-paie'
+    | '/aadf/courriers'
     | '/aadf/messages'
     | '/aadf/profil'
     | '/aadf/protocoles'
@@ -1416,6 +1498,7 @@ export interface FileRouteTypes {
     | '/aadf/taches'
     | '/aadf/transmissions'
     | '/admin/agenda'
+    | '/admin/courriers'
     | '/admin/dossiers'
     | '/admin/ecoles'
     | '/admin/facturation'
@@ -1430,7 +1513,9 @@ export interface FileRouteTypes {
     | '/commercial/agenda'
     | '/commercial/agenda-marketing'
     | '/commercial/analyses'
+    | '/commercial/bulletins-paie'
     | '/commercial/calendrier-editorial'
+    | '/commercial/courriers'
     | '/commercial/facturation'
     | '/commercial/marketing'
     | '/commercial/profil'
@@ -1441,6 +1526,7 @@ export interface FileRouteTypes {
     | '/comptabilite/budget'
     | '/comptabilite/budget-previsionnel'
     | '/comptabilite/bulletins-paie'
+    | '/comptabilite/courriers'
     | '/comptabilite/facturation'
     | '/comptabilite/factures'
     | '/comptabilite/profil'
@@ -1482,6 +1568,7 @@ export interface FileRouteTypes {
     | '/rh/agenda'
     | '/rh/bulletins-paie'
     | '/rh/contrats'
+    | '/rh/courriers'
     | '/rh/entretiens'
     | '/rh/facturation'
     | '/rh/personnel'
@@ -1491,6 +1578,7 @@ export interface FileRouteTypes {
     | '/rh/reunions'
     | '/secretaire/agenda'
     | '/secretaire/attribution'
+    | '/secretaire/bulletins-paie'
     | '/secretaire/clients'
     | '/secretaire/courriers'
     | '/secretaire/etudiants'
@@ -1542,6 +1630,8 @@ export interface FileRouteTypes {
     | '/app'
     | '/entretien/$sessionId'
     | '/aadf/agenda'
+    | '/aadf/bulletins-paie'
+    | '/aadf/courriers'
     | '/aadf/messages'
     | '/aadf/profil'
     | '/aadf/protocoles'
@@ -1549,6 +1639,7 @@ export interface FileRouteTypes {
     | '/aadf/taches'
     | '/aadf/transmissions'
     | '/admin/agenda'
+    | '/admin/courriers'
     | '/admin/dossiers'
     | '/admin/ecoles'
     | '/admin/messages'
@@ -1562,7 +1653,9 @@ export interface FileRouteTypes {
     | '/commercial/agenda'
     | '/commercial/agenda-marketing'
     | '/commercial/analyses'
+    | '/commercial/bulletins-paie'
     | '/commercial/calendrier-editorial'
+    | '/commercial/courriers'
     | '/commercial/marketing'
     | '/commercial/profil'
     | '/commercial/rendez-vous-clients'
@@ -1572,6 +1665,7 @@ export interface FileRouteTypes {
     | '/comptabilite/budget'
     | '/comptabilite/budget-previsionnel'
     | '/comptabilite/bulletins-paie'
+    | '/comptabilite/courriers'
     | '/comptabilite/factures'
     | '/comptabilite/profil'
     | '/comptabilite/rapport-suivi'
@@ -1609,6 +1703,7 @@ export interface FileRouteTypes {
     | '/rh/agenda'
     | '/rh/bulletins-paie'
     | '/rh/contrats'
+    | '/rh/courriers'
     | '/rh/entretiens'
     | '/rh/personnel'
     | '/rh/profil'
@@ -1617,6 +1712,7 @@ export interface FileRouteTypes {
     | '/rh/reunions'
     | '/secretaire/agenda'
     | '/secretaire/attribution'
+    | '/secretaire/bulletins-paie'
     | '/secretaire/clients'
     | '/secretaire/courriers'
     | '/secretaire/messages'
@@ -1677,6 +1773,8 @@ export interface FileRouteTypes {
     | '/_authenticated/secretaire'
     | '/entretien/$sessionId'
     | '/_authenticated/aadf/agenda'
+    | '/_authenticated/aadf/bulletins-paie'
+    | '/_authenticated/aadf/courriers'
     | '/_authenticated/aadf/messages'
     | '/_authenticated/aadf/profil'
     | '/_authenticated/aadf/protocoles'
@@ -1684,6 +1782,7 @@ export interface FileRouteTypes {
     | '/_authenticated/aadf/taches'
     | '/_authenticated/aadf/transmissions'
     | '/_authenticated/admin/agenda'
+    | '/_authenticated/admin/courriers'
     | '/_authenticated/admin/dossiers'
     | '/_authenticated/admin/ecoles'
     | '/_authenticated/admin/facturation'
@@ -1698,7 +1797,9 @@ export interface FileRouteTypes {
     | '/_authenticated/commercial/agenda'
     | '/_authenticated/commercial/agenda-marketing'
     | '/_authenticated/commercial/analyses'
+    | '/_authenticated/commercial/bulletins-paie'
     | '/_authenticated/commercial/calendrier-editorial'
+    | '/_authenticated/commercial/courriers'
     | '/_authenticated/commercial/facturation'
     | '/_authenticated/commercial/marketing'
     | '/_authenticated/commercial/profil'
@@ -1709,6 +1810,7 @@ export interface FileRouteTypes {
     | '/_authenticated/comptabilite/budget'
     | '/_authenticated/comptabilite/budget-previsionnel'
     | '/_authenticated/comptabilite/bulletins-paie'
+    | '/_authenticated/comptabilite/courriers'
     | '/_authenticated/comptabilite/facturation'
     | '/_authenticated/comptabilite/factures'
     | '/_authenticated/comptabilite/profil'
@@ -1750,6 +1852,7 @@ export interface FileRouteTypes {
     | '/_authenticated/rh/agenda'
     | '/_authenticated/rh/bulletins-paie'
     | '/_authenticated/rh/contrats'
+    | '/_authenticated/rh/courriers'
     | '/_authenticated/rh/entretiens'
     | '/_authenticated/rh/facturation'
     | '/_authenticated/rh/personnel'
@@ -1759,6 +1862,7 @@ export interface FileRouteTypes {
     | '/_authenticated/rh/reunions'
     | '/_authenticated/secretaire/agenda'
     | '/_authenticated/secretaire/attribution'
+    | '/_authenticated/secretaire/bulletins-paie'
     | '/_authenticated/secretaire/clients'
     | '/_authenticated/secretaire/courriers'
     | '/_authenticated/secretaire/etudiants'
@@ -2080,6 +2184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSecretaireClientsRouteImport
       parentRoute: typeof AuthenticatedSecretaireRoute
     }
+    '/_authenticated/secretaire/bulletins-paie': {
+      id: '/_authenticated/secretaire/bulletins-paie'
+      path: '/bulletins-paie'
+      fullPath: '/secretaire/bulletins-paie'
+      preLoaderRoute: typeof AuthenticatedSecretaireBulletinsPaieRouteImport
+      parentRoute: typeof AuthenticatedSecretaireRoute
+    }
     '/_authenticated/secretaire/attribution': {
       id: '/_authenticated/secretaire/attribution'
       path: '/attribution'
@@ -2141,6 +2252,13 @@ declare module '@tanstack/react-router' {
       path: '/entretiens'
       fullPath: '/rh/entretiens'
       preLoaderRoute: typeof AuthenticatedRhEntretiensRouteImport
+      parentRoute: typeof AuthenticatedRhRoute
+    }
+    '/_authenticated/rh/courriers': {
+      id: '/_authenticated/rh/courriers'
+      path: '/courriers'
+      fullPath: '/rh/courriers'
+      preLoaderRoute: typeof AuthenticatedRhCourriersRouteImport
       parentRoute: typeof AuthenticatedRhRoute
     }
     '/_authenticated/rh/contrats': {
@@ -2430,6 +2548,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedComptabiliteFacturationRouteImport
       parentRoute: typeof AuthenticatedComptabiliteRoute
     }
+    '/_authenticated/comptabilite/courriers': {
+      id: '/_authenticated/comptabilite/courriers'
+      path: '/courriers'
+      fullPath: '/comptabilite/courriers'
+      preLoaderRoute: typeof AuthenticatedComptabiliteCourriersRouteImport
+      parentRoute: typeof AuthenticatedComptabiliteRoute
+    }
     '/_authenticated/comptabilite/bulletins-paie': {
       id: '/_authenticated/comptabilite/bulletins-paie'
       path: '/bulletins-paie'
@@ -2500,11 +2625,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCommercialFacturationRouteImport
       parentRoute: typeof AuthenticatedCommercialRoute
     }
+    '/_authenticated/commercial/courriers': {
+      id: '/_authenticated/commercial/courriers'
+      path: '/courriers'
+      fullPath: '/commercial/courriers'
+      preLoaderRoute: typeof AuthenticatedCommercialCourriersRouteImport
+      parentRoute: typeof AuthenticatedCommercialRoute
+    }
     '/_authenticated/commercial/calendrier-editorial': {
       id: '/_authenticated/commercial/calendrier-editorial'
       path: '/calendrier-editorial'
       fullPath: '/commercial/calendrier-editorial'
       preLoaderRoute: typeof AuthenticatedCommercialCalendrierEditorialRouteImport
+      parentRoute: typeof AuthenticatedCommercialRoute
+    }
+    '/_authenticated/commercial/bulletins-paie': {
+      id: '/_authenticated/commercial/bulletins-paie'
+      path: '/bulletins-paie'
+      fullPath: '/commercial/bulletins-paie'
+      preLoaderRoute: typeof AuthenticatedCommercialBulletinsPaieRouteImport
       parentRoute: typeof AuthenticatedCommercialRoute
     }
     '/_authenticated/commercial/analyses': {
@@ -2605,6 +2744,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDossiersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/courriers': {
+      id: '/_authenticated/admin/courriers'
+      path: '/courriers'
+      fullPath: '/admin/courriers'
+      preLoaderRoute: typeof AuthenticatedAdminCourriersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/agenda': {
       id: '/_authenticated/admin/agenda'
       path: '/agenda'
@@ -2652,6 +2798,20 @@ declare module '@tanstack/react-router' {
       path: '/messages'
       fullPath: '/aadf/messages'
       preLoaderRoute: typeof AuthenticatedAadfMessagesRouteImport
+      parentRoute: typeof AuthenticatedAadfRoute
+    }
+    '/_authenticated/aadf/courriers': {
+      id: '/_authenticated/aadf/courriers'
+      path: '/courriers'
+      fullPath: '/aadf/courriers'
+      preLoaderRoute: typeof AuthenticatedAadfCourriersRouteImport
+      parentRoute: typeof AuthenticatedAadfRoute
+    }
+    '/_authenticated/aadf/bulletins-paie': {
+      id: '/_authenticated/aadf/bulletins-paie'
+      path: '/bulletins-paie'
+      fullPath: '/aadf/bulletins-paie'
+      preLoaderRoute: typeof AuthenticatedAadfBulletinsPaieRouteImport
       parentRoute: typeof AuthenticatedAadfRoute
     }
     '/_authenticated/aadf/agenda': {
@@ -2813,6 +2973,8 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAadfRouteChildren {
   AuthenticatedAadfAgendaRoute: typeof AuthenticatedAadfAgendaRoute
+  AuthenticatedAadfBulletinsPaieRoute: typeof AuthenticatedAadfBulletinsPaieRoute
+  AuthenticatedAadfCourriersRoute: typeof AuthenticatedAadfCourriersRoute
   AuthenticatedAadfMessagesRoute: typeof AuthenticatedAadfMessagesRoute
   AuthenticatedAadfProfilRoute: typeof AuthenticatedAadfProfilRoute
   AuthenticatedAadfProtocolesRoute: typeof AuthenticatedAadfProtocolesRoute
@@ -2824,6 +2986,8 @@ interface AuthenticatedAadfRouteChildren {
 
 const AuthenticatedAadfRouteChildren: AuthenticatedAadfRouteChildren = {
   AuthenticatedAadfAgendaRoute: AuthenticatedAadfAgendaRoute,
+  AuthenticatedAadfBulletinsPaieRoute: AuthenticatedAadfBulletinsPaieRoute,
+  AuthenticatedAadfCourriersRoute: AuthenticatedAadfCourriersRoute,
   AuthenticatedAadfMessagesRoute: AuthenticatedAadfMessagesRoute,
   AuthenticatedAadfProfilRoute: AuthenticatedAadfProfilRoute,
   AuthenticatedAadfProtocolesRoute: AuthenticatedAadfProtocolesRoute,
@@ -2856,6 +3020,7 @@ const AuthenticatedAdminFacturationRouteWithChildren =
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAgendaRoute: typeof AuthenticatedAdminAgendaRoute
+  AuthenticatedAdminCourriersRoute: typeof AuthenticatedAdminCourriersRoute
   AuthenticatedAdminDossiersRoute: typeof AuthenticatedAdminDossiersRoute
   AuthenticatedAdminEcolesRoute: typeof AuthenticatedAdminEcolesRoute
   AuthenticatedAdminFacturationRoute: typeof AuthenticatedAdminFacturationRouteWithChildren
@@ -2871,6 +3036,7 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAgendaRoute: AuthenticatedAdminAgendaRoute,
+  AuthenticatedAdminCourriersRoute: AuthenticatedAdminCourriersRoute,
   AuthenticatedAdminDossiersRoute: AuthenticatedAdminDossiersRoute,
   AuthenticatedAdminEcolesRoute: AuthenticatedAdminEcolesRoute,
   AuthenticatedAdminFacturationRoute:
@@ -2912,7 +3078,9 @@ interface AuthenticatedCommercialRouteChildren {
   AuthenticatedCommercialAgendaRoute: typeof AuthenticatedCommercialAgendaRoute
   AuthenticatedCommercialAgendaMarketingRoute: typeof AuthenticatedCommercialAgendaMarketingRoute
   AuthenticatedCommercialAnalysesRoute: typeof AuthenticatedCommercialAnalysesRoute
+  AuthenticatedCommercialBulletinsPaieRoute: typeof AuthenticatedCommercialBulletinsPaieRoute
   AuthenticatedCommercialCalendrierEditorialRoute: typeof AuthenticatedCommercialCalendrierEditorialRoute
+  AuthenticatedCommercialCourriersRoute: typeof AuthenticatedCommercialCourriersRoute
   AuthenticatedCommercialFacturationRoute: typeof AuthenticatedCommercialFacturationRouteWithChildren
   AuthenticatedCommercialMarketingRoute: typeof AuthenticatedCommercialMarketingRoute
   AuthenticatedCommercialProfilRoute: typeof AuthenticatedCommercialProfilRoute
@@ -2930,8 +3098,12 @@ const AuthenticatedCommercialRouteChildren: AuthenticatedCommercialRouteChildren
     AuthenticatedCommercialAgendaMarketingRoute:
       AuthenticatedCommercialAgendaMarketingRoute,
     AuthenticatedCommercialAnalysesRoute: AuthenticatedCommercialAnalysesRoute,
+    AuthenticatedCommercialBulletinsPaieRoute:
+      AuthenticatedCommercialBulletinsPaieRoute,
     AuthenticatedCommercialCalendrierEditorialRoute:
       AuthenticatedCommercialCalendrierEditorialRoute,
+    AuthenticatedCommercialCourriersRoute:
+      AuthenticatedCommercialCourriersRoute,
     AuthenticatedCommercialFacturationRoute:
       AuthenticatedCommercialFacturationRouteWithChildren,
     AuthenticatedCommercialMarketingRoute:
@@ -2973,6 +3145,7 @@ interface AuthenticatedComptabiliteRouteChildren {
   AuthenticatedComptabiliteBudgetRoute: typeof AuthenticatedComptabiliteBudgetRoute
   AuthenticatedComptabiliteBudgetPrevisionnelRoute: typeof AuthenticatedComptabiliteBudgetPrevisionnelRoute
   AuthenticatedComptabiliteBulletinsPaieRoute: typeof AuthenticatedComptabiliteBulletinsPaieRoute
+  AuthenticatedComptabiliteCourriersRoute: typeof AuthenticatedComptabiliteCourriersRoute
   AuthenticatedComptabiliteFacturationRoute: typeof AuthenticatedComptabiliteFacturationRouteWithChildren
   AuthenticatedComptabiliteFacturesRoute: typeof AuthenticatedComptabiliteFacturesRoute
   AuthenticatedComptabiliteProfilRoute: typeof AuthenticatedComptabiliteProfilRoute
@@ -2992,6 +3165,8 @@ const AuthenticatedComptabiliteRouteChildren: AuthenticatedComptabiliteRouteChil
       AuthenticatedComptabiliteBudgetPrevisionnelRoute,
     AuthenticatedComptabiliteBulletinsPaieRoute:
       AuthenticatedComptabiliteBulletinsPaieRoute,
+    AuthenticatedComptabiliteCourriersRoute:
+      AuthenticatedComptabiliteCourriersRoute,
     AuthenticatedComptabiliteFacturationRoute:
       AuthenticatedComptabiliteFacturationRouteWithChildren,
     AuthenticatedComptabiliteFacturesRoute:
@@ -3217,6 +3392,7 @@ interface AuthenticatedRhRouteChildren {
   AuthenticatedRhAgendaRoute: typeof AuthenticatedRhAgendaRoute
   AuthenticatedRhBulletinsPaieRoute: typeof AuthenticatedRhBulletinsPaieRoute
   AuthenticatedRhContratsRoute: typeof AuthenticatedRhContratsRoute
+  AuthenticatedRhCourriersRoute: typeof AuthenticatedRhCourriersRoute
   AuthenticatedRhEntretiensRoute: typeof AuthenticatedRhEntretiensRoute
   AuthenticatedRhFacturationRoute: typeof AuthenticatedRhFacturationRouteWithChildren
   AuthenticatedRhPersonnelRoute: typeof AuthenticatedRhPersonnelRoute
@@ -3231,6 +3407,7 @@ const AuthenticatedRhRouteChildren: AuthenticatedRhRouteChildren = {
   AuthenticatedRhAgendaRoute: AuthenticatedRhAgendaRoute,
   AuthenticatedRhBulletinsPaieRoute: AuthenticatedRhBulletinsPaieRoute,
   AuthenticatedRhContratsRoute: AuthenticatedRhContratsRoute,
+  AuthenticatedRhCourriersRoute: AuthenticatedRhCourriersRoute,
   AuthenticatedRhEntretiensRoute: AuthenticatedRhEntretiensRoute,
   AuthenticatedRhFacturationRoute: AuthenticatedRhFacturationRouteWithChildren,
   AuthenticatedRhPersonnelRoute: AuthenticatedRhPersonnelRoute,
@@ -3284,6 +3461,7 @@ const AuthenticatedSecretaireFacturationRouteWithChildren =
 interface AuthenticatedSecretaireRouteChildren {
   AuthenticatedSecretaireAgendaRoute: typeof AuthenticatedSecretaireAgendaRoute
   AuthenticatedSecretaireAttributionRoute: typeof AuthenticatedSecretaireAttributionRoute
+  AuthenticatedSecretaireBulletinsPaieRoute: typeof AuthenticatedSecretaireBulletinsPaieRoute
   AuthenticatedSecretaireClientsRoute: typeof AuthenticatedSecretaireClientsRoute
   AuthenticatedSecretaireCourriersRoute: typeof AuthenticatedSecretaireCourriersRoute
   AuthenticatedSecretaireEtudiantsRoute: typeof AuthenticatedSecretaireEtudiantsRouteWithChildren
@@ -3303,6 +3481,8 @@ const AuthenticatedSecretaireRouteChildren: AuthenticatedSecretaireRouteChildren
     AuthenticatedSecretaireAgendaRoute: AuthenticatedSecretaireAgendaRoute,
     AuthenticatedSecretaireAttributionRoute:
       AuthenticatedSecretaireAttributionRoute,
+    AuthenticatedSecretaireBulletinsPaieRoute:
+      AuthenticatedSecretaireBulletinsPaieRoute,
     AuthenticatedSecretaireClientsRoute: AuthenticatedSecretaireClientsRoute,
     AuthenticatedSecretaireCourriersRoute:
       AuthenticatedSecretaireCourriersRoute,

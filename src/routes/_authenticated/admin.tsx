@@ -1,19 +1,30 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { LayoutDashboard, FileCheck2, MessageSquare, CalendarDays, School, CalendarClock, UserCircle, Calendar } from "lucide-react";
+import {
+  LayoutDashboard,
+  FileCheck2,
+  MessageSquare,
+  CalendarDays,
+  School,
+  CalendarClock,
+  UserCircle,
+  Calendar,
+  Mail,
+} from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { RoleGuard } from "@/components/RoleGuard";
 
 // Utilisateurs, Dossiers, Facturation → accessibles via menu 3-points
 const NAV = [
-  { label: "Tableau de bord", to: "/admin",                       icon: LayoutDashboard },
-  { label: "Validations",     to: "/admin/validations",           icon: FileCheck2 },
-  { label: "Écoles",          to: "/admin/ecoles",                icon: School },
-  { label: "Messages",        to: "/admin/messages",              icon: MessageSquare },
-  { label: "Agenda",          to: "/admin/agenda",                icon: Calendar },
-  { label: "Réunions",        to: "/admin/reunions",              icon: CalendarDays },
-  { label: "Rendez-vous",     to: "/admin/rendez-vous",           icon: CalendarDays },
-  { label: "RDV Clients",     to: "/admin/rendez-vous-clients",   icon: CalendarClock },
-  { label: "Mon Profil",      to: "/admin/profil",                icon: UserCircle },
+  { label: "Tableau de bord", to: "/admin", icon: LayoutDashboard },
+  { label: "Validations", to: "/admin/validations", icon: FileCheck2 },
+  { label: "Écoles", to: "/admin/ecoles", icon: School },
+  { label: "Messages", to: "/admin/messages", icon: MessageSquare },
+  { label: "Transmissions internes", to: "/admin/courriers", icon: Mail },
+  { label: "Agenda", to: "/admin/agenda", icon: Calendar },
+  { label: "Réunions", to: "/admin/reunions", icon: CalendarDays },
+  { label: "Rendez-vous", to: "/admin/rendez-vous", icon: CalendarDays },
+  { label: "RDV Clients", to: "/admin/rendez-vous-clients", icon: CalendarClock },
+  { label: "Mon Profil", to: "/admin/profil", icon: UserCircle },
 ];
 
 export const Route = createFileRoute("/_authenticated/admin")({

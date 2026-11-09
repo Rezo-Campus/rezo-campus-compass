@@ -9,6 +9,7 @@ import {
   Receipt,
   UserCircle,
   Banknote,
+  Mail,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { RoleGuard } from "@/components/RoleGuard";
@@ -19,6 +20,7 @@ const NAV = [
   { label: "Budget Prévisionnel", to: "/comptabilite/budget-previsionnel", icon: BarChart2 },
   { label: "Rapport de Suivi", to: "/comptabilite/rapport-suivi", icon: ClipboardList },
   { label: "Bulletins de paie", to: "/comptabilite/bulletins-paie", icon: Banknote },
+  { label: "Transmissions internes", to: "/comptabilite/courriers", icon: Mail },
   { label: "Factures", to: "/comptabilite/factures", icon: Receipt },
   { label: "Agenda", to: "/comptabilite/agenda", icon: Calendar },
   { label: "RDV Clients", to: "/comptabilite/rendez-vous-clients", icon: CalendarClock },

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
-import { Plus, Pencil, Trash2, Loader2, Printer, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Printer, X, Send, FileText } from "lucide-react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { toast } from "sonner";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
@@ -46,6 +46,7 @@ type Bulletin = {
   salaire_net: number;
   note: string | null;
   status: string;
+  recipient_user_id: string | null;
   created_at: string;
   personnel?: {
     full_name: string;
@@ -64,11 +65,29 @@ type Personnel = {
   status: string;
 };
 
+type UserRole = {
+  user_id: string;
+  role: string;
+  email?: string | null;
+  display_name?: string | null;
+};
+
 /* ── Helpers ────────────────────────────────────────────────────────────── */
 const DEFAULT_RETENUES: Omit<Line, "id">[] = [
   { label: "CNPS (part salariale)", type: "percent", value: 2.8 },
   { label: "IRPP", type: "percent", value: 11 },
 ];
+
+const ROLE_LABELS: Record<string, string> = {
+  admin: "Administration",
+  commercial: "Mkt & Communication",
+  rh: "Ressources Humaines",
+  comptable: "Comptabilité",
+  chef_projet: "Projets IT",
+  secretaire: "Secrétariat",
+  aadf: "AADF",
+  conseiller: "Conseiller",
+};
 
 function getEmptyForm() {
   return {
@@ -125,6 +144,7 @@ function fmtPeriod(ym: string) {
 const STATUS_COLORS: Record<string, string> = {
   brouillon: "bg-amber-100 text-amber-700",
   emis: "bg-green-100 text-green-700",
+  envoye: "bg-blue-100 text-blue-700",
 };
 
 /* ── Print ──────────────────────────────────────────────────────────────── */
@@ -140,7 +160,6 @@ function printBulletin(b: Bulletin) {
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; font-size: 11px; color: #111; padding: 24px; max-width: 740px; margin: auto; }
-    /* ── En-tête ── */
     .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #15803d; padding-bottom: 12px; margin-bottom: 14px; }
     .header-left { display: flex; flex-direction: column; gap: 2px; }
     .company-name { font-size: 18px; font-weight: bold; color: #15803d; letter-spacing: 1px; text-transform: uppercase; }
@@ -150,11 +169,9 @@ function printBulletin(b: Bulletin) {
     .bulletin-title { font-size: 15px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; color: #111; }
     .bulletin-period { font-size: 10px; color: #15803d; font-weight: 600; margin-top: 3px; }
     .bulletin-ref { font-size: 9px; color: #888; margin-top: 2px; }
-    /* ── Corps ── */
     .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
     .box { border: 1px solid #ccc; border-radius: 4px; padding: 10px; }
-    .box h2 { font-size: 9px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #666;
-               border-bottom: 1px solid #eee; padding-bottom: 4px; margin-bottom: 7px; }
+    .box h2 { font-size: 9px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; color: #666; border-bottom: 1px solid #eee; padding-bottom: 4px; margin-bottom: 7px; }
     .row { display: flex; justify-content: space-between; padding: 2.5px 0; border-bottom: 1px solid #f2f2f2; }
     .row:last-child { border-bottom: none; }
     .label { color: #444; }
@@ -172,15 +189,11 @@ function printBulletin(b: Bulletin) {
   </style>
 </head>
 <body>
-  <!-- En-tête entreprise -->
   <div class="header">
     <div class="header-left">
       <div class="company-name">Rézo Campus Consulting</div>
       <div class="company-sub">Cabinet de conseil en orientation &amp; accompagnement académique</div>
-      <div class="company-info">
-        Tél : +242 06 800 01 99 &nbsp;|&nbsp; Email : contact@rezoconnect.com<br>
-        RC : 741051 &nbsp;|&nbsp; NIU : MXXXXXXXXXX
-      </div>
+      <div class="company-info">Tél : +242 06 800 01 99 &nbsp;|&nbsp; Email : contact@rezoconnect.com<br>RC : 741051 &nbsp;|&nbsp; NIU : MXXXXXXXXXX</div>
     </div>
     <div class="header-right">
       <div class="bulletin-title">Bulletin de Paie</div>
@@ -188,7 +201,6 @@ function printBulletin(b: Bulletin) {
       <div class="bulletin-ref">Réf. : BP-${b.period_month.replace("-", "")}-${b.id.slice(0, 6).toUpperCase()}</div>
     </div>
   </div>
-
   <div class="grid2">
     <div class="box">
       <h2>Informations Employé</h2>
@@ -212,35 +224,26 @@ function printBulletin(b: Bulletin) {
       }
     </div>
   </div>
-
   ${
     b.retenues.length > 0
-      ? `
-  <div class="box" style="margin-bottom:14px">
-    <h2>Retenues &amp; Cotisations</h2>
-    ${b.retenues
-      .map((r) => {
-        const amt = r.type === "fixed" ? r.value : (brut * r.value) / 100;
-        return `<div class="row"><span class="label">${r.label}${r.type === "percent" ? ` (${r.value}%)` : ""}</span><span class="value minus">- ${fmt(amt)}</span></div>`;
-      })
-      .join("")}
-  </div>`
+      ? `<div class="box" style="margin-bottom:14px"><h2>Retenues &amp; Cotisations</h2>${b.retenues
+          .map((r) => {
+            const amt = r.type === "fixed" ? r.value : (brut * r.value) / 100;
+            return `<div class="row"><span class="label">${r.label}${r.type === "percent" ? ` (${r.value}%)` : ""}</span><span class="value minus">- ${fmt(amt)}</span></div>`;
+          })
+          .join("")}</div>`
       : ""
   }
-
   <div class="summary">
     <div class="s-row"><span>Salaire brut</span><span>${fmt(brut)}</span></div>
     <div class="s-row" style="color:#dc2626"><span>Total retenues</span><span>- ${fmt(totalRetenues)}</span></div>
     <div class="s-row total"><span>SALAIRE NET À PAYER</span><span>${fmt(net)}</span></div>
   </div>
-
   ${b.note ? `<div class="box" style="margin-top:14px"><h2>Observations</h2><p style="color:#555;margin-top:4px;font-size:10px">${b.note}</p></div>` : ""}
-
   <div class="signature">
     <div class="sig-box"><div class="sig-label">Signature de l'employé</div></div>
     <div class="sig-box"><div class="sig-label">Cachet &amp; Signature employeur</div></div>
   </div>
-
   <div class="footer">Document généré le ${new Date().toLocaleString("fr-FR")} · Rézo Campus</div>
 </body>
 </html>`;
@@ -341,13 +344,20 @@ function LineEditor({
   );
 }
 
-/* ── Main component ─────────────────────────────────────────────────────── */
+/* ── Router : route vers la bonne vue selon le rôle ────────────────────── */
 export function BulletinsPaie() {
+  const { data: auth } = useAuth();
+  const role = auth?.role;
+  if (!role || role === "ecole" || role === "etudiant") return null;
+  if (role !== "admin") return <MesBulletins />;
+  return <BulletinsPaieAdmin />;
+}
+
+/* ── Vue Admin : CRUD complet + envoi ───────────────────────────────────── */
+function BulletinsPaieAdmin() {
   const { data: auth } = useAuth();
   const qc = useQueryClient();
   const db = supabase as any;
-
-  const canWrite = auth?.role === "admin" || auth?.role === "comptable";
 
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -355,10 +365,12 @@ export function BulletinsPaie() {
   const [filterPersonnel, setFilterPersonnel] = useState("__all__");
   const [form, setForm] = useState(getEmptyForm);
 
+  const [pendingSend, setPendingSend] = useState<Bulletin | null>(null);
+  const [sendRecipientId, setSendRecipientId] = useState("");
+
   const base = parseFloat(form.salaireBase) || 0;
   const { brut, totalRetenues, net } = compute(base, form.primes, form.retenues);
 
-  /* Queries */
   const { data: personnel = [] } = useQuery({
     queryKey: ["personnel-active"],
     queryFn: async () => {
@@ -383,12 +395,20 @@ export function BulletinsPaie() {
     },
   });
 
+  const { data: userRoles = [] } = useQuery({
+    queryKey: ["user-roles-staff"],
+    queryFn: async () => {
+      const { data } = await db.from("staff_accounts").select("user_id, role, email, display_name");
+      return (data ?? []) as UserRole[];
+    },
+    enabled: !!pendingSend,
+  });
+
   const filtered =
     filterPersonnel === "__all__"
       ? bulletins
       : bulletins.filter((b) => b.personnel_id === filterPersonnel);
 
-  /* Handlers */
   function resetAndClose() {
     setOpen(false);
     setEditingId(null);
@@ -409,13 +429,11 @@ export function BulletinsPaie() {
     setOpen(true);
   }
 
-  /* Mutations */
   const save = useMutation({
     mutationFn: async () => {
       if (!form.personnelId) throw new Error("Sélectionnez un employé");
       if (!form.periodMonth) throw new Error("Période requise");
       if (!base) throw new Error("Salaire de base requis");
-
       const payload = {
         personnel_id: form.personnelId,
         period_month: form.periodMonth,
@@ -429,7 +447,6 @@ export function BulletinsPaie() {
         status: form.status,
         created_by: auth?.user?.id,
       };
-
       if (editingId) {
         const { error } = await db.from("bulletins_paie").update(payload).eq("id", editingId);
         if (error) throw error;
@@ -458,15 +475,45 @@ export function BulletinsPaie() {
     onError: (e: Error) => toast.error("Erreur", { description: e.message }),
   });
 
+  const sendBulletin = useMutation({
+    mutationFn: async ({
+      bulletinId,
+      recipientId,
+      bulletin,
+    }: {
+      bulletinId: string;
+      recipientId: string;
+      bulletin: Bulletin;
+    }) => {
+      const { error } = await db
+        .from("bulletins_paie")
+        .update({ recipient_user_id: recipientId, status: "envoye" })
+        .eq("id", bulletinId);
+      if (error) throw error;
+      await supabase.from("notifications").insert({
+        user_id: recipientId,
+        title: "Bulletin de paie disponible",
+        body: `Votre bulletin de paie pour ${fmtPeriod(bulletin.period_month)} est disponible. Net à payer : ${fmt(bulletin.salaire_net)}`,
+        data: { type: "bulletin_paie", bulletin_id: bulletinId },
+      });
+    },
+    onSuccess: () => {
+      toast.success("Bulletin envoyé avec succès");
+      setPendingSend(null);
+      setSendRecipientId("");
+      qc.invalidateQueries({ queryKey: ["bulletins-paie"] });
+    },
+    onError: (e: Error) => toast.error("Erreur d'envoi", { description: e.message }),
+  });
+
   return (
     <>
       <PageHeader
         eyebrow="Comptabilité"
         title="Bulletins de paie"
-        description="Établissez et imprimez les bulletins de salaire du personnel."
+        description="Établissez, envoyez et imprimez les bulletins de salaire du personnel."
       />
 
-      {/* Toolbar */}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <Select value={filterPersonnel} onValueChange={setFilterPersonnel}>
           <SelectTrigger className="w-56">
@@ -481,21 +528,17 @@ export function BulletinsPaie() {
             ))}
           </SelectContent>
         </Select>
-
-        {canWrite && (
-          <Button
-            onClick={() => {
-              setForm(getEmptyForm());
-              setEditingId(null);
-              setOpen(true);
-            }}
-          >
-            <Plus className="mr-2 size-4" /> Nouveau bulletin
-          </Button>
-        )}
+        <Button
+          onClick={() => {
+            setForm(getEmptyForm());
+            setEditingId(null);
+            setOpen(true);
+          }}
+        >
+          <Plus className="mr-2 size-4" /> Nouveau bulletin
+        </Button>
       </div>
 
-      {/* List */}
       <Panel title={`${filtered.length} bulletin${filtered.length !== 1 ? "s" : ""}`}>
         {isLoading ? (
           <Loader2 className="mx-auto size-5 animate-spin text-primary" />
@@ -517,7 +560,11 @@ export function BulletinsPaie() {
                     <Badge
                       className={`text-[10px] border-0 ${STATUS_COLORS[b.status] ?? "bg-muted"}`}
                     >
-                      {b.status === "emis" ? "Émis" : "Brouillon"}
+                      {b.status === "emis"
+                        ? "Émis"
+                        : b.status === "envoye"
+                          ? "Envoyé"
+                          : "Brouillon"}
                     </Badge>
                   </div>
                   <div className="mt-0.5 flex flex-wrap gap-x-4 text-xs text-muted-foreground">
@@ -534,7 +581,7 @@ export function BulletinsPaie() {
                     </span>
                   </div>
                 </div>
-                <div className="flex shrink-0 gap-1">
+                <div className="flex shrink-0 flex-wrap gap-1">
                   <Button
                     size="sm"
                     variant="outline"
@@ -543,21 +590,30 @@ export function BulletinsPaie() {
                   >
                     <Printer className="mr-1 size-3.5" /> Imprimer
                   </Button>
-                  {canWrite && (
-                    <>
-                      <Button size="sm" variant="ghost" className="h-7" onClick={() => openEdit(b)}>
-                        <Pencil className="size-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-7 text-destructive hover:bg-destructive/10"
-                        onClick={() => setPendingDeleteId(b.id)}
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </>
+                  {b.status !== "envoye" && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs text-blue-600 border-blue-200 hover:bg-blue-50"
+                      onClick={() => {
+                        setPendingSend(b);
+                        setSendRecipientId("");
+                      }}
+                    >
+                      <Send className="mr-1 size-3.5" /> Envoyer
+                    </Button>
                   )}
+                  <Button size="sm" variant="ghost" className="h-7" onClick={() => openEdit(b)}>
+                    <Pencil className="size-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 text-destructive hover:bg-destructive/10"
+                    onClick={() => setPendingDeleteId(b.id)}
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
                 </div>
               </li>
             ))}
@@ -578,7 +634,6 @@ export function BulletinsPaie() {
               {editingId ? "Modifier le bulletin de paie" : "Nouveau bulletin de paie"}
             </DialogTitle>
           </DialogHeader>
-
           <ScrollArea className="max-h-[72vh] pr-3">
             <form
               id="bulletin-form"
@@ -588,7 +643,6 @@ export function BulletinsPaie() {
               }}
               className="space-y-5 py-1"
             >
-              {/* Employé + Période */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label>Employé *</Label>
@@ -617,8 +671,6 @@ export function BulletinsPaie() {
                   />
                 </div>
               </div>
-
-              {/* Salaire de base */}
               <div className="space-y-1.5">
                 <Label>Salaire de base (FCFA) *</Label>
                 <Input
@@ -630,8 +682,6 @@ export function BulletinsPaie() {
                   placeholder="ex. 150 000"
                 />
               </div>
-
-              {/* Primes */}
               <div className="rounded-lg border border-border p-4">
                 <LineEditor
                   lines={form.primes}
@@ -639,8 +689,6 @@ export function BulletinsPaie() {
                   onChange={(primes) => setForm((f) => ({ ...f, primes }))}
                 />
               </div>
-
-              {/* Retenues */}
               <div className="rounded-lg border border-border p-4">
                 <LineEditor
                   lines={form.retenues}
@@ -648,8 +696,6 @@ export function BulletinsPaie() {
                   onChange={(retenues) => setForm((f) => ({ ...f, retenues }))}
                 />
               </div>
-
-              {/* Récapitulatif live */}
               <div className="rounded-lg bg-muted/40 border border-border p-4 space-y-1.5 text-sm">
                 <p className="text-xs font-semibold uppercase text-muted-foreground mb-2 tracking-wide">
                   Récapitulatif
@@ -679,8 +725,6 @@ export function BulletinsPaie() {
                   <span className="text-primary">{fmt(net)}</span>
                 </div>
               </div>
-
-              {/* Statut + Note */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label>Statut</Label>
@@ -708,7 +752,6 @@ export function BulletinsPaie() {
               </div>
             </form>
           </ScrollArea>
-
           <DialogFooter>
             <Button variant="outline" onClick={resetAndClose}>
               Annuler
@@ -716,6 +759,77 @@ export function BulletinsPaie() {
             <Button type="submit" form="bulletin-form" disabled={save.isPending}>
               {save.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
               {editingId ? "Enregistrer les modifications" : "Créer le bulletin"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog envoi */}
+      <Dialog
+        open={!!pendingSend}
+        onOpenChange={(v) => {
+          if (!v) {
+            setPendingSend(null);
+            setSendRecipientId("");
+          }
+        }}
+      >
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Envoyer le bulletin de paie</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <p className="text-sm text-muted-foreground">
+              Associez le bulletin de <strong>{pendingSend?.personnel?.full_name}</strong> à un
+              compte utilisateur enregistré pour l'en notifier.
+            </p>
+            <div className="space-y-1.5">
+              <Label>Compte destinataire *</Label>
+              <Select value={sendRecipientId} onValueChange={setSendRecipientId}>
+                <SelectTrigger className="[&>span]:truncate [&>span]:block [&>span]:text-left">
+                  <SelectValue placeholder="Choisir un compte…" />
+                </SelectTrigger>
+                <SelectContent className="max-w-sm">
+                  {userRoles.map((u) => (
+                    <SelectItem key={u.user_id} value={u.user_id}>
+                      <span className="font-medium">
+                        {u.display_name ?? u.email ?? u.user_id.slice(-8)}
+                      </span>
+                      <span className="ml-1 text-muted-foreground text-xs">
+                        — {ROLE_LABELS[u.role] ?? u.role}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Chaque compte est identifié par son email et son département.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setPendingSend(null);
+                setSendRecipientId("");
+              }}
+            >
+              Annuler
+            </Button>
+            <Button
+              disabled={!sendRecipientId || sendBulletin.isPending}
+              onClick={() => {
+                if (pendingSend && sendRecipientId)
+                  sendBulletin.mutate({
+                    bulletinId: pendingSend.id,
+                    recipientId: sendRecipientId,
+                    bulletin: pendingSend,
+                  });
+              }}
+            >
+              {sendBulletin.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+              <Send className="mr-2 size-4" /> Envoyer
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -734,6 +848,102 @@ export function BulletinsPaie() {
         }}
         loading={del.isPending}
       />
+    </>
+  );
+}
+
+/* ── Vue Employé : lecture des bulletins reçus ──────────────────────────── */
+function MesBulletins() {
+  const { data: auth } = useAuth();
+  const db = supabase as any;
+
+  const { data: bulletins = [], isLoading } = useQuery({
+    queryKey: ["mes-bulletins", auth?.user?.id],
+    queryFn: async () => {
+      if (!auth?.user?.id) return [];
+      const { data, error } = await db
+        .from("bulletins_paie")
+        .select("*, personnel(full_name, department, hire_date, email)")
+        .eq("recipient_user_id", auth.user.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as Bulletin[];
+    },
+    enabled: !!auth?.user?.id,
+  });
+
+  return (
+    <>
+      <PageHeader
+        eyebrow="Mes documents"
+        title="Mes bulletins de paie"
+        description="Consultez et imprimez vos bulletins de salaire émis par l'administration."
+      />
+      {isLoading ? (
+        <Loader2 className="mx-auto size-5 animate-spin text-primary" />
+      ) : bulletins.length === 0 ? (
+        <Panel title="Bulletins de paie">
+          <div className="py-10 text-center text-sm text-muted-foreground">
+            <FileText className="mx-auto mb-3 size-10 opacity-20" />
+            Aucun bulletin disponible pour le moment.
+            <br />
+            <span className="text-xs">
+              L'administration vous notifiera dès qu'un bulletin est émis.
+            </span>
+          </div>
+        </Panel>
+      ) : (
+        <Panel
+          title={`${bulletins.length} bulletin${bulletins.length !== 1 ? "s" : ""} reçu${bulletins.length !== 1 ? "s" : ""}`}
+        >
+          <ul className="divide-y divide-border">
+            {bulletins.map((b) => (
+              <li key={b.id} className="flex flex-wrap items-center gap-3 p-3">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-medium text-sm">{fmtPeriod(b.period_month)}</span>
+                    {b.personnel?.department && (
+                      <span className="text-xs text-muted-foreground">
+                        · {b.personnel.department}
+                      </span>
+                    )}
+                    <Badge className="text-[10px] border-0 bg-blue-100 text-blue-700">Reçu</Badge>
+                  </div>
+                  <div className="mt-0.5 flex flex-wrap gap-x-4 text-xs text-muted-foreground">
+                    <span>
+                      Brut :{" "}
+                      <span className="font-medium text-foreground">{fmt(b.salaire_brut)}</span>
+                    </span>
+                    <span>
+                      Retenues : <span className="text-red-600">{fmt(b.total_retenues)}</span>
+                    </span>
+                    <span>
+                      Net :{" "}
+                      <span className="font-semibold text-green-700">{fmt(b.salaire_net)}</span>
+                    </span>
+                  </div>
+                  <div className="mt-0.5 text-xs text-muted-foreground">
+                    Reçu le{" "}
+                    {new Date(b.created_at).toLocaleDateString("fr-FR", {
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 text-xs shrink-0"
+                  onClick={() => printBulletin(b)}
+                >
+                  <Printer className="mr-1 size-3.5" /> Imprimer
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      )}
     </>
   );
 }
