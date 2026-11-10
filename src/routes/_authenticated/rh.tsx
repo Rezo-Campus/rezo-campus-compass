@@ -8,14 +8,15 @@ import {
   UserCircle,
   Banknote,
   Mail,
+  CalendarDays,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { RoleGuard } from "@/components/RoleGuard";
 
-// Agenda, Contrats, Entretiens, Réunions → accessibles via menu 3-points
 const NAV = [
   { label: "Tableau de bord", to: "/rh", icon: LayoutDashboard },
   { label: "Personnel", to: "/rh/personnel", icon: Users },
+  { label: "Réunions", to: "/rh/reunions", icon: CalendarDays },
   { label: "Bulletins de paie", to: "/rh/bulletins-paie", icon: Banknote },
   { label: "Transmissions internes", to: "/rh/courriers", icon: Mail },
   { label: "Protocoles", to: "/rh/protocoles", icon: ClipboardList },

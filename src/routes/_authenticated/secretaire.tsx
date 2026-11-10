@@ -11,6 +11,7 @@ import {
   UserCircle,
   ArrowLeftRight,
   Banknote,
+  CalendarDays,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { RoleGuard } from "@/components/RoleGuard";
@@ -25,6 +26,7 @@ const NAV = [
   { label: "Attribution", to: "/secretaire/attribution", icon: UserPlus },
   { label: "Messagerie", to: "/secretaire/messages", icon: MessageSquare },
   { label: "Mes bulletins de paie", to: "/secretaire/bulletins-paie", icon: Banknote },
+  { label: "Réunions", to: "/secretaire/reunions", icon: CalendarDays },
   { label: "RDV Étudiants", to: "/secretaire/rendez-vous-etudiants", icon: CalendarClock },
   { label: "Mon Profil", to: "/secretaire/profil", icon: UserCircle },
 ];
