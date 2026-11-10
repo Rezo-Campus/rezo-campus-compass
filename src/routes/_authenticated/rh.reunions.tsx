@@ -39,11 +39,18 @@ const STATUS_COLORS: Record<string, string> = {
   annulee: "bg-red-100 text-red-700",
 };
 
-const emptyForm = { title: "", scheduled_at: "", duration_min: 60, location: "", agenda: "", notes: "" };
+const emptyForm = {
+  title: "",
+  scheduled_at: "",
+  duration_min: 60,
+  location: "",
+  agenda: "",
+  notes: "",
+};
 
 export function MeetingsCalendar() {
   const { data: auth } = useAuth();
-  const canManage = auth?.role === "admin" || auth?.role === "rh";
+  const canManage = auth?.role === "admin" || auth?.role === "rh" || auth?.role === "secretaire";
   const qc = useQueryClient();
 
   const [month, setMonth] = useState(() => {
@@ -78,7 +85,9 @@ export function MeetingsCalendar() {
         qc.invalidateQueries({ queryKey: ["meetings"] });
       })
       .subscribe();
-    return () => { void supabase.removeChannel(channel); };
+    return () => {
+      void supabase.removeChannel(channel);
+    };
   }, [qc]);
 
   function resetAndClose() {
@@ -91,14 +100,18 @@ export function MeetingsCalendar() {
     setEditingId(null);
     const base = day ?? new Date();
     base.setHours(9, 0, 0, 0);
-    const local = new Date(base.getTime() - base.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    const local = new Date(base.getTime() - base.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 16);
     setForm({ ...emptyForm, scheduled_at: local });
     setFormOpen(true);
   }
 
   function openEdit(m: Meeting) {
     const dt = new Date(m.scheduled_at);
-    const local = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    const local = new Date(dt.getTime() - dt.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 16);
     setForm({
       title: m.title,
       scheduled_at: local,
@@ -146,17 +159,30 @@ export function MeetingsCalendar() {
           const { data: internalUsers } = await db
             .from("user_roles")
             .select("user_id")
-            .in("role", ["admin", "conseiller", "rh", "chef_projet", "commercial", "comptable", "secretaire", "aadf"]);
+            .in("role", [
+              "admin",
+              "conseiller",
+              "rh",
+              "chef_projet",
+              "commercial",
+              "comptable",
+              "secretaire",
+              "aadf",
+            ]);
           const notifs = (internalUsers ?? [])
             .filter((u: any) => u.user_id !== auth?.user?.id)
             .map((u: any) => ({
               user_id: u.user_id,
-              title: wasEditing ? `Réunion modifiée : ${meetingTitle}` : `Nouvelle réunion : ${meetingTitle}`,
+              title: wasEditing
+                ? `Réunion modifiée : ${meetingTitle}`
+                : `Nouvelle réunion : ${meetingTitle}`,
               body: `Prévue le ${new Date(meetingDate).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" })}${meetingLocation ? ` · ${meetingLocation}` : ""}`,
               data: { type: "meeting" },
             }));
           if (notifs.length) await supabase.from("notifications").insert(notifs);
-        } catch { /* best-effort */ }
+        } catch {
+          /* best-effort */
+        }
       })();
     },
     onError: (e: Error) => toast.error("Erreur", { description: e.message }),
@@ -207,7 +233,10 @@ export function MeetingsCalendar() {
             <button
               key={m.id}
               type="button"
-              onClick={(e) => { e.stopPropagation(); setDetailMeeting(m); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setDetailMeeting(m);
+              }}
               className={`block w-full truncate rounded px-1 py-0.5 text-left text-[10px] font-medium transition hover:opacity-80 ${STATUS_COLORS[m.status] ?? "bg-muted"}`}
               title={`${m.title}${m.location ? " · " + m.location : ""}`}
             >
@@ -220,8 +249,12 @@ export function MeetingsCalendar() {
       {/* Liste à venir (lecture rapide, complément du calendrier) */}
       <div className="mt-6">
         <Panel title="Prochaines réunions">
-          {meetings.filter((m) => new Date(m.scheduled_at) >= new Date() && m.status === "programmee").length === 0 ? (
-            <p className="py-4 text-center text-sm text-muted-foreground">Aucune réunion à venir.</p>
+          {meetings.filter(
+            (m) => new Date(m.scheduled_at) >= new Date() && m.status === "programmee",
+          ).length === 0 ? (
+            <p className="py-4 text-center text-sm text-muted-foreground">
+              Aucune réunion à venir.
+            </p>
           ) : (
             <ul className="space-y-2">
               {meetings
@@ -242,10 +275,15 @@ export function MeetingsCalendar() {
                         <div className="mt-0.5 flex flex-wrap gap-x-3 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Clock className="size-3" />
-                            {new Date(m.scheduled_at).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" })}
+                            {new Date(m.scheduled_at).toLocaleString("fr-FR", {
+                              dateStyle: "medium",
+                              timeStyle: "short",
+                            })}
                           </span>
                           {m.location && (
-                            <span className="flex items-center gap-1"><MapPin className="size-3" /> {m.location}</span>
+                            <span className="flex items-center gap-1">
+                              <MapPin className="size-3" /> {m.location}
+                            </span>
                           )}
                         </div>
                       </div>
@@ -258,12 +296,23 @@ export function MeetingsCalendar() {
       </div>
 
       {/* Dialog formulaire */}
-      <Dialog open={formOpen} onOpenChange={(v) => { if (!v) resetAndClose(); }}>
+      <Dialog
+        open={formOpen}
+        onOpenChange={(v) => {
+          if (!v) resetAndClose();
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{editingId ? "Modifier la réunion" : "Planifier une réunion"}</DialogTitle>
           </DialogHeader>
-          <form onSubmit={(e) => { e.preventDefault(); save.mutate(); }} className="space-y-4">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              save.mutate();
+            }}
+            className="space-y-4"
+          >
             <div className="space-y-1.5">
               <Label>Titre de la réunion *</Label>
               <Input
@@ -286,7 +335,9 @@ export function MeetingsCalendar() {
               <div className="space-y-1.5">
                 <Label>Durée (min)</Label>
                 <Input
-                  type="number" min={10} max={480}
+                  type="number"
+                  min={10}
+                  max={480}
                   value={form.duration_min}
                   onChange={(e) => setForm((f) => ({ ...f, duration_min: Number(e.target.value) }))}
                 />
@@ -326,7 +377,12 @@ export function MeetingsCalendar() {
       </Dialog>
 
       {/* Dialog détail */}
-      <Dialog open={detailMeeting !== null} onOpenChange={(v) => { if (!v) setDetailMeeting(null); }}>
+      <Dialog
+        open={detailMeeting !== null}
+        onOpenChange={(v) => {
+          if (!v) setDetailMeeting(null);
+        }}
+      >
         <DialogContent>
           {detailMeeting && (
             <>
@@ -335,13 +391,19 @@ export function MeetingsCalendar() {
               </DialogHeader>
               <div className="space-y-4">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[detailMeeting.status] ?? "bg-muted"}`}>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[detailMeeting.status] ?? "bg-muted"}`}
+                  >
                     {STATUS_LABELS[detailMeeting.status] ?? detailMeeting.status}
                   </span>
                   <span className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Clock className="size-3" />
-                    {new Date(detailMeeting.scheduled_at).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" })}
-                    {" · "}{detailMeeting.duration_min} min
+                    {new Date(detailMeeting.scheduled_at).toLocaleString("fr-FR", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
+                    {" · "}
+                    {detailMeeting.duration_min} min
                   </span>
                   {detailMeeting.location && (
                     <span className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -351,7 +413,9 @@ export function MeetingsCalendar() {
                 </div>
 
                 <div>
-                  <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Ordre du jour</p>
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Ordre du jour
+                  </p>
                   {detailMeeting.agenda ? (
                     <p className="whitespace-pre-wrap rounded-lg border border-border bg-muted/30 p-3 text-sm">
                       {detailMeeting.agenda}
@@ -363,8 +427,12 @@ export function MeetingsCalendar() {
 
                 {detailMeeting.notes && (
                   <div>
-                    <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Notes</p>
-                    <p className="whitespace-pre-wrap text-sm text-muted-foreground">{detailMeeting.notes}</p>
+                    <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      Notes
+                    </p>
+                    <p className="whitespace-pre-wrap text-sm text-muted-foreground">
+                      {detailMeeting.notes}
+                    </p>
                   </div>
                 )}
 
@@ -390,7 +458,9 @@ export function MeetingsCalendar() {
 
       <ConfirmDialog
         open={pendingDeleteId !== null}
-        onOpenChange={(o) => { if (!o) setPendingDeleteId(null); }}
+        onOpenChange={(o) => {
+          if (!o) setPendingDeleteId(null);
+        }}
         title="Supprimer cette réunion ?"
         description="Cette action est irréversible. La réunion sera définitivement supprimée."
         onConfirm={() => {
