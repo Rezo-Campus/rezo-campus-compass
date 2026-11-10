@@ -1,0 +1,1 @@
+import{j as t}from"./index-bSKqJ2uR.js";import{A as n}from"./AgendaView-ihofDBdB.js";import"./bell-NOteoBlo.js";const i=()=>t.jsx(n,{department:"all",canEdit:!0,title:"Agenda général — administration"});export{i as component};

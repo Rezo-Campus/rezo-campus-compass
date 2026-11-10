@@ -1,0 +1,1 @@
+import{j as s}from"./index-bSKqJ2uR.js";import{T as o}from"./TransmissionsInternes-D7WzNnsC.js";import"./inbox-B5Ascakq.js";const n=()=>s.jsx(o,{department:"rh",eyebrow:"Ressources Humaines"});export{n as component};
