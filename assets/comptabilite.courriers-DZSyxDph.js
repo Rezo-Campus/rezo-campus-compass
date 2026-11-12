@@ -1,0 +1,1 @@
+import{j as t}from"./index-CcPEXbJW.js";import{T as o}from"./TransmissionsInternes-CczSl6a1.js";import"./inbox-Bh0464Sq.js";const i=()=>t.jsx(o,{department:"comptabilite",eyebrow:"Comptabilité"});export{i as component};

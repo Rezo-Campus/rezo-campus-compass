@@ -1,1 +1,0 @@
-import{j as o}from"./index-DPqsuCUd.js";import{T as t}from"./TransmissionsInternes-DtphPmD3.js";import"./inbox-YPv3WR9W.js";const e=()=>o.jsx(t,{department:"commercial",eyebrow:"Marketing & Communication"});export{e as component};
