@@ -19,6 +19,7 @@ import { RoleGuard } from "@/components/RoleGuard";
 const NAV = [
   { label: "Tableau de bord", to: "/secretaire", icon: LayoutDashboard },
   { label: "Courriers", to: "/secretaire/courriers", icon: Mail },
+  { label: "Transmissions internes", to: "/secretaire/transmissions", icon: ArrowLeftRight },
   { label: "Clients", to: "/secretaire/clients", icon: Users },
   { label: "Étudiants", to: "/secretaire/etudiants", icon: GraduationCap },
   { label: "Validations", to: "/secretaire/validations", icon: FileCheck2 },
