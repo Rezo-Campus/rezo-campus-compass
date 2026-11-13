@@ -1,0 +1,1 @@
+import{j as t}from"./index-CZqWLZ3V.js";import{A as e}from"./AgendaView-xtMavHNW.js";import"./bell-BmBldbcA.js";const a=()=>t.jsx(e,{department:"all",canEdit:!0,title:"Agenda général — tous les départements"});export{a as component};

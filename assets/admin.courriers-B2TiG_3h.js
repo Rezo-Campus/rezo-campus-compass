@@ -1,1 +1,0 @@
-import{j as n}from"./index-CcPEXbJW.js";import{T as t}from"./TransmissionsInternes-CczSl6a1.js";import"./inbox-Bh0464Sq.js";const s=()=>n.jsx(t,{department:"admin",eyebrow:"Administration générale",canSeeAll:!0});export{s as component};
