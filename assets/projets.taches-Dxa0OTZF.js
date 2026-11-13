@@ -1,1 +1,0 @@
-import{j as t}from"./index-CZqWLZ3V.js";import{A as e}from"./AgendaView-xtMavHNW.js";import"./bell-BmBldbcA.js";const m=()=>t.jsx(e,{department:"projets",canEdit:!0,title:"Tâches — Management de Projet"});export{m as component};

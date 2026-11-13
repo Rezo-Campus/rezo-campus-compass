@@ -1,1 +1,0 @@
-import{j as t}from"./index-CZqWLZ3V.js";import{A as o}from"./AgendaView-xtMavHNW.js";import"./bell-BmBldbcA.js";const m=()=>t.jsx(o,{department:"aadf",canEdit:!0,title:"Agenda AADF"});export{m as component};
