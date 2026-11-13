@@ -1,7 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
-import { Loader2, Plus, Trash2, ClipboardList, Printer, RefreshCw, ChevronDown, ChevronRight, PenLine } from "lucide-react";
+import {
+  Loader2,
+  Plus,
+  Trash2,
+  ClipboardList,
+  Printer,
+  RefreshCw,
+  ChevronDown,
+  ChevronRight,
+  PenLine,
+} from "lucide-react";
+import { injectCachetInHtml } from "@/lib/cachet-utils";
 import { toast } from "sonner";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
 import { Button } from "@/components/ui/button";
@@ -14,7 +25,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { BUDGET_ROWS, fmt } from "@/lib/budget-structure";
 import type { BudgetRow } from "@/lib/budget-structure";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/comptabilite/rapport-suivi")({
@@ -30,13 +45,25 @@ const LY = "#fffde7";
 type ItemVals = { budget: number; realise: number };
 type RapportVals = Record<string, ItemVals>;
 type RapportRecord = {
-  id: string; period_start: string; period_end: string;
-  vals: RapportVals; comments: string | null; created_at: string;
+  id: string;
+  period_start: string;
+  period_end: string;
+  vals: RapportVals;
+  comments: string | null;
+  created_at: string;
 };
-type CustomRow = { id: string; label: string; type: "sub" | "item"; parent_id: string; sort_order: number };
+type CustomRow = {
+  id: string;
+  label: string;
+  type: "sub" | "item";
+  parent_id: string;
+  sort_order: number;
+};
 
 /* ── Date helpers ── */
-function fmtDateShort(iso: string) { return new Date(iso).toLocaleDateString("fr-FR"); }
+function fmtDateShort(iso: string) {
+  return new Date(iso).toLocaleDateString("fr-FR");
+}
 function fmtDatePeriod(d: string) {
   return d ? new Date(d + "T12:00:00").toLocaleDateString("fr-FR") : "…………………";
 }
@@ -52,17 +79,24 @@ function buildAllRows(customRows: CustomRow[]): BudgetRow[] {
       result.push(sub);
       const builtinItems = BUDGET_ROWS.filter((r) => r.type === "item" && r.parentId === sub.id);
       builtinItems.forEach((item) => result.push(item));
-      customRows.filter((r) => r.type === "item" && r.parent_id === sub.id)
+      customRows
+        .filter((r) => r.type === "item" && r.parent_id === sub.id)
         .sort((a, b) => a.sort_order - b.sort_order)
-        .forEach((r) => result.push({ id: r.id, label: r.label, type: "item", parentId: r.parent_id }));
+        .forEach((r) =>
+          result.push({ id: r.id, label: r.label, type: "item", parentId: r.parent_id }),
+        );
     });
-    customRows.filter((r) => r.type === "sub" && r.parent_id === sec.id)
+    customRows
+      .filter((r) => r.type === "sub" && r.parent_id === sec.id)
       .sort((a, b) => a.sort_order - b.sort_order)
       .forEach((csub) => {
         result.push({ id: csub.id, label: csub.label, type: "sub", parentId: csub.parent_id });
-        customRows.filter((r) => r.type === "item" && r.parent_id === csub.id)
+        customRows
+          .filter((r) => r.type === "item" && r.parent_id === csub.id)
           .sort((a, b) => a.sort_order - b.sort_order)
-          .forEach((r) => result.push({ id: r.id, label: r.label, type: "item", parentId: r.parent_id }));
+          .forEach((r) =>
+            result.push({ id: r.id, label: r.label, type: "item", parentId: r.parent_id }),
+          );
       });
   });
   return result;
@@ -70,21 +104,33 @@ function buildAllRows(customRows: CustomRow[]): BudgetRow[] {
 
 function initVals(allRows: BudgetRow[]): RapportVals {
   const v: RapportVals = {};
-  allRows.forEach((r) => { if (r.type === "item") v[r.id] = { budget: 0, realise: 0 }; });
+  allRows.forEach((r) => {
+    if (r.type === "item") v[r.id] = { budget: 0, realise: 0 };
+  });
   return v;
 }
 
-function computeRapport(vals: RapportVals, allRows: BudgetRow[]): Record<string, { budget: number; realise: number }> {
+function computeRapport(
+  vals: RapportVals,
+  allRows: BudgetRow[],
+): Record<string, { budget: number; realise: number }> {
   const r: Record<string, { budget: number; realise: number }> = {};
   allRows.forEach((row) => {
-    if (row.type === "item") r[row.id] = { budget: Number(vals[row.id]?.budget) || 0, realise: Number(vals[row.id]?.realise) || 0 };
+    if (row.type === "item")
+      r[row.id] = {
+        budget: Number(vals[row.id]?.budget) || 0,
+        realise: Number(vals[row.id]?.realise) || 0,
+      };
   });
   allRows.forEach((row) => {
     if (row.type === "sub") {
       const items = allRows.filter((x) => x.type === "item" && x.parentId === row.id);
       r[row.id] = items.reduce(
-        (acc, it) => ({ budget: acc.budget + (r[it.id]?.budget || 0), realise: acc.realise + (r[it.id]?.realise || 0) }),
-        { budget: 0, realise: 0 }
+        (acc, it) => ({
+          budget: acc.budget + (r[it.id]?.budget || 0),
+          realise: acc.realise + (r[it.id]?.realise || 0),
+        }),
+        { budget: 0, realise: 0 },
       );
     }
   });
@@ -92,8 +138,11 @@ function computeRapport(vals: RapportVals, allRows: BudgetRow[]): Record<string,
     if (row.type === "section") {
       const subs = allRows.filter((x) => x.type === "sub" && x.parentId === row.id);
       r[row.id] = subs.reduce(
-        (acc, s) => ({ budget: acc.budget + (r[s.id]?.budget || 0), realise: acc.realise + (r[s.id]?.realise || 0) }),
-        { budget: 0, realise: 0 }
+        (acc, s) => ({
+          budget: acc.budget + (r[s.id]?.budget || 0),
+          realise: acc.realise + (r[s.id]?.realise || 0),
+        }),
+        { budget: 0, realise: 0 },
       );
     }
   });
@@ -102,40 +151,68 @@ function computeRapport(vals: RapportVals, allRows: BudgetRow[]): Record<string,
 
 function pct(realise: number, budget: number): string {
   if (!budget) return "-";
-  return (realise / budget * 100).toFixed(1) + " %";
+  return ((realise / budget) * 100).toFixed(1) + " %";
 }
 
 /* ── Print ── */
 function buildPrintHTML(
-  periodStart: string, periodEnd: string,
+  periodStart: string,
+  periodEnd: string,
   computed: Record<string, { budget: number; realise: number }>,
   comments: string,
   allRows: BudgetRow[],
 ): string {
-  const dataRows = allRows.map((row) => {
-    const { budget, realise } = computed[row.id] || { budget: 0, realise: 0 };
-    const ecart = realise - budget;
-    const p = pct(realise, budget);
-    let bg: string, color: string, fw: string, pl: string;
-    if (row.type === "section") { bg = DK; color = "white"; fw = "bold"; pl = "8px"; }
-    else if (row.type === "sub") { bg = LG; color = DK; fw = "bold"; pl = "14px"; }
-    else { bg = LY; color = "#333"; fw = "normal"; pl = "20px"; }
-    const tdS = (extra = "") => `style="border:1px solid #ccc;padding:3px 6px;background:${bg};color:${color};font-size:8pt;${extra}"`;
-    const ecartColor = ecart < 0 ? "#c0392b" : ecart > 0 ? "#1a5c3a" : color;
-    return `<tr style="font-weight:${fw};">
+  const dataRows = allRows
+    .map((row) => {
+      const { budget, realise } = computed[row.id] || { budget: 0, realise: 0 };
+      const ecart = realise - budget;
+      const p = pct(realise, budget);
+      let bg: string, color: string, fw: string, pl: string;
+      if (row.type === "section") {
+        bg = DK;
+        color = "white";
+        fw = "bold";
+        pl = "8px";
+      } else if (row.type === "sub") {
+        bg = LG;
+        color = DK;
+        fw = "bold";
+        pl = "14px";
+      } else {
+        bg = LY;
+        color = "#333";
+        fw = "normal";
+        pl = "20px";
+      }
+      const tdS = (extra = "") =>
+        `style="border:1px solid #ccc;padding:3px 6px;background:${bg};color:${color};font-size:8pt;${extra}"`;
+      const ecartColor = ecart < 0 ? "#c0392b" : ecart > 0 ? "#1a5c3a" : color;
+      return `<tr style="font-weight:${fw};">
       <td ${tdS(`padding-left:${pl}`)}>${row.label}</td>
       <td ${tdS("text-align:right;")}>${fmt(budget, false)}</td>
       <td ${tdS("text-align:right;background:#fffde7;")}>${fmt(realise, false)}</td>
       <td style="border:1px solid #ccc;padding:3px 6px;font-size:8pt;text-align:right;font-weight:bold;color:${ecartColor};">${ecart === 0 ? "-" : fmt(ecart, false)}</td>
       <td style="border:1px solid #ccc;padding:3px 6px;font-size:8pt;text-align:right;">${p}</td>
     </tr>`;
-  }).join("");
-  const prodB = computed["produits"]?.budget || 0; const prodR = computed["produits"]?.realise || 0;
-  const charB = computed["charges"]?.budget || 0;  const charR = computed["charges"]?.realise || 0;
-  const resB = prodB - charB; const resR = prodR - charR; const resE = resR - resB;
-  const commentRows = comments.split("\n").filter(Boolean).map((l) =>
-    `<tr><td colspan="5" style="border:1px solid #ccc;padding:3px 8px;font-size:8pt;">${l}</td></tr>`
-  ).join("") || `<tr><td colspan="5" style="border:1px solid #ccc;padding:6px 8px;color:#aaa;font-style:italic;font-size:8pt;">Aucun commentaire</td></tr>`;
+    })
+    .join("");
+  const prodB = computed["produits"]?.budget || 0;
+  const prodR = computed["produits"]?.realise || 0;
+  const charB = computed["charges"]?.budget || 0;
+  const charR = computed["charges"]?.realise || 0;
+  const resB = prodB - charB;
+  const resR = prodR - charR;
+  const resE = resR - resB;
+  const commentRows =
+    comments
+      .split("\n")
+      .filter(Boolean)
+      .map(
+        (l) =>
+          `<tr><td colspan="5" style="border:1px solid #ccc;padding:3px 8px;font-size:8pt;">${l}</td></tr>`,
+      )
+      .join("") ||
+    `<tr><td colspan="5" style="border:1px solid #ccc;padding:6px 8px;color:#aaa;font-style:italic;font-size:8pt;">Aucun commentaire</td></tr>`;
   const logoUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/1.png`;
   return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Rapport de Suivi Budgétaire</title>
 <style>body{font-family:Arial,sans-serif;margin:12mm 10mm;font-size:8pt;}@media print{@page{size:A4 landscape;margin:10mm;}body{margin:0;}}table{border-collapse:collapse;width:100%;}</style>
@@ -175,34 +252,55 @@ function buildPrintHTML(
   <div>Colonne Budget : reprise du budget prévisionnel.</div>
   <div>Colonne Réalisé : montants effectivement encaissés ou décaissés.</div>
   <div>Écart positif sur les charges = dépassement.</div>
-</div></body></html>`;
+</div>
+<div style="display:flex;justify-content:flex-end;margin-top:24px;">
+  <div style="border:1px solid #ccc;width:150px;padding:6px;text-align:center;">
+    <!-- CACHET -->
+    <div style="font-size:8pt;color:#666;margin-top:4px;border-top:1px solid #ccc;padding-top:3px;">Administrateur général</div>
+  </div>
+</div>
+</body></html>`;
 }
 
 /* ─── Structure panel ─────────────────────────────────────────── */
-function StructurePanel({ customRows, onRefresh }: { customRows: CustomRow[]; onRefresh: () => void }) {
+function StructurePanel({
+  customRows,
+  onRefresh,
+}: {
+  customRows: CustomRow[];
+  onRefresh: () => void;
+}) {
   const qc = useQueryClient();
   const [expanded, setExpanded] = useState(false);
-  const [addSub,    setAddSub]    = useState(false);
-  const [addItem,   setAddItem]   = useState(false);
-  const [newLabel,  setNewLabel]  = useState("");
+  const [addSub, setAddSub] = useState(false);
+  const [addItem, setAddItem] = useState(false);
+  const [newLabel, setNewLabel] = useState("");
   const [newParent, setNewParent] = useState("");
-  const [delId,     setDelId]     = useState<string | null>(null);
+  const [delId, setDelId] = useState<string | null>(null);
 
   const sections = BUDGET_ROWS.filter((r) => r.type === "section");
-  const allSubs  = [
+  const allSubs = [
     ...BUDGET_ROWS.filter((r) => r.type === "sub"),
-    ...customRows.filter((r) => r.type === "sub").map((r) => ({ id: r.id, label: r.label, type: "sub" as const, parentId: r.parent_id })),
+    ...customRows
+      .filter((r) => r.type === "sub")
+      .map((r) => ({ id: r.id, label: r.label, type: "sub" as const, parentId: r.parent_id })),
   ];
 
   const addSubMut = useMutation({
     mutationFn: async () => {
       if (!newLabel.trim() || !newParent) throw new Error("Remplis le libellé et la section.");
-      const { error } = await db.from("rapport_structure_custom").insert({ label: newLabel.trim(), type: "sub", parent_id: newParent, sort_order: 100 });
+      const { error } = await db
+        .from("rapport_structure_custom")
+        .insert({ label: newLabel.trim(), type: "sub", parent_id: newParent, sort_order: 100 });
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Libellé ajouté"); setAddSub(false); setNewLabel(""); setNewParent("");
-      qc.invalidateQueries({ queryKey: ["rapport-structure-custom"] }); onRefresh();
+      toast.success("Libellé ajouté");
+      setAddSub(false);
+      setNewLabel("");
+      setNewParent("");
+      qc.invalidateQueries({ queryKey: ["rapport-structure-custom"] });
+      onRefresh();
     },
     onError: (e: Error) => toast.error("Erreur", { description: e.message }),
   });
@@ -210,12 +308,18 @@ function StructurePanel({ customRows, onRefresh }: { customRows: CustomRow[]; on
   const addItemMut = useMutation({
     mutationFn: async () => {
       if (!newLabel.trim() || !newParent) throw new Error("Remplis la ligne et le libellé parent.");
-      const { error } = await db.from("rapport_structure_custom").insert({ label: newLabel.trim(), type: "item", parent_id: newParent, sort_order: 100 });
+      const { error } = await db
+        .from("rapport_structure_custom")
+        .insert({ label: newLabel.trim(), type: "item", parent_id: newParent, sort_order: 100 });
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Ligne ajoutée"); setAddItem(false); setNewLabel(""); setNewParent("");
-      qc.invalidateQueries({ queryKey: ["rapport-structure-custom"] }); onRefresh();
+      toast.success("Ligne ajoutée");
+      setAddItem(false);
+      setNewLabel("");
+      setNewParent("");
+      qc.invalidateQueries({ queryKey: ["rapport-structure-custom"] });
+      onRefresh();
     },
     onError: (e: Error) => toast.error("Erreur", { description: e.message }),
   });
@@ -226,8 +330,10 @@ function StructurePanel({ customRows, onRefresh }: { customRows: CustomRow[]; on
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Supprimé"); setDelId(null);
-      qc.invalidateQueries({ queryKey: ["rapport-structure-custom"] }); onRefresh();
+      toast.success("Supprimé");
+      setDelId(null);
+      qc.invalidateQueries({ queryKey: ["rapport-structure-custom"] });
+      onRefresh();
     },
     onError: (e: Error) => toast.error("Erreur", { description: e.message }),
   });
@@ -238,14 +344,17 @@ function StructurePanel({ customRows, onRefresh }: { customRows: CustomRow[]; on
         className="flex w-full items-center justify-between px-4 py-3 text-sm font-semibold text-foreground hover:bg-muted/30 transition-colors rounded-xl"
         onClick={() => setExpanded((v) => !v)}
       >
-        <span className="flex items-center gap-2"><PenLine className="size-4 text-primary" /> Gérer la structure du rapport</span>
+        <span className="flex items-center gap-2">
+          <PenLine className="size-4 text-primary" /> Gérer la structure du rapport
+        </span>
         {expanded ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
       </button>
 
       {expanded && (
         <div className="border-t border-border px-4 pb-4 pt-3 space-y-4">
           <p className="text-xs text-muted-foreground">
-            Ajoutez ou supprimez des libellés et des lignes personnalisées. Les lignes intégrées ne peuvent pas être supprimées.
+            Ajoutez ou supprimez des libellés et des lignes personnalisées. Les lignes intégrées ne
+            peuvent pas être supprimées.
           </p>
 
           {/* Add sub (libellé) */}
@@ -253,14 +362,24 @@ function StructurePanel({ customRows, onRefresh }: { customRows: CustomRow[]; on
             <div className="flex flex-wrap items-end gap-2 rounded-lg bg-muted/30 p-3">
               <div className="flex-1 min-w-[160px] space-y-1">
                 <Label className="text-xs">Nom du libellé</Label>
-                <Input value={newLabel} onChange={(e) => setNewLabel(e.target.value)} placeholder="Ex : Vente de formations" />
+                <Input
+                  value={newLabel}
+                  onChange={(e) => setNewLabel(e.target.value)}
+                  placeholder="Ex : Vente de formations"
+                />
               </div>
               <div className="flex-1 min-w-[160px] space-y-1">
                 <Label className="text-xs">Section parent</Label>
                 <Select value={newParent} onValueChange={setNewParent}>
-                  <SelectTrigger><SelectValue placeholder="Choisir…" /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choisir…" />
+                  </SelectTrigger>
                   <SelectContent>
-                    {sections.map((s) => <SelectItem key={s.id} value={s.id}>{s.label}</SelectItem>)}
+                    {sections.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -268,11 +387,30 @@ function StructurePanel({ customRows, onRefresh }: { customRows: CustomRow[]; on
                 <Button size="sm" onClick={() => addSubMut.mutate()} disabled={addSubMut.isPending}>
                   {addSubMut.isPending && <Loader2 className="mr-1 size-3 animate-spin" />} Ajouter
                 </Button>
-                <Button size="sm" variant="ghost" onClick={() => { setAddSub(false); setNewLabel(""); setNewParent(""); }}>Annuler</Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setAddSub(false);
+                    setNewLabel("");
+                    setNewParent("");
+                  }}
+                >
+                  Annuler
+                </Button>
               </div>
             </div>
           ) : (
-            <Button size="sm" variant="outline" onClick={() => { setAddItem(false); setAddSub(true); setNewLabel(""); setNewParent(""); }}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setAddItem(false);
+                setAddSub(true);
+                setNewLabel("");
+                setNewParent("");
+              }}
+            >
               <Plus className="mr-1.5 size-3.5" /> Ajouter un libellé (sous-catégorie)
             </Button>
           )}
@@ -282,26 +420,59 @@ function StructurePanel({ customRows, onRefresh }: { customRows: CustomRow[]; on
             <div className="flex flex-wrap items-end gap-2 rounded-lg bg-muted/30 p-3">
               <div className="flex-1 min-w-[160px] space-y-1">
                 <Label className="text-xs">Intitulé de la ligne</Label>
-                <Input value={newLabel} onChange={(e) => setNewLabel(e.target.value)} placeholder="Ex : Frais de déplacement terrain" />
+                <Input
+                  value={newLabel}
+                  onChange={(e) => setNewLabel(e.target.value)}
+                  placeholder="Ex : Frais de déplacement terrain"
+                />
               </div>
               <div className="flex-1 min-w-[200px] space-y-1">
                 <Label className="text-xs">Libellé parent</Label>
                 <Select value={newParent} onValueChange={setNewParent}>
-                  <SelectTrigger><SelectValue placeholder="Choisir…" /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choisir…" />
+                  </SelectTrigger>
                   <SelectContent>
-                    {allSubs.map((s) => <SelectItem key={s.id} value={s.id}>{s.label}</SelectItem>)}
+                    {allSubs.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="flex gap-2">
-                <Button size="sm" onClick={() => addItemMut.mutate()} disabled={addItemMut.isPending}>
+                <Button
+                  size="sm"
+                  onClick={() => addItemMut.mutate()}
+                  disabled={addItemMut.isPending}
+                >
                   {addItemMut.isPending && <Loader2 className="mr-1 size-3 animate-spin" />} Ajouter
                 </Button>
-                <Button size="sm" variant="ghost" onClick={() => { setAddItem(false); setNewLabel(""); setNewParent(""); }}>Annuler</Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setAddItem(false);
+                    setNewLabel("");
+                    setNewParent("");
+                  }}
+                >
+                  Annuler
+                </Button>
               </div>
             </div>
           ) : (
-            <Button size="sm" variant="outline" onClick={() => { setAddSub(false); setAddItem(true); setNewLabel(""); setNewParent(""); }}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setAddSub(false);
+                setAddItem(true);
+                setNewLabel("");
+                setNewParent("");
+              }}
+            >
               <Plus className="mr-1.5 size-3.5" /> Ajouter une ligne budgétaire
             </Button>
           )}
@@ -309,19 +480,32 @@ function StructurePanel({ customRows, onRefresh }: { customRows: CustomRow[]; on
           {/* List custom rows */}
           {customRows.length > 0 && (
             <div className="space-y-1">
-              <p className="text-xs font-semibold text-muted-foreground">Éléments personnalisés :</p>
+              <p className="text-xs font-semibold text-muted-foreground">
+                Éléments personnalisés :
+              </p>
               {customRows.map((r) => {
-                const parentLabel = allSubs.find((s) => s.id === r.parent_id)?.label
-                  ?? BUDGET_ROWS.find((s) => s.id === r.parent_id)?.label
-                  ?? r.parent_id;
+                const parentLabel =
+                  allSubs.find((s) => s.id === r.parent_id)?.label ??
+                  BUDGET_ROWS.find((s) => s.id === r.parent_id)?.label ??
+                  r.parent_id;
                 return (
-                  <div key={r.id} className="flex items-center justify-between rounded-lg border border-border px-3 py-1.5 text-xs">
+                  <div
+                    key={r.id}
+                    className="flex items-center justify-between rounded-lg border border-border px-3 py-1.5 text-xs"
+                  >
                     <span>
                       <span className="font-medium">{r.label}</span>
-                      <span className="ml-2 text-muted-foreground">({r.type === "sub" ? "Libellé" : "Ligne"} sous «{parentLabel}»)</span>
+                      <span className="ml-2 text-muted-foreground">
+                        ({r.type === "sub" ? "Libellé" : "Ligne"} sous «{parentLabel}»)
+                      </span>
                     </span>
-                    <Button size="sm" variant="ghost" className="h-6 px-1.5 text-destructive hover:bg-destructive/10"
-                      onClick={() => setDelId(r.id)} title="Supprimer">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 px-1.5 text-destructive hover:bg-destructive/10"
+                      onClick={() => setDelId(r.id)}
+                      title="Supprimer"
+                    >
                       <Trash2 className="size-3" />
                     </Button>
                   </div>
@@ -337,10 +521,14 @@ function StructurePanel({ customRows, onRefresh }: { customRows: CustomRow[]; on
 
       <ConfirmDialog
         open={delId !== null}
-        onOpenChange={(o) => { if (!o) setDelId(null); }}
+        onOpenChange={(o) => {
+          if (!o) setDelId(null);
+        }}
         title="Supprimer cet élément ?"
         description="Les valeurs saisies pour cette ligne dans tous les rapports ne seront plus affichées."
-        onConfirm={() => { if (delId) delMut.mutate(delId); }}
+        onConfirm={() => {
+          if (delId) delMut.mutate(delId);
+        }}
         loading={delMut.isPending}
       />
     </div>
@@ -349,15 +537,25 @@ function StructurePanel({ customRows, onRefresh }: { customRows: CustomRow[]; on
 
 /* ─── Editor ─────────────────────────────────────────────────── */
 function RapportEditor({
-  initialPeriodStart, initialPeriodEnd, initialVals, initialComments,
-  rapportId, allRows,
-  onSave, onCancel, saving,
+  initialPeriodStart,
+  initialPeriodEnd,
+  initialVals,
+  initialComments,
+  rapportId,
+  allRows,
+  onSave,
+  onCancel,
+  saving,
 }: {
-  initialPeriodStart: string; initialPeriodEnd: string;
-  initialVals: RapportVals; initialComments: string;
-  rapportId?: string; allRows: BudgetRow[];
+  initialPeriodStart: string;
+  initialPeriodEnd: string;
+  initialVals: RapportVals;
+  initialComments: string;
+  rapportId?: string;
+  allRows: BudgetRow[];
   onSave: (ps: string, pe: string, vals: RapportVals, comments: string) => void;
-  onCancel: () => void; saving: boolean;
+  onCancel: () => void;
+  saving: boolean;
 }) {
   const [periodStart, setPeriodStart] = useState(initialPeriodStart);
   const [periodEnd, setPeriodEnd] = useState(initialPeriodEnd);
@@ -375,7 +573,8 @@ function RapportEditor({
     if (!rapportId) return;
     setSyncing(true);
     try {
-      const { data: txns, error } = await db.from("transactions")
+      const { data: txns, error } = await db
+        .from("transactions")
         .select("rapport_row_id, amount")
         .eq("rapport_id", rapportId)
         .not("rapport_row_id", "is", null);
@@ -393,7 +592,9 @@ function RapportEditor({
         return next;
       });
       const count = Object.keys(grouped).length;
-      toast.success(`Synchronisation effectuée — ${count} ligne${count > 1 ? "s" : ""} mise${count > 1 ? "s" : ""} à jour`);
+      toast.success(
+        `Synchronisation effectuée — ${count} ligne${count > 1 ? "s" : ""} mise${count > 1 ? "s" : ""} à jour`,
+      );
     } catch (e: unknown) {
       toast.error("Erreur de synchronisation", { description: (e as Error).message });
     } finally {
@@ -401,13 +602,20 @@ function RapportEditor({
     }
   };
 
-  const doPrint = () => {
-    const html = buildPrintHTML(periodStart, periodEnd, computed, comments, allRows);
+  const doPrint = async () => {
+    let html = buildPrintHTML(periodStart, periodEnd, computed, comments, allRows);
+    html = await injectCachetInHtml(html);
     const w = window.open("", "_blank");
-    if (!w) { alert("Autorisez les pop-ups pour imprimer."); return; }
+    if (!w) {
+      alert("Autorisez les pop-ups pour imprimer.");
+      return;
+    }
     w.document.write(html);
     w.document.close();
-    setTimeout(() => { w.focus(); w.print(); }, 400);
+    setTimeout(() => {
+      w.focus();
+      w.print();
+    }, 400);
   };
 
   const prodC = computed["produits"] || { budget: 0, realise: 0 };
@@ -420,21 +628,44 @@ function RapportEditor({
       <div className="flex flex-wrap items-end gap-4 rounded-xl border border-border bg-card p-4">
         <div>
           <Label className="text-xs text-muted-foreground">Période du</Label>
-          <Input type="date" value={periodStart} onChange={(e) => setPeriodStart(e.target.value)} className="mt-1 w-40" />
+          <Input
+            type="date"
+            value={periodStart}
+            onChange={(e) => setPeriodStart(e.target.value)}
+            className="mt-1 w-40"
+          />
         </div>
         <div>
           <Label className="text-xs text-muted-foreground">au</Label>
-          <Input type="date" value={periodEnd} onChange={(e) => setPeriodEnd(e.target.value)} className="mt-1 w-40" />
+          <Input
+            type="date"
+            value={periodEnd}
+            onChange={(e) => setPeriodEnd(e.target.value)}
+            className="mt-1 w-40"
+          />
         </div>
         <div className="ml-auto flex flex-wrap items-center gap-2">
           {rapportId && (
-            <Button variant="outline" onClick={syncFromTransactions} disabled={syncing} title="Importer les montants réalisés depuis les transactions liées à ce rapport">
-              {syncing ? <Loader2 className="mr-2 size-4 animate-spin" /> : <RefreshCw className="mr-2 size-4" />}
+            <Button
+              variant="outline"
+              onClick={syncFromTransactions}
+              disabled={syncing}
+              title="Importer les montants réalisés depuis les transactions liées à ce rapport"
+            >
+              {syncing ? (
+                <Loader2 className="mr-2 size-4 animate-spin" />
+              ) : (
+                <RefreshCw className="mr-2 size-4" />
+              )}
               Sync transactions
             </Button>
           )}
-          <Button variant="outline" onClick={doPrint}><Printer className="mr-2 size-4" /> Imprimer</Button>
-          <Button variant="outline" onClick={onCancel}>Annuler</Button>
+          <Button variant="outline" onClick={doPrint}>
+            <Printer className="mr-2 size-4" /> Imprimer
+          </Button>
+          <Button variant="outline" onClick={onCancel}>
+            Annuler
+          </Button>
           <Button onClick={() => onSave(periodStart, periodEnd, vals, comments)} disabled={saving}>
             {saving && <Loader2 className="mr-2 size-4 animate-spin" />}Enregistrer
           </Button>
@@ -445,7 +676,12 @@ function RapportEditor({
         <table className="w-full border-collapse text-xs">
           <thead>
             <tr style={{ background: DK }}>
-              <th className="sticky left-0 min-w-[200px] p-2 text-left text-xs text-white" style={{ background: DK }}>Libellé</th>
+              <th
+                className="sticky left-0 min-w-[200px] p-2 text-left text-xs text-white"
+                style={{ background: DK }}
+              >
+                Libellé
+              </th>
               <th className="min-w-[110px] p-2 text-right text-xs text-white">Budget</th>
               <th className="min-w-[110px] p-2 text-right text-xs text-white">Réalisé</th>
               <th className="min-w-[110px] p-2 text-right text-xs text-white">Écart</th>
@@ -464,41 +700,89 @@ function RapportEditor({
               const pl = isSection ? "pl-2" : isSub ? "pl-4" : "pl-6";
               return (
                 <tr key={row.id} style={{ background: rowBg }}>
-                  <td className={`sticky left-0 border-b border-border/40 p-1.5 text-xs ${pl} ${textCls}`} style={{ background: rowBg }}>{row.label}</td>
+                  <td
+                    className={`sticky left-0 border-b border-border/40 p-1.5 text-xs ${pl} ${textCls}`}
+                    style={{ background: rowBg }}
+                  >
+                    {row.label}
+                  </td>
                   <td className="border-b border-border/40 p-0.5">
                     {isItem ? (
-                      <input type="number" min={0} step="0.01" value={budget === 0 ? "" : budget}
+                      <input
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        value={budget === 0 ? "" : budget}
                         onChange={(e) => setField(row.id, "budget", e.target.value)}
-                        className="w-full rounded bg-transparent px-1 py-0.5 text-right text-xs outline-none focus:bg-white focus:ring-1 focus:ring-primary" placeholder="-" />
+                        className="w-full rounded bg-transparent px-1 py-0.5 text-right text-xs outline-none focus:bg-white focus:ring-1 focus:ring-primary"
+                        placeholder="-"
+                      />
                     ) : (
-                      <span className={`block px-1 text-right text-xs ${isSection ? "text-white" : ""}`}>{fmt(budget, false)}</span>
+                      <span
+                        className={`block px-1 text-right text-xs ${isSection ? "text-white" : ""}`}
+                      >
+                        {fmt(budget, false)}
+                      </span>
                     )}
                   </td>
-                  <td className="border-b border-border/40 p-0.5" style={{ background: isItem ? "#fffde7" : rowBg }}>
+                  <td
+                    className="border-b border-border/40 p-0.5"
+                    style={{ background: isItem ? "#fffde7" : rowBg }}
+                  >
                     {isItem ? (
-                      <input type="number" min={0} step="0.01" value={realise === 0 ? "" : realise}
+                      <input
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        value={realise === 0 ? "" : realise}
                         onChange={(e) => setField(row.id, "realise", e.target.value)}
-                        className="w-full rounded bg-transparent px-1 py-0.5 text-right text-xs outline-none focus:bg-white focus:ring-1 focus:ring-primary" placeholder="-" />
+                        className="w-full rounded bg-transparent px-1 py-0.5 text-right text-xs outline-none focus:bg-white focus:ring-1 focus:ring-primary"
+                        placeholder="-"
+                      />
                     ) : (
-                      <span className={`block px-1 text-right text-xs ${isSection ? "text-white" : ""}`}>{fmt(realise, false)}</span>
+                      <span
+                        className={`block px-1 text-right text-xs ${isSection ? "text-white" : ""}`}
+                      >
+                        {fmt(realise, false)}
+                      </span>
                     )}
                   </td>
-                  <td className="border-b border-border/40 px-2 text-right text-xs font-semibold"
-                    style={{ color: ecart < 0 ? "#c0392b" : ecart > 0 ? DK : "inherit" }}>
+                  <td
+                    className="border-b border-border/40 px-2 text-right text-xs font-semibold"
+                    style={{ color: ecart < 0 ? "#c0392b" : ecart > 0 ? DK : "inherit" }}
+                  >
                     {ecart === 0 ? "-" : fmt(ecart, false)}
                   </td>
-                  <td className="border-b border-border/40 px-2 text-right text-xs">{pct(realise, budget)}</td>
+                  <td className="border-b border-border/40 px-2 text-right text-xs">
+                    {pct(realise, budget)}
+                  </td>
                 </tr>
               );
             })}
             <tr style={{ background: DK }}>
-              <td className="sticky left-0 p-2 text-xs font-bold text-white" style={{ background: DK }} colSpan={5}>SYNTHÈSE</td>
+              <td
+                className="sticky left-0 p-2 text-xs font-bold text-white"
+                style={{ background: DK }}
+                colSpan={5}
+              >
+                SYNTHÈSE
+              </td>
             </tr>
             <tr style={{ background: DK }}>
-              <td className="sticky left-0 p-2 text-xs font-bold text-white" style={{ background: DK }}>Résultat de la période</td>
+              <td
+                className="sticky left-0 p-2 text-xs font-bold text-white"
+                style={{ background: DK }}
+              >
+                Résultat de la période
+              </td>
               <td className="p-2 text-right text-xs font-bold text-white">{fmt(resB, false)}</td>
               <td className="p-2 text-right text-xs font-bold text-white">{fmt(resR, false)}</td>
-              <td className="p-2 text-right text-xs font-bold" style={{ color: (resR - resB) < 0 ? "#ff8a80" : "#a5d6a7" }}>{fmt(resR - resB, false)}</td>
+              <td
+                className="p-2 text-right text-xs font-bold"
+                style={{ color: resR - resB < 0 ? "#ff8a80" : "#a5d6a7" }}
+              >
+                {fmt(resR - resB, false)}
+              </td>
               <td className="p-2 text-right text-xs font-bold text-white">{pct(resR, resB)}</td>
             </tr>
           </tbody>
@@ -507,9 +791,13 @@ function RapportEditor({
 
       <div className="rounded-xl border border-border bg-card p-4">
         <Label className="text-sm font-semibold">Commentaires et actions correctives</Label>
-        <Textarea className="mt-2 resize-none" rows={4} value={comments}
+        <Textarea
+          className="mt-2 resize-none"
+          rows={4}
+          value={comments}
           onChange={(e) => setComments(e.target.value)}
-          placeholder="Observations, analyses d'écarts, actions à mettre en œuvre…" />
+          placeholder="Observations, analyses d'écarts, actions à mettre en œuvre…"
+        />
       </div>
     </div>
   );
@@ -527,7 +815,10 @@ function RapportSuivi() {
   const { data: rapports = [], isLoading } = useQuery({
     queryKey: ["rapports-suivi"],
     queryFn: async () => {
-      const { data, error } = await db.from("rapports_suivi").select("*").order("period_start", { ascending: false });
+      const { data, error } = await db
+        .from("rapports_suivi")
+        .select("*")
+        .order("period_start", { ascending: false });
       if (error) throw error;
       return (data ?? []) as RapportRecord[];
     },
@@ -537,10 +828,15 @@ function RapportSuivi() {
     queryKey: ["rapport-structure-custom"],
     queryFn: async () => {
       try {
-        const { data, error } = await db.from("rapport_structure_custom").select("*").order("sort_order");
+        const { data, error } = await db
+          .from("rapport_structure_custom")
+          .select("*")
+          .order("sort_order");
         if (error) return [];
         return (data ?? []) as CustomRow[];
-      } catch { return []; }
+      } catch {
+        return [];
+      }
     },
   });
 
@@ -549,13 +845,27 @@ function RapportSuivi() {
   const editing = view !== "list" && view !== "new" ? rapports.find((r) => r.id === view) : null;
 
   const save = useMutation({
-    mutationFn: async ({ ps, pe, vals, comments, id }: { ps: string; pe: string; vals: RapportVals; comments: string; id?: string }) => {
+    mutationFn: async ({
+      ps,
+      pe,
+      vals,
+      comments,
+      id,
+    }: {
+      ps: string;
+      pe: string;
+      vals: RapportVals;
+      comments: string;
+      id?: string;
+    }) => {
       const payload = { period_start: ps, period_end: pe, vals, comments: comments || null };
       if (id) {
         const { error } = await db.from("rapports_suivi").update(payload).eq("id", id);
         if (error) throw error;
       } else {
-        const { error } = await db.from("rapports_suivi").insert({ ...payload, created_by: userId });
+        const { error } = await db
+          .from("rapports_suivi")
+          .insert({ ...payload, created_by: userId });
         if (error) throw error;
       }
     },
@@ -572,18 +882,28 @@ function RapportSuivi() {
       const { error } = await db.from("rapports_suivi").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => { toast.success("Rapport supprimé"); qc.invalidateQueries({ queryKey: ["rapports-suivi"] }); },
+    onSuccess: () => {
+      toast.success("Rapport supprimé");
+      qc.invalidateQueries({ queryKey: ["rapports-suivi"] });
+    },
     onError: (e: Error) => toast.error("Erreur", { description: e.message }),
   });
 
-  function doPrint(r: RapportRecord) {
+  async function doPrint(r: RapportRecord) {
     const computed = computeRapport(r.vals || initVals(allRows), allRows);
-    const html = buildPrintHTML(r.period_start, r.period_end, computed, r.comments || "", allRows);
+    let html = buildPrintHTML(r.period_start, r.period_end, computed, r.comments || "", allRows);
+    html = await injectCachetInHtml(html);
     const w = window.open("", "_blank");
-    if (!w) { alert("Autorisez les pop-ups pour imprimer."); return; }
+    if (!w) {
+      alert("Autorisez les pop-ups pour imprimer.");
+      return;
+    }
     w.document.write(html);
     w.document.close();
-    setTimeout(() => { w.focus(); w.print(); }, 400);
+    setTimeout(() => {
+      w.focus();
+      w.print();
+    }, 400);
   }
 
   const curYear = new Date().getFullYear();
@@ -592,19 +912,26 @@ function RapportSuivi() {
     const isEdit = !!editing;
     return (
       <>
-        <PageHeader eyebrow="Comptabilité" title={isEdit
-          ? `Rapport ${fmtDatePeriod(editing!.period_start)} – ${fmtDatePeriod(editing!.period_end)}`
-          : "Nouveau rapport de suivi"} />
+        <PageHeader
+          eyebrow="Comptabilité"
+          title={
+            isEdit
+              ? `Rapport ${fmtDatePeriod(editing!.period_start)} – ${fmtDatePeriod(editing!.period_end)}`
+              : "Nouveau rapport de suivi"
+          }
+        />
         <RapportEditor
           initialPeriodStart={editing ? editing.period_start : `${curYear}-01-01`}
           initialPeriodEnd={editing ? editing.period_end : `${curYear}-12-31`}
-          initialVals={editing ? (editing.vals || initVals(allRows)) : initVals(allRows)}
-          initialComments={editing ? (editing.comments || "") : ""}
+          initialVals={editing ? editing.vals || initVals(allRows) : initVals(allRows)}
+          initialComments={editing ? editing.comments || "" : ""}
           rapportId={editing?.id}
           allRows={allRows}
           saving={save.isPending}
           onCancel={() => setView("list")}
-          onSave={(ps, pe, vals, comments) => save.mutate({ ps, pe, vals, comments, id: editing?.id })}
+          onSave={(ps, pe, vals, comments) =>
+            save.mutate({ ps, pe, vals, comments, id: editing?.id })
+          }
         />
       </>
     );
@@ -612,11 +939,16 @@ function RapportSuivi() {
 
   return (
     <>
-      <PageHeader eyebrow="Comptabilité" title="Rapport de Suivi Budgétaire"
-        description="Créez et gérez les rapports de suivi budgétaire par période." />
+      <PageHeader
+        eyebrow="Comptabilité"
+        title="Rapport de Suivi Budgétaire"
+        description="Créez et gérez les rapports de suivi budgétaire par période."
+      />
 
       <div className="mb-4 flex justify-end">
-        <Button onClick={() => setView("new")}><Plus className="mr-2 size-4" /> Nouveau rapport</Button>
+        <Button onClick={() => setView("new")}>
+          <Plus className="mr-2 size-4" /> Nouveau rapport
+        </Button>
       </div>
 
       <Panel title={`${rapports.length} rapport${rapports.length !== 1 ? "s" : ""}`}>
@@ -635,7 +967,10 @@ function RapportSuivi() {
               const charC = computed["charges"] || { budget: 0, realise: 0 };
               const resR = prodC.realise - charC.realise;
               return (
-                <li key={r.id} className="flex flex-wrap items-center gap-3 rounded-xl border border-border p-4">
+                <li
+                  key={r.id}
+                  className="flex flex-wrap items-center gap-3 rounded-xl border border-border p-4"
+                >
                   <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
                     <ClipboardList className="size-5" />
                   </div>
@@ -644,7 +979,14 @@ function RapportSuivi() {
                       {fmtDatePeriod(r.period_start)} → {fmtDatePeriod(r.period_end)}
                     </div>
                     <div className="mt-0.5 flex flex-wrap gap-x-4 text-xs text-muted-foreground">
-                      <span>Résultat réalisé : <span className={`font-medium ${resR < 0 ? "text-red-600" : "text-foreground"}`}>{fmt(resR, false)}</span></span>
+                      <span>
+                        Résultat réalisé :{" "}
+                        <span
+                          className={`font-medium ${resR < 0 ? "text-red-600" : "text-foreground"}`}
+                        >
+                          {fmt(resR, false)}
+                        </span>
+                      </span>
                       <span>Créé le {fmtDateShort(r.created_at)}</span>
                     </div>
                   </div>
@@ -652,9 +994,15 @@ function RapportSuivi() {
                     <Button size="sm" variant="outline" onClick={() => doPrint(r)}>
                       <Printer className="mr-1 size-3.5" /> Imprimer
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={() => setView(r.id)}>Modifier</Button>
-                    <Button size="sm" variant="ghost" className="text-destructive hover:bg-destructive/10"
-                      onClick={() => setPendingDeleteId(r.id)}>
+                    <Button size="sm" variant="ghost" onClick={() => setView(r.id)}>
+                      Modifier
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-destructive hover:bg-destructive/10"
+                      onClick={() => setPendingDeleteId(r.id)}
+                    >
                       <Trash2 className="size-4" />
                     </Button>
                   </div>
@@ -665,14 +1013,22 @@ function RapportSuivi() {
         )}
       </Panel>
 
-      <StructurePanel customRows={customRows} onRefresh={() => qc.invalidateQueries({ queryKey: ["rapport-structure-custom"] })} />
+      <StructurePanel
+        customRows={customRows}
+        onRefresh={() => qc.invalidateQueries({ queryKey: ["rapport-structure-custom"] })}
+      />
 
       <ConfirmDialog
         open={pendingDeleteId !== null}
-        onOpenChange={(o) => { if (!o) setPendingDeleteId(null); }}
+        onOpenChange={(o) => {
+          if (!o) setPendingDeleteId(null);
+        }}
         title="Supprimer ce rapport ?"
         description="Cette action est irréversible."
-        onConfirm={() => { if (pendingDeleteId) del.mutate(pendingDeleteId); setPendingDeleteId(null); }}
+        onConfirm={() => {
+          if (pendingDeleteId) del.mutate(pendingDeleteId);
+          setPendingDeleteId(null);
+        }}
         loading={del.isPending}
       />
     </>

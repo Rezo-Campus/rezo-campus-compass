@@ -9,6 +9,7 @@ import {
   UserCircle,
   Calendar,
   Mail,
+  Stamp,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { RoleGuard } from "@/components/RoleGuard";
@@ -24,6 +25,7 @@ const NAV = [
   { label: "Réunions", to: "/admin/reunions", icon: CalendarDays },
   { label: "Rendez-vous", to: "/admin/rendez-vous", icon: CalendarDays },
   { label: "RDV Clients", to: "/admin/rendez-vous-clients", icon: CalendarClock },
+  { label: "Cachets officiels", to: "/admin/cachets", icon: Stamp },
   { label: "Mon Profil", to: "/admin/profil", icon: UserCircle },
 ];
 

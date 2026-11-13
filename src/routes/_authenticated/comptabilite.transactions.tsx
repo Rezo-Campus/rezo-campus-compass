@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
+import { injectCachetInHtml } from "@/lib/cachet-utils";
 import {
   Plus,
   Pencil,
@@ -233,7 +234,10 @@ function buildReceiptHTML(t: Txn): string {
       <div style="border:1px solid #333;width:160px;height:70px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;"><span style="font-size:8.5pt;font-style:italic;color:#555;">Secrétaire particulier</span></div>
     </div>
     <div style="text-align:center;">
-      <div style="border:1px solid #333;width:160px;height:70px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;"><span style="font-size:8.5pt;font-style:italic;color:#555;">Administrateur général</span></div>
+      <div style="border:1px solid #333;width:140px;height:130px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:4px;">
+        <!-- CACHET -->
+        <span style="font-size:8.5pt;font-style:italic;color:#555;">Administrateur général</span>
+      </div>
     </div>
   </div>
 </div>
@@ -241,8 +245,9 @@ function buildReceiptHTML(t: Txn): string {
 </body></html>`;
 }
 
-function doPrintReceipt(t: Txn) {
-  const html = buildReceiptHTML(t);
+async function doPrintReceipt(t: Txn) {
+  let html = buildReceiptHTML(t);
+  html = await injectCachetInHtml(html);
   const w = window.open("", "_blank");
   if (!w) {
     alert("Autorisez les pop-ups pour imprimer.");

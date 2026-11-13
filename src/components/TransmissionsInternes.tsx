@@ -13,6 +13,7 @@ import {
   Download,
   Paperclip,
   Trash2,
+  Stamp,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
@@ -40,6 +41,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { stampPdfInStorage } from "@/lib/cachet-utils";
 
 const db = supabase as any;
 
@@ -100,6 +102,7 @@ type Transmission = {
   created_at: string;
   document_path?: string | null;
   document_name?: string | null;
+  is_stamped?: boolean | null;
 };
 
 function getEmptyForm() {
@@ -125,8 +128,68 @@ export function TransmissionsInternes({
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const [pendingDelete, setPendingDelete] = useState<Transmission | null>(null);
+  const [stampingId, setStampingId] = useState<string | null>(null);
+  const [batchStamping, setBatchStamping] = useState(false);
 
   const isAdmin = auth?.role === "admin";
+
+  async function applyStamp(t: Transmission): Promise<void> {
+    if (!t.document_path) return;
+    const stamped = await stampPdfInStorage("transmissions", t.document_path, "carre");
+    const blob = new Blob([stamped], { type: "application/pdf" });
+    const { error: upErr } = await supabase.storage
+      .from("transmissions")
+      .upload(t.document_path, blob, { upsert: true, contentType: "application/pdf" });
+    if (upErr) throw upErr;
+    await db.from("transmissions_internes").update({ is_stamped: true }).eq("id", t.id);
+  }
+
+  async function handleStamp(t: Transmission) {
+    if (!t.document_path) return;
+    if (!t.document_name?.toLowerCase().endsWith(".pdf")) {
+      toast.error("Cachetage impossible", {
+        description:
+          "Seuls les fichiers PDF peuvent être cachetés. Convertissez le document en PDF puis téléversez-le à nouveau.",
+      });
+      return;
+    }
+    setStampingId(t.id);
+    try {
+      await applyStamp(t);
+      toast.success("Cachet appliqué avec succès");
+      qc.invalidateQueries({ queryKey: ["transmissions-internes"] });
+    } catch (e: any) {
+      toast.error("Erreur lors du cachetage", { description: e.message });
+    } finally {
+      setStampingId(null);
+    }
+  }
+
+  async function handleBatchStamp(toStamp: Transmission[]) {
+    if (toStamp.length === 0) {
+      toast.info("Tous les documents PDF sont déjà cachetés");
+      return;
+    }
+    setBatchStamping(true);
+    let done = 0;
+    let failed = 0;
+    for (const t of toStamp) {
+      try {
+        await applyStamp(t);
+        done++;
+      } catch {
+        failed++;
+      }
+    }
+    setBatchStamping(false);
+    qc.invalidateQueries({ queryKey: ["transmissions-internes"] });
+    if (failed === 0)
+      toast.success(`${done} document${done > 1 ? "s" : ""} cacheté${done > 1 ? "s" : ""}`);
+    else
+      toast.warning(
+        `${done} réussi${done > 1 ? "s" : ""}, ${failed} échec${failed > 1 ? "s" : ""}`,
+      );
+  }
 
   const { data: transmissions = [], isLoading } = useQuery({
     queryKey: ["transmissions-internes", department, canSeeAll],
@@ -149,6 +212,9 @@ export function TransmissionsInternes({
     : transmissions.filter((t) => t.from_department === department);
 
   const inboxUnread = inbox.filter((t) => t.status === "envoye").length;
+  const unstampedPdfs = transmissions.filter(
+    (t) => t.document_path && t.document_name?.toLowerCase().endsWith(".pdf") && !t.is_stamped,
+  );
 
   const send = useMutation({
     mutationFn: async () => {
@@ -281,6 +347,32 @@ export function TransmissionsInternes({
         </div>
       </div>
 
+      {isAdmin && unstampedPdfs.length > 0 && (
+        <div className="mb-4 flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+          <div className="flex items-center gap-2 text-sm text-amber-800">
+            <Stamp className="size-4 shrink-0" />
+            <span>
+              <strong>{unstampedPdfs.length}</strong> document{unstampedPdfs.length > 1 ? "s" : ""}{" "}
+              PDF sans cachet
+            </span>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-amber-300 text-amber-800 hover:bg-amber-100"
+            disabled={batchStamping}
+            onClick={() => handleBatchStamp(unstampedPdfs)}
+          >
+            {batchStamping ? (
+              <Loader2 className="mr-1.5 size-3.5 animate-spin" />
+            ) : (
+              <Stamp className="mr-1.5 size-3.5" />
+            )}
+            {batchStamping ? "Cachetage en cours…" : "Tout cachetter"}
+          </Button>
+        </div>
+      )}
+
       <Tabs value={tab} onValueChange={(v) => setTab(v as "recus" | "envoyes")}>
         <TabsList className="mb-4">
           <TabsTrigger value="recus" className="relative">
@@ -303,6 +395,8 @@ export function TransmissionsInternes({
             emptyLabel="Aucun courrier reçu."
             isAdmin={isAdmin}
             onDelete={(t) => setPendingDelete(t)}
+            stampingId={stampingId}
+            onStamp={handleStamp}
           />
         </TabsContent>
 
@@ -315,6 +409,8 @@ export function TransmissionsInternes({
             emptyLabel="Aucun courrier envoyé."
             isAdmin={isAdmin}
             onDelete={(t) => setPendingDelete(t)}
+            stampingId={stampingId}
+            onStamp={handleStamp}
           />
         </TabsContent>
       </Tabs>
@@ -497,6 +593,8 @@ function TransList({
   emptyLabel,
   isAdmin = false,
   onDelete,
+  stampingId,
+  onStamp,
 }: {
   items: Transmission[];
   isLoading: boolean;
@@ -505,6 +603,8 @@ function TransList({
   emptyLabel: string;
   isAdmin?: boolean;
   onDelete?: (t: Transmission) => void;
+  stampingId?: string | null;
+  onStamp?: (t: Transmission) => void;
 }) {
   if (isLoading) return <Loader2 className="mx-auto size-5 animate-spin text-primary" />;
 
@@ -641,6 +741,28 @@ function TransList({
                     <StIcon className="mr-1 size-2.5" />
                     {st.label}
                   </Badge>
+                )}
+                {isAdmin && onStamp && t.document_path && !t.is_stamped && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs"
+                    disabled={stampingId === t.id}
+                    onClick={() => onStamp(t)}
+                    title="Apposer le cachet officiel"
+                  >
+                    {stampingId === t.id ? (
+                      <Loader2 className="mr-1 size-3.5 animate-spin" />
+                    ) : (
+                      <Stamp className="mr-1 size-3.5" />
+                    )}
+                    Cachetter
+                  </Button>
+                )}
+                {isAdmin && t.document_path && t.is_stamped && (
+                  <span className="flex items-center gap-1 text-[11px] text-green-700">
+                    <CheckCircle2 className="size-3.5" /> Cacheté
+                  </span>
                 )}
                 {isAdmin && onDelete && (
                   <Button

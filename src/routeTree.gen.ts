@@ -129,6 +129,7 @@ import { Route as AuthenticatedAdminFacturationRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminEcolesRouteImport } from './routes/_authenticated/admin.ecoles'
 import { Route as AuthenticatedAdminDossiersRouteImport } from './routes/_authenticated/admin.dossiers'
 import { Route as AuthenticatedAdminCourriersRouteImport } from './routes/_authenticated/admin.courriers'
+import { Route as AuthenticatedAdminCachetsRouteImport } from './routes/_authenticated/admin.cachets'
 import { Route as AuthenticatedAdminAgendaRouteImport } from './routes/_authenticated/admin.agenda'
 import { Route as AuthenticatedAadfTransmissionsRouteImport } from './routes/_authenticated/aadf.transmissions'
 import { Route as AuthenticatedAadfTachesRouteImport } from './routes/_authenticated/aadf.taches'
@@ -856,6 +857,12 @@ const AuthenticatedAdminCourriersRoute =
     path: '/courriers',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminCachetsRoute =
+  AuthenticatedAdminCachetsRouteImport.update({
+    id: '/cachets',
+    path: '/cachets',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminAgendaRoute =
   AuthenticatedAdminAgendaRouteImport.update({
     id: '/agenda',
@@ -1067,6 +1074,7 @@ export interface FileRoutesByFullPath {
   '/aadf/taches': typeof AuthenticatedAadfTachesRoute
   '/aadf/transmissions': typeof AuthenticatedAadfTransmissionsRoute
   '/admin/agenda': typeof AuthenticatedAdminAgendaRoute
+  '/admin/cachets': typeof AuthenticatedAdminCachetsRoute
   '/admin/courriers': typeof AuthenticatedAdminCourriersRoute
   '/admin/dossiers': typeof AuthenticatedAdminDossiersRoute
   '/admin/ecoles': typeof AuthenticatedAdminEcolesRoute
@@ -1209,6 +1217,7 @@ export interface FileRoutesByTo {
   '/aadf/taches': typeof AuthenticatedAadfTachesRoute
   '/aadf/transmissions': typeof AuthenticatedAadfTransmissionsRoute
   '/admin/agenda': typeof AuthenticatedAdminAgendaRoute
+  '/admin/cachets': typeof AuthenticatedAdminCachetsRoute
   '/admin/courriers': typeof AuthenticatedAdminCourriersRoute
   '/admin/dossiers': typeof AuthenticatedAdminDossiersRoute
   '/admin/ecoles': typeof AuthenticatedAdminEcolesRoute
@@ -1354,6 +1363,7 @@ export interface FileRoutesById {
   '/_authenticated/aadf/taches': typeof AuthenticatedAadfTachesRoute
   '/_authenticated/aadf/transmissions': typeof AuthenticatedAadfTransmissionsRoute
   '/_authenticated/admin/agenda': typeof AuthenticatedAdminAgendaRoute
+  '/_authenticated/admin/cachets': typeof AuthenticatedAdminCachetsRoute
   '/_authenticated/admin/courriers': typeof AuthenticatedAdminCourriersRoute
   '/_authenticated/admin/dossiers': typeof AuthenticatedAdminDossiersRoute
   '/_authenticated/admin/ecoles': typeof AuthenticatedAdminEcolesRoute
@@ -1508,6 +1518,7 @@ export interface FileRouteTypes {
     | '/aadf/taches'
     | '/aadf/transmissions'
     | '/admin/agenda'
+    | '/admin/cachets'
     | '/admin/courriers'
     | '/admin/dossiers'
     | '/admin/ecoles'
@@ -1650,6 +1661,7 @@ export interface FileRouteTypes {
     | '/aadf/taches'
     | '/aadf/transmissions'
     | '/admin/agenda'
+    | '/admin/cachets'
     | '/admin/courriers'
     | '/admin/dossiers'
     | '/admin/ecoles'
@@ -1794,6 +1806,7 @@ export interface FileRouteTypes {
     | '/_authenticated/aadf/taches'
     | '/_authenticated/aadf/transmissions'
     | '/_authenticated/admin/agenda'
+    | '/_authenticated/admin/cachets'
     | '/_authenticated/admin/courriers'
     | '/_authenticated/admin/dossiers'
     | '/_authenticated/admin/ecoles'
@@ -2771,6 +2784,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCourriersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/cachets': {
+      id: '/_authenticated/admin/cachets'
+      path: '/cachets'
+      fullPath: '/admin/cachets'
+      preLoaderRoute: typeof AuthenticatedAdminCachetsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/agenda': {
       id: '/_authenticated/admin/agenda'
       path: '/agenda'
@@ -3040,6 +3060,7 @@ const AuthenticatedAdminFacturationRouteWithChildren =
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAgendaRoute: typeof AuthenticatedAdminAgendaRoute
+  AuthenticatedAdminCachetsRoute: typeof AuthenticatedAdminCachetsRoute
   AuthenticatedAdminCourriersRoute: typeof AuthenticatedAdminCourriersRoute
   AuthenticatedAdminDossiersRoute: typeof AuthenticatedAdminDossiersRoute
   AuthenticatedAdminEcolesRoute: typeof AuthenticatedAdminEcolesRoute
@@ -3056,6 +3077,7 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAgendaRoute: AuthenticatedAdminAgendaRoute,
+  AuthenticatedAdminCachetsRoute: AuthenticatedAdminCachetsRoute,
   AuthenticatedAdminCourriersRoute: AuthenticatedAdminCourriersRoute,
   AuthenticatedAdminDossiersRoute: AuthenticatedAdminDossiersRoute,
   AuthenticatedAdminEcolesRoute: AuthenticatedAdminEcolesRoute,

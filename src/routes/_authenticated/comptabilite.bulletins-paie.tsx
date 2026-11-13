@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { Plus, Pencil, Trash2, Loader2, Printer, X, Send, FileText } from "lucide-react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { toast } from "sonner";
+import { getCachetBase64 } from "@/lib/cachet-utils";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -148,9 +149,10 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 /* ── Print ──────────────────────────────────────────────────────────────── */
-function printBulletin(b: Bulletin) {
+async function printBulletin(b: Bulletin) {
   const { brut, totalRetenues, net } = compute(b.salaire_base, b.primes, b.retenues);
   const emp = b.personnel;
+  const cachetBase64 = await getCachetBase64("carre").catch(() => null);
 
   const html = `<!DOCTYPE html>
 <html lang="fr">
@@ -242,7 +244,10 @@ function printBulletin(b: Bulletin) {
   ${b.note ? `<div class="box" style="margin-top:14px"><h2>Observations</h2><p style="color:#555;margin-top:4px;font-size:10px">${b.note}</p></div>` : ""}
   <div class="signature">
     <div class="sig-box"><div class="sig-label">Signature de l'employé</div></div>
-    <div class="sig-box"><div class="sig-label">Cachet &amp; Signature employeur</div></div>
+    <div class="sig-box" style="height:120px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:4px 8px;">
+      <div class="sig-label">Cachet &amp; Signature employeur</div>
+      ${cachetBase64 ? `<img src="${cachetBase64}" style="width:100px;height:100px;object-fit:contain;opacity:0.85;" alt="Cachet officiel" />` : ""}
+    </div>
   </div>
   <div class="footer">Document généré le ${new Date().toLocaleString("fr-FR")} · Rézo Campus</div>
 </body>
