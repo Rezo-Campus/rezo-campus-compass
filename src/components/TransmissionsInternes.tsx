@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Plus,
   Loader2,
@@ -9,9 +9,14 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
+  FileText,
+  Download,
+  Paperclip,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -93,6 +98,8 @@ type Transmission = {
   status: string;
   priority: string;
   created_at: string;
+  document_path?: string | null;
+  document_name?: string | null;
 };
 
 function getEmptyForm() {
@@ -114,6 +121,12 @@ export function TransmissionsInternes({
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(getEmptyForm);
   const [tab, setTab] = useState<"recus" | "envoyes">("recus");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [pendingDelete, setPendingDelete] = useState<Transmission | null>(null);
+
+  const isAdmin = auth?.role === "admin";
 
   const { data: transmissions = [], isLoading } = useQuery({
     queryKey: ["transmissions-internes", department, canSeeAll],
@@ -141,6 +154,22 @@ export function TransmissionsInternes({
     mutationFn: async () => {
       if (!form.subject.trim()) throw new Error("Objet requis");
       if (form.to_department === "__none__") throw new Error("Département destinataire requis");
+
+      let document_path: string | null = null;
+      let document_name: string | null = null;
+      if (selectedFile) {
+        setUploading(true);
+        const ext = selectedFile.name.split(".").pop() ?? "pdf";
+        const path = `${auth?.user?.id ?? "anon"}/${crypto.randomUUID()}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("transmissions")
+          .upload(path, selectedFile);
+        setUploading(false);
+        if (upErr) throw upErr;
+        document_path = path;
+        document_name = selectedFile.name;
+      }
+
       const { error } = await db.from("transmissions_internes").insert({
         type: form.type,
         subject: form.subject.trim(),
@@ -150,6 +179,8 @@ export function TransmissionsInternes({
         from_user_id: auth?.user?.id ?? null,
         status: "envoye",
         priority: form.priority,
+        document_path,
+        document_name,
       });
       if (error) throw error;
       try {
@@ -175,9 +206,13 @@ export function TransmissionsInternes({
       toast.success("Courrier envoyé");
       setOpen(false);
       setForm(getEmptyForm());
+      setSelectedFile(null);
       qc.invalidateQueries({ queryKey: ["transmissions-internes"] });
     },
-    onError: (e: Error) => toast.error("Erreur", { description: e.message }),
+    onError: (e: Error) => {
+      setUploading(false);
+      toast.error("Erreur", { description: e.message });
+    },
   });
 
   const updateStatus = useMutation({
@@ -186,6 +221,21 @@ export function TransmissionsInternes({
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["transmissions-internes"] }),
+    onError: (e: Error) => toast.error("Erreur", { description: e.message }),
+  });
+
+  const deleteTransmission = useMutation({
+    mutationFn: async (t: Transmission) => {
+      if (t.document_path) {
+        await supabase.storage.from("transmissions").remove([t.document_path]);
+      }
+      const { error } = await db.from("transmissions_internes").delete().eq("id", t.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Transmission supprimée");
+      qc.invalidateQueries({ queryKey: ["transmissions-internes"] });
+    },
     onError: (e: Error) => toast.error("Erreur", { description: e.message }),
   });
 
@@ -251,6 +301,8 @@ export function TransmissionsInternes({
             isInbox
             onStatusChange={(id, status) => updateStatus.mutate({ id, status })}
             emptyLabel="Aucun courrier reçu."
+            isAdmin={isAdmin}
+            onDelete={(t) => setPendingDelete(t)}
           />
         </TabsContent>
 
@@ -261,6 +313,8 @@ export function TransmissionsInternes({
             isInbox={false}
             onStatusChange={(id, status) => updateStatus.mutate({ id, status })}
             emptyLabel="Aucun courrier envoyé."
+            isAdmin={isAdmin}
+            onDelete={(t) => setPendingDelete(t)}
           />
         </TabsContent>
       </Tabs>
@@ -357,22 +411,79 @@ export function TransmissionsInternes({
                   placeholder="Détails, contexte, pièces jointes référencées…"
                 />
               </div>
+              <div className="space-y-1.5">
+                <Label>Document joint (optionnel)</Label>
+                <div
+                  className="flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed border-border p-3 hover:border-primary/40 hover:bg-muted/30 transition"
+                  onClick={() => fileRef.current?.click()}
+                >
+                  <Paperclip className="size-4 shrink-0 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground truncate">
+                    {selectedFile ? selectedFile.name : "Cliquer pour joindre un fichier"}
+                  </span>
+                </div>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  className="hidden"
+                  accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) setSelectedFile(f);
+                    e.target.value = "";
+                  }}
+                />
+                {selectedFile && (
+                  <button
+                    type="button"
+                    className="text-xs text-destructive hover:underline"
+                    onClick={() => setSelectedFile(null)}
+                  >
+                    Retirer le fichier
+                  </button>
+                )}
+              </div>
             </div>
           </ScrollArea>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setOpen(false);
+                setSelectedFile(null);
+              }}
+            >
               Annuler
             </Button>
             <Button
               onClick={() => send.mutate()}
-              disabled={send.isPending || !form.subject.trim() || form.to_department === "__none__"}
+              disabled={
+                send.isPending ||
+                uploading ||
+                !form.subject.trim() ||
+                form.to_department === "__none__"
+              }
             >
-              {send.isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
+              {(send.isPending || uploading) && <Loader2 className="mr-2 size-4 animate-spin" />}
               <Send className="mr-2 size-4" /> Envoyer
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        onOpenChange={(o) => {
+          if (!o) setPendingDelete(null);
+        }}
+        title="Supprimer cette transmission ?"
+        description="Cette action est irréversible. La transmission et son document joint seront définitivement supprimés."
+        onConfirm={() => {
+          if (pendingDelete) deleteTransmission.mutate(pendingDelete);
+          setPendingDelete(null);
+        }}
+        loading={deleteTransmission.isPending}
+      />
     </>
   );
 }
@@ -384,12 +495,16 @@ function TransList({
   isInbox,
   onStatusChange,
   emptyLabel,
+  isAdmin = false,
+  onDelete,
 }: {
   items: Transmission[];
   isLoading: boolean;
   isInbox: boolean;
   onStatusChange: (id: string, status: string) => void;
   emptyLabel: string;
+  isAdmin?: boolean;
+  onDelete?: (t: Transmission) => void;
 }) {
   if (isLoading) return <Loader2 className="mx-auto size-5 animate-spin text-primary" />;
 
@@ -454,8 +569,33 @@ function TransList({
                     {t.body}
                   </p>
                 )}
+                {t.document_name && (
+                  <div className="mt-1.5 flex items-center gap-1.5 text-xs text-primary">
+                    <FileText className="size-3.5 shrink-0" />
+                    <span className="truncate max-w-[200px]">{t.document_name}</span>
+                  </div>
+                )}
               </div>
               <div className="flex shrink-0 flex-wrap items-center gap-1">
+                {t.document_path && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-xs"
+                    onClick={async () => {
+                      const { data, error } = await supabase.storage
+                        .from("transmissions")
+                        .createSignedUrl(t.document_path!, 3600);
+                      if (error || !data) {
+                        toast.error("Lien indisponible");
+                        return;
+                      }
+                      window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+                    }}
+                  >
+                    <Download className="mr-1 size-3.5" /> Document
+                  </Button>
+                )}
                 {isInbox && t.status === "envoye" && (
                   <>
                     <Button
@@ -501,6 +641,17 @@ function TransList({
                     <StIcon className="mr-1 size-2.5" />
                     {st.label}
                   </Badge>
+                )}
+                {isAdmin && onDelete && (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="size-7 text-destructive hover:bg-destructive/10"
+                    title="Supprimer"
+                    onClick={() => onDelete(t)}
+                  >
+                    <Trash2 className="size-3.5" />
+                  </Button>
                 )}
               </div>
             </div>
