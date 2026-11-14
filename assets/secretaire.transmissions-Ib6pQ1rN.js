@@ -1,0 +1,1 @@
+import{j as t}from"./index-B_J8bVID.js";import{T as e}from"./TransmissionsInternes-E5zK3iRP.js";import"./inbox-AQREQiI8.js";import"./stamp-C_Zoue0H.js";const m=()=>t.jsx(e,{department:"secretaire",eyebrow:"Secrétariat",canSeeAll:!0});export{m as component};
