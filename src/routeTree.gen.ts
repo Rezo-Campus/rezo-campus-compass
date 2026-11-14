@@ -42,6 +42,7 @@ import { Route as AuthenticatedSecretaireTransactionsRouteImport } from './route
 import { Route as AuthenticatedSecretaireReunionsRouteImport } from './routes/_authenticated/secretaire.reunions'
 import { Route as AuthenticatedSecretaireRendezVousEtudiantsRouteImport } from './routes/_authenticated/secretaire.rendez-vous-etudiants'
 import { Route as AuthenticatedSecretaireRendezVousRouteImport } from './routes/_authenticated/secretaire.rendez-vous'
+import { Route as AuthenticatedSecretaireRapportSuiviRouteImport } from './routes/_authenticated/secretaire.rapport-suivi'
 import { Route as AuthenticatedSecretaireProfilRouteImport } from './routes/_authenticated/secretaire.profil'
 import { Route as AuthenticatedSecretaireMessagesRouteImport } from './routes/_authenticated/secretaire.messages'
 import { Route as AuthenticatedSecretaireFacturationRouteImport } from './routes/_authenticated/secretaire.facturation'
@@ -49,6 +50,7 @@ import { Route as AuthenticatedSecretaireEtudiantsRouteImport } from './routes/_
 import { Route as AuthenticatedSecretaireCourriersRouteImport } from './routes/_authenticated/secretaire.courriers'
 import { Route as AuthenticatedSecretaireClientsRouteImport } from './routes/_authenticated/secretaire.clients'
 import { Route as AuthenticatedSecretaireBulletinsPaieRouteImport } from './routes/_authenticated/secretaire.bulletins-paie'
+import { Route as AuthenticatedSecretaireBudgetPrevisionnelRouteImport } from './routes/_authenticated/secretaire.budget-previsionnel'
 import { Route as AuthenticatedSecretaireAttributionRouteImport } from './routes/_authenticated/secretaire.attribution'
 import { Route as AuthenticatedSecretaireAgendaRouteImport } from './routes/_authenticated/secretaire.agenda'
 import { Route as AuthenticatedRhReunionsRouteImport } from './routes/_authenticated/rh.reunions'
@@ -69,6 +71,7 @@ import { Route as AuthenticatedProjetsRendezVousClientsRouteImport } from './rou
 import { Route as AuthenticatedProjetsProfilRouteImport } from './routes/_authenticated/projets.profil'
 import { Route as AuthenticatedProjetsListeRouteImport } from './routes/_authenticated/projets.liste'
 import { Route as AuthenticatedProjetsFacturationRouteImport } from './routes/_authenticated/projets.facturation'
+import { Route as AuthenticatedProjetsCourriersRouteImport } from './routes/_authenticated/projets.courriers'
 import { Route as AuthenticatedProjetsAnalytiquesRouteImport } from './routes/_authenticated/projets.analytiques'
 import { Route as AuthenticatedProjetsAgendaRouteImport } from './routes/_authenticated/projets.agenda'
 import { Route as AuthenticatedEtudiantRendezVousRouteImport } from './routes/_authenticated/etudiant.rendez-vous'
@@ -339,6 +342,12 @@ const AuthenticatedSecretaireRendezVousRoute =
     path: '/rendez-vous',
     getParentRoute: () => AuthenticatedSecretaireRoute,
   } as any)
+const AuthenticatedSecretaireRapportSuiviRoute =
+  AuthenticatedSecretaireRapportSuiviRouteImport.update({
+    id: '/rapport-suivi',
+    path: '/rapport-suivi',
+    getParentRoute: () => AuthenticatedSecretaireRoute,
+  } as any)
 const AuthenticatedSecretaireProfilRoute =
   AuthenticatedSecretaireProfilRouteImport.update({
     id: '/profil',
@@ -379,6 +388,12 @@ const AuthenticatedSecretaireBulletinsPaieRoute =
   AuthenticatedSecretaireBulletinsPaieRouteImport.update({
     id: '/bulletins-paie',
     path: '/bulletins-paie',
+    getParentRoute: () => AuthenticatedSecretaireRoute,
+  } as any)
+const AuthenticatedSecretaireBudgetPrevisionnelRoute =
+  AuthenticatedSecretaireBudgetPrevisionnelRouteImport.update({
+    id: '/budget-previsionnel',
+    path: '/budget-previsionnel',
     getParentRoute: () => AuthenticatedSecretaireRoute,
   } as any)
 const AuthenticatedSecretaireAttributionRoute =
@@ -495,6 +510,12 @@ const AuthenticatedProjetsFacturationRoute =
   AuthenticatedProjetsFacturationRouteImport.update({
     id: '/facturation',
     path: '/facturation',
+    getParentRoute: () => AuthenticatedProjetsRoute,
+  } as any)
+const AuthenticatedProjetsCourriersRoute =
+  AuthenticatedProjetsCourriersRouteImport.update({
+    id: '/courriers',
+    path: '/courriers',
     getParentRoute: () => AuthenticatedProjetsRoute,
   } as any)
 const AuthenticatedProjetsAnalytiquesRoute =
@@ -1135,6 +1156,7 @@ export interface FileRoutesByFullPath {
   '/etudiant/rendez-vous': typeof AuthenticatedEtudiantRendezVousRoute
   '/projets/agenda': typeof AuthenticatedProjetsAgendaRoute
   '/projets/analytiques': typeof AuthenticatedProjetsAnalytiquesRoute
+  '/projets/courriers': typeof AuthenticatedProjetsCourriersRoute
   '/projets/facturation': typeof AuthenticatedProjetsFacturationRouteWithChildren
   '/projets/liste': typeof AuthenticatedProjetsListeRoute
   '/projets/profil': typeof AuthenticatedProjetsProfilRoute
@@ -1155,6 +1177,7 @@ export interface FileRoutesByFullPath {
   '/rh/reunions': typeof AuthenticatedRhReunionsRoute
   '/secretaire/agenda': typeof AuthenticatedSecretaireAgendaRoute
   '/secretaire/attribution': typeof AuthenticatedSecretaireAttributionRoute
+  '/secretaire/budget-previsionnel': typeof AuthenticatedSecretaireBudgetPrevisionnelRoute
   '/secretaire/bulletins-paie': typeof AuthenticatedSecretaireBulletinsPaieRoute
   '/secretaire/clients': typeof AuthenticatedSecretaireClientsRoute
   '/secretaire/courriers': typeof AuthenticatedSecretaireCourriersRoute
@@ -1162,6 +1185,7 @@ export interface FileRoutesByFullPath {
   '/secretaire/facturation': typeof AuthenticatedSecretaireFacturationRouteWithChildren
   '/secretaire/messages': typeof AuthenticatedSecretaireMessagesRoute
   '/secretaire/profil': typeof AuthenticatedSecretaireProfilRoute
+  '/secretaire/rapport-suivi': typeof AuthenticatedSecretaireRapportSuiviRoute
   '/secretaire/rendez-vous': typeof AuthenticatedSecretaireRendezVousRoute
   '/secretaire/rendez-vous-etudiants': typeof AuthenticatedSecretaireRendezVousEtudiantsRoute
   '/secretaire/reunions': typeof AuthenticatedSecretaireReunionsRoute
@@ -1273,6 +1297,7 @@ export interface FileRoutesByTo {
   '/etudiant/rendez-vous': typeof AuthenticatedEtudiantRendezVousRoute
   '/projets/agenda': typeof AuthenticatedProjetsAgendaRoute
   '/projets/analytiques': typeof AuthenticatedProjetsAnalytiquesRoute
+  '/projets/courriers': typeof AuthenticatedProjetsCourriersRoute
   '/projets/liste': typeof AuthenticatedProjetsListeRoute
   '/projets/profil': typeof AuthenticatedProjetsProfilRoute
   '/projets/rendez-vous-clients': typeof AuthenticatedProjetsRendezVousClientsRoute
@@ -1291,11 +1316,13 @@ export interface FileRoutesByTo {
   '/rh/reunions': typeof AuthenticatedRhReunionsRoute
   '/secretaire/agenda': typeof AuthenticatedSecretaireAgendaRoute
   '/secretaire/attribution': typeof AuthenticatedSecretaireAttributionRoute
+  '/secretaire/budget-previsionnel': typeof AuthenticatedSecretaireBudgetPrevisionnelRoute
   '/secretaire/bulletins-paie': typeof AuthenticatedSecretaireBulletinsPaieRoute
   '/secretaire/clients': typeof AuthenticatedSecretaireClientsRoute
   '/secretaire/courriers': typeof AuthenticatedSecretaireCourriersRoute
   '/secretaire/messages': typeof AuthenticatedSecretaireMessagesRoute
   '/secretaire/profil': typeof AuthenticatedSecretaireProfilRoute
+  '/secretaire/rapport-suivi': typeof AuthenticatedSecretaireRapportSuiviRoute
   '/secretaire/rendez-vous': typeof AuthenticatedSecretaireRendezVousRoute
   '/secretaire/rendez-vous-etudiants': typeof AuthenticatedSecretaireRendezVousEtudiantsRoute
   '/secretaire/reunions': typeof AuthenticatedSecretaireReunionsRoute
@@ -1424,6 +1451,7 @@ export interface FileRoutesById {
   '/_authenticated/etudiant/rendez-vous': typeof AuthenticatedEtudiantRendezVousRoute
   '/_authenticated/projets/agenda': typeof AuthenticatedProjetsAgendaRoute
   '/_authenticated/projets/analytiques': typeof AuthenticatedProjetsAnalytiquesRoute
+  '/_authenticated/projets/courriers': typeof AuthenticatedProjetsCourriersRoute
   '/_authenticated/projets/facturation': typeof AuthenticatedProjetsFacturationRouteWithChildren
   '/_authenticated/projets/liste': typeof AuthenticatedProjetsListeRoute
   '/_authenticated/projets/profil': typeof AuthenticatedProjetsProfilRoute
@@ -1444,6 +1472,7 @@ export interface FileRoutesById {
   '/_authenticated/rh/reunions': typeof AuthenticatedRhReunionsRoute
   '/_authenticated/secretaire/agenda': typeof AuthenticatedSecretaireAgendaRoute
   '/_authenticated/secretaire/attribution': typeof AuthenticatedSecretaireAttributionRoute
+  '/_authenticated/secretaire/budget-previsionnel': typeof AuthenticatedSecretaireBudgetPrevisionnelRoute
   '/_authenticated/secretaire/bulletins-paie': typeof AuthenticatedSecretaireBulletinsPaieRoute
   '/_authenticated/secretaire/clients': typeof AuthenticatedSecretaireClientsRoute
   '/_authenticated/secretaire/courriers': typeof AuthenticatedSecretaireCourriersRoute
@@ -1451,6 +1480,7 @@ export interface FileRoutesById {
   '/_authenticated/secretaire/facturation': typeof AuthenticatedSecretaireFacturationRouteWithChildren
   '/_authenticated/secretaire/messages': typeof AuthenticatedSecretaireMessagesRoute
   '/_authenticated/secretaire/profil': typeof AuthenticatedSecretaireProfilRoute
+  '/_authenticated/secretaire/rapport-suivi': typeof AuthenticatedSecretaireRapportSuiviRoute
   '/_authenticated/secretaire/rendez-vous': typeof AuthenticatedSecretaireRendezVousRoute
   '/_authenticated/secretaire/rendez-vous-etudiants': typeof AuthenticatedSecretaireRendezVousEtudiantsRoute
   '/_authenticated/secretaire/reunions': typeof AuthenticatedSecretaireReunionsRoute
@@ -1579,6 +1609,7 @@ export interface FileRouteTypes {
     | '/etudiant/rendez-vous'
     | '/projets/agenda'
     | '/projets/analytiques'
+    | '/projets/courriers'
     | '/projets/facturation'
     | '/projets/liste'
     | '/projets/profil'
@@ -1599,6 +1630,7 @@ export interface FileRouteTypes {
     | '/rh/reunions'
     | '/secretaire/agenda'
     | '/secretaire/attribution'
+    | '/secretaire/budget-previsionnel'
     | '/secretaire/bulletins-paie'
     | '/secretaire/clients'
     | '/secretaire/courriers'
@@ -1606,6 +1638,7 @@ export interface FileRouteTypes {
     | '/secretaire/facturation'
     | '/secretaire/messages'
     | '/secretaire/profil'
+    | '/secretaire/rapport-suivi'
     | '/secretaire/rendez-vous'
     | '/secretaire/rendez-vous-etudiants'
     | '/secretaire/reunions'
@@ -1717,6 +1750,7 @@ export interface FileRouteTypes {
     | '/etudiant/rendez-vous'
     | '/projets/agenda'
     | '/projets/analytiques'
+    | '/projets/courriers'
     | '/projets/liste'
     | '/projets/profil'
     | '/projets/rendez-vous-clients'
@@ -1735,11 +1769,13 @@ export interface FileRouteTypes {
     | '/rh/reunions'
     | '/secretaire/agenda'
     | '/secretaire/attribution'
+    | '/secretaire/budget-previsionnel'
     | '/secretaire/bulletins-paie'
     | '/secretaire/clients'
     | '/secretaire/courriers'
     | '/secretaire/messages'
     | '/secretaire/profil'
+    | '/secretaire/rapport-suivi'
     | '/secretaire/rendez-vous'
     | '/secretaire/rendez-vous-etudiants'
     | '/secretaire/reunions'
@@ -1867,6 +1903,7 @@ export interface FileRouteTypes {
     | '/_authenticated/etudiant/rendez-vous'
     | '/_authenticated/projets/agenda'
     | '/_authenticated/projets/analytiques'
+    | '/_authenticated/projets/courriers'
     | '/_authenticated/projets/facturation'
     | '/_authenticated/projets/liste'
     | '/_authenticated/projets/profil'
@@ -1887,6 +1924,7 @@ export interface FileRouteTypes {
     | '/_authenticated/rh/reunions'
     | '/_authenticated/secretaire/agenda'
     | '/_authenticated/secretaire/attribution'
+    | '/_authenticated/secretaire/budget-previsionnel'
     | '/_authenticated/secretaire/bulletins-paie'
     | '/_authenticated/secretaire/clients'
     | '/_authenticated/secretaire/courriers'
@@ -1894,6 +1932,7 @@ export interface FileRouteTypes {
     | '/_authenticated/secretaire/facturation'
     | '/_authenticated/secretaire/messages'
     | '/_authenticated/secretaire/profil'
+    | '/_authenticated/secretaire/rapport-suivi'
     | '/_authenticated/secretaire/rendez-vous'
     | '/_authenticated/secretaire/rendez-vous-etudiants'
     | '/_authenticated/secretaire/reunions'
@@ -2175,6 +2214,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSecretaireRendezVousRouteImport
       parentRoute: typeof AuthenticatedSecretaireRoute
     }
+    '/_authenticated/secretaire/rapport-suivi': {
+      id: '/_authenticated/secretaire/rapport-suivi'
+      path: '/rapport-suivi'
+      fullPath: '/secretaire/rapport-suivi'
+      preLoaderRoute: typeof AuthenticatedSecretaireRapportSuiviRouteImport
+      parentRoute: typeof AuthenticatedSecretaireRoute
+    }
     '/_authenticated/secretaire/profil': {
       id: '/_authenticated/secretaire/profil'
       path: '/profil'
@@ -2222,6 +2268,13 @@ declare module '@tanstack/react-router' {
       path: '/bulletins-paie'
       fullPath: '/secretaire/bulletins-paie'
       preLoaderRoute: typeof AuthenticatedSecretaireBulletinsPaieRouteImport
+      parentRoute: typeof AuthenticatedSecretaireRoute
+    }
+    '/_authenticated/secretaire/budget-previsionnel': {
+      id: '/_authenticated/secretaire/budget-previsionnel'
+      path: '/budget-previsionnel'
+      fullPath: '/secretaire/budget-previsionnel'
+      preLoaderRoute: typeof AuthenticatedSecretaireBudgetPrevisionnelRouteImport
       parentRoute: typeof AuthenticatedSecretaireRoute
     }
     '/_authenticated/secretaire/attribution': {
@@ -2362,6 +2415,13 @@ declare module '@tanstack/react-router' {
       path: '/facturation'
       fullPath: '/projets/facturation'
       preLoaderRoute: typeof AuthenticatedProjetsFacturationRouteImport
+      parentRoute: typeof AuthenticatedProjetsRoute
+    }
+    '/_authenticated/projets/courriers': {
+      id: '/_authenticated/projets/courriers'
+      path: '/courriers'
+      fullPath: '/projets/courriers'
+      preLoaderRoute: typeof AuthenticatedProjetsCourriersRouteImport
       parentRoute: typeof AuthenticatedProjetsRoute
     }
     '/_authenticated/projets/analytiques': {
@@ -3382,6 +3442,7 @@ const AuthenticatedProjetsFacturationRouteWithChildren =
 interface AuthenticatedProjetsRouteChildren {
   AuthenticatedProjetsAgendaRoute: typeof AuthenticatedProjetsAgendaRoute
   AuthenticatedProjetsAnalytiquesRoute: typeof AuthenticatedProjetsAnalytiquesRoute
+  AuthenticatedProjetsCourriersRoute: typeof AuthenticatedProjetsCourriersRoute
   AuthenticatedProjetsFacturationRoute: typeof AuthenticatedProjetsFacturationRouteWithChildren
   AuthenticatedProjetsListeRoute: typeof AuthenticatedProjetsListeRoute
   AuthenticatedProjetsProfilRoute: typeof AuthenticatedProjetsProfilRoute
@@ -3396,6 +3457,7 @@ interface AuthenticatedProjetsRouteChildren {
 const AuthenticatedProjetsRouteChildren: AuthenticatedProjetsRouteChildren = {
   AuthenticatedProjetsAgendaRoute: AuthenticatedProjetsAgendaRoute,
   AuthenticatedProjetsAnalytiquesRoute: AuthenticatedProjetsAnalytiquesRoute,
+  AuthenticatedProjetsCourriersRoute: AuthenticatedProjetsCourriersRoute,
   AuthenticatedProjetsFacturationRoute:
     AuthenticatedProjetsFacturationRouteWithChildren,
   AuthenticatedProjetsListeRoute: AuthenticatedProjetsListeRoute,
@@ -3503,6 +3565,7 @@ const AuthenticatedSecretaireFacturationRouteWithChildren =
 interface AuthenticatedSecretaireRouteChildren {
   AuthenticatedSecretaireAgendaRoute: typeof AuthenticatedSecretaireAgendaRoute
   AuthenticatedSecretaireAttributionRoute: typeof AuthenticatedSecretaireAttributionRoute
+  AuthenticatedSecretaireBudgetPrevisionnelRoute: typeof AuthenticatedSecretaireBudgetPrevisionnelRoute
   AuthenticatedSecretaireBulletinsPaieRoute: typeof AuthenticatedSecretaireBulletinsPaieRoute
   AuthenticatedSecretaireClientsRoute: typeof AuthenticatedSecretaireClientsRoute
   AuthenticatedSecretaireCourriersRoute: typeof AuthenticatedSecretaireCourriersRoute
@@ -3510,6 +3573,7 @@ interface AuthenticatedSecretaireRouteChildren {
   AuthenticatedSecretaireFacturationRoute: typeof AuthenticatedSecretaireFacturationRouteWithChildren
   AuthenticatedSecretaireMessagesRoute: typeof AuthenticatedSecretaireMessagesRoute
   AuthenticatedSecretaireProfilRoute: typeof AuthenticatedSecretaireProfilRoute
+  AuthenticatedSecretaireRapportSuiviRoute: typeof AuthenticatedSecretaireRapportSuiviRoute
   AuthenticatedSecretaireRendezVousRoute: typeof AuthenticatedSecretaireRendezVousRoute
   AuthenticatedSecretaireRendezVousEtudiantsRoute: typeof AuthenticatedSecretaireRendezVousEtudiantsRoute
   AuthenticatedSecretaireReunionsRoute: typeof AuthenticatedSecretaireReunionsRoute
@@ -3524,6 +3588,8 @@ const AuthenticatedSecretaireRouteChildren: AuthenticatedSecretaireRouteChildren
     AuthenticatedSecretaireAgendaRoute: AuthenticatedSecretaireAgendaRoute,
     AuthenticatedSecretaireAttributionRoute:
       AuthenticatedSecretaireAttributionRoute,
+    AuthenticatedSecretaireBudgetPrevisionnelRoute:
+      AuthenticatedSecretaireBudgetPrevisionnelRoute,
     AuthenticatedSecretaireBulletinsPaieRoute:
       AuthenticatedSecretaireBulletinsPaieRoute,
     AuthenticatedSecretaireClientsRoute: AuthenticatedSecretaireClientsRoute,
@@ -3535,6 +3601,8 @@ const AuthenticatedSecretaireRouteChildren: AuthenticatedSecretaireRouteChildren
       AuthenticatedSecretaireFacturationRouteWithChildren,
     AuthenticatedSecretaireMessagesRoute: AuthenticatedSecretaireMessagesRoute,
     AuthenticatedSecretaireProfilRoute: AuthenticatedSecretaireProfilRoute,
+    AuthenticatedSecretaireRapportSuiviRoute:
+      AuthenticatedSecretaireRapportSuiviRoute,
     AuthenticatedSecretaireRendezVousRoute:
       AuthenticatedSecretaireRendezVousRoute,
     AuthenticatedSecretaireRendezVousEtudiantsRoute:

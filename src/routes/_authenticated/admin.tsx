@@ -10,6 +10,8 @@ import {
   Calendar,
   Mail,
   Stamp,
+  BarChart2,
+  ClipboardList,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { RoleGuard } from "@/components/RoleGuard";
@@ -26,6 +28,8 @@ const NAV = [
   { label: "Rendez-vous", to: "/admin/rendez-vous", icon: CalendarDays },
   { label: "RDV Clients", to: "/admin/rendez-vous-clients", icon: CalendarClock },
   { label: "Cachets officiels", to: "/admin/cachets", icon: Stamp },
+  { label: "Budget secrétariat", to: "/secretaire/budget-previsionnel", icon: BarChart2 },
+  { label: "Rapport secrétariat", to: "/secretaire/rapport-suivi", icon: ClipboardList },
   { label: "Mon Profil", to: "/admin/profil", icon: UserCircle },
 ];
 

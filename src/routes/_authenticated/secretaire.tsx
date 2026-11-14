@@ -12,6 +12,8 @@ import {
   ArrowLeftRight,
   Banknote,
   CalendarDays,
+  BarChart2,
+  ClipboardList,
 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { RoleGuard } from "@/components/RoleGuard";
@@ -29,6 +31,8 @@ const NAV = [
   { label: "Mes bulletins de paie", to: "/secretaire/bulletins-paie", icon: Banknote },
   { label: "Réunions", to: "/secretaire/reunions", icon: CalendarDays },
   { label: "RDV Étudiants", to: "/secretaire/rendez-vous-etudiants", icon: CalendarClock },
+  { label: "Budget prévisionnel", to: "/secretaire/budget-previsionnel", icon: BarChart2 },
+  { label: "Rapport de suivi", to: "/secretaire/rapport-suivi", icon: ClipboardList },
   { label: "Mon Profil", to: "/secretaire/profil", icon: UserCircle },
 ];
 

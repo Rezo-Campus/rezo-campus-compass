@@ -1,7 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useMemo, useCallback } from "react";
-import { Loader2, Plus, Trash2, BarChart2, Printer } from "lucide-react";
+import {
+  Loader2,
+  Plus,
+  Trash2,
+  BarChart2,
+  Printer,
+  PenLine,
+  ChevronDown,
+  ChevronRight,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { injectCachetInHtml } from "@/lib/cachet-utils";
 import { toast } from "sonner";
 import { PageHeader, Panel } from "@/components/dashboard-bits";
@@ -15,12 +26,18 @@ import {
   BUDGET_ROWS,
   MONTHS_SHORT,
   MONTHS_FULL,
-  initVals,
-  computeAll,
   rowTotal,
   fmt,
   type Vals,
+  type BudgetRow,
 } from "@/lib/budget-structure";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/comptabilite/budget-previsionnel")({
   component: BudgetPrevisionnel,
@@ -39,11 +56,100 @@ type BudgetRecord = {
   created_at: string;
 };
 
+type CustomRow = {
+  id: string;
+  label: string;
+  type: "sub" | "item";
+  parent_id: string;
+  sort_order: number;
+};
+
 function fmtDateShort(iso: string) {
   return new Date(iso).toLocaleDateString("fr-FR");
 }
 
-function buildPrintHTML(year: number, computed: Vals): string {
+/* ── Local helpers ── */
+function buildAllRows(customRows: CustomRow[], hiddenIds: Set<string>): BudgetRow[] {
+  const sections = BUDGET_ROWS.filter((r) => r.type === "section");
+  const result: BudgetRow[] = [];
+  sections.forEach((sec) => {
+    result.push(sec);
+    const builtinSubs = BUDGET_ROWS.filter((r) => r.type === "sub" && r.parentId === sec.id);
+    builtinSubs.forEach((sub) => {
+      if (hiddenIds.has(sub.id)) return;
+      result.push(sub);
+      const builtinItems = BUDGET_ROWS.filter((r) => r.type === "item" && r.parentId === sub.id);
+      builtinItems.forEach((item) => {
+        if (!hiddenIds.has(item.id)) result.push(item);
+      });
+      customRows
+        .filter((r) => r.type === "item" && r.parent_id === sub.id)
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .forEach((r) => {
+          if (!hiddenIds.has(r.id))
+            result.push({ id: r.id, label: r.label, type: "item", parentId: r.parent_id });
+        });
+    });
+    customRows
+      .filter((r) => r.type === "sub" && r.parent_id === sec.id)
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .forEach((csub) => {
+        if (hiddenIds.has(csub.id)) return;
+        result.push({ id: csub.id, label: csub.label, type: "sub", parentId: csub.parent_id });
+        customRows
+          .filter((r) => r.type === "item" && r.parent_id === csub.id)
+          .sort((a, b) => a.sort_order - b.sort_order)
+          .forEach((r) => {
+            if (!hiddenIds.has(r.id))
+              result.push({ id: r.id, label: r.label, type: "item", parentId: r.parent_id });
+          });
+      });
+  });
+  return result;
+}
+
+function computeAllForRows(vals: Vals, rows: BudgetRow[]): Vals {
+  const r: Vals = {};
+  rows.forEach((row) => {
+    if (row.type === "item")
+      r[row.id] = (vals[row.id] || Array(12).fill(0)).map((v) => Number(v) || 0);
+  });
+  rows.forEach((row) => {
+    if (row.type === "sub") {
+      const items = rows.filter((x) => x.type === "item" && x.parentId === row.id);
+      const tot = Array(12).fill(0);
+      items.forEach((it) =>
+        r[it.id]?.forEach((v, i) => {
+          tot[i] += v;
+        }),
+      );
+      r[row.id] = tot;
+    }
+  });
+  rows.forEach((row) => {
+    if (row.type === "section") {
+      const subs = rows.filter((x) => x.type === "sub" && x.parentId === row.id);
+      const tot = Array(12).fill(0);
+      subs.forEach((sub) =>
+        r[sub.id]?.forEach((v, i) => {
+          tot[i] += v;
+        }),
+      );
+      r[row.id] = tot;
+    }
+  });
+  return r;
+}
+
+function initValsForRows(rows: BudgetRow[]): Vals {
+  const v: Vals = {};
+  rows.forEach((r) => {
+    if (r.type === "item") v[r.id] = Array(12).fill(0);
+  });
+  return v;
+}
+
+function buildPrintHTML(year: number, computed: Vals, allRows: BudgetRow[]): string {
   const thStyle = `style="background:${DK};color:white;padding:4px 5px;text-align:right;font-size:7.5pt;border:1px solid #0d3d27;white-space:nowrap;"`;
   const thLabelStyle = `style="background:${DK};color:white;padding:4px 8px;text-align:left;font-size:8pt;border:1px solid #0d3d27;min-width:200px;"`;
   const monthHeaders = MONTHS_FULL.map((m) => `<th ${thStyle}>${m}</th>`).join("");
@@ -54,38 +160,40 @@ function buildPrintHTML(year: number, computed: Vals): string {
   resMois.forEach((v: number, i: number) => {
     resCumul.push((resCumul[i - 1] || 0) + v);
   });
-  const dataRows = BUDGET_ROWS.map((row) => {
-    const vals = computed[row.id] || Array(12).fill(0);
-    const total = rowTotal(computed, row.id);
-    let bg: string, color: string, fw: string, pl: string, darkTotal: string;
-    if (row.type === "section") {
-      bg = DK;
-      color = "white";
-      fw = "bold";
-      pl = "8px";
-      darkTotal = "#0d3d27";
-    } else if (row.type === "sub") {
-      bg = LG;
-      color = DK;
-      fw = "bold";
-      pl = "14px";
-      darkTotal = "#b8ddc8";
-    } else {
-      bg = LY;
-      color = "#333";
-      fw = "normal";
-      pl = "20px";
-      darkTotal = "#fff3b0";
-    }
-    const cells = vals
-      .map(
-        (v: number) =>
-          `<td style="text-align:right;padding:3px 5px;background:${bg};color:${color};border:1px solid #ccc;font-size:7.5pt;">${row.type === "item" ? fmt(v) : fmt(v, false)}</td>`,
-      )
-      .join("");
-    const totalCell = `<td style="text-align:right;padding:3px 5px;background:${darkTotal};color:${row.type === "section" ? "white" : color};font-weight:bold;border:1px solid #ccc;font-size:7.5pt;">${fmt(total, false)}</td>`;
-    return `<tr style="font-weight:${fw};"><td style="padding:3px ${pl};background:${bg};color:${color};border:1px solid #ccc;font-size:8pt;">${row.label}</td>${cells}${totalCell}</tr>`;
-  }).join("");
+  const dataRows = allRows
+    .map((row) => {
+      const vals = computed[row.id] || Array(12).fill(0);
+      const total = rowTotal(computed, row.id);
+      let bg: string, color: string, fw: string, pl: string, darkTotal: string;
+      if (row.type === "section") {
+        bg = DK;
+        color = "white";
+        fw = "bold";
+        pl = "8px";
+        darkTotal = "#0d3d27";
+      } else if (row.type === "sub") {
+        bg = LG;
+        color = DK;
+        fw = "bold";
+        pl = "14px";
+        darkTotal = "#b8ddc8";
+      } else {
+        bg = LY;
+        color = "#333";
+        fw = "normal";
+        pl = "20px";
+        darkTotal = "#fff3b0";
+      }
+      const cells = vals
+        .map(
+          (v: number) =>
+            `<td style="text-align:right;padding:3px 5px;background:${bg};color:${color};border:1px solid #ccc;font-size:7.5pt;">${row.type === "item" ? fmt(v) : fmt(v, false)}</td>`,
+        )
+        .join("");
+      const totalCell = `<td style="text-align:right;padding:3px 5px;background:${darkTotal};color:${row.type === "section" ? "white" : color};font-weight:bold;border:1px solid #ccc;font-size:7.5pt;">${fmt(total, false)}</td>`;
+      return `<tr style="font-weight:${fw};"><td style="padding:3px ${pl};background:${bg};color:${color};border:1px solid #ccc;font-size:8pt;">${row.label}</td>${cells}${totalCell}</tr>`;
+    })
+    .join("");
   const resMoisRow = resMois
     .map(
       (v: number) =>
@@ -130,11 +238,427 @@ function buildPrintHTML(year: number, computed: Vals): string {
 </body></html>`;
 }
 
+/* ─── Structure panel ─────────────────────────────────────────── */
+function StructurePanel({
+  customRows,
+  hiddenIds,
+  onRefresh,
+}: {
+  customRows: CustomRow[];
+  hiddenIds: Set<string>;
+  onRefresh: () => void;
+}) {
+  const qc = useQueryClient();
+  const [expanded, setExpanded] = useState(false);
+  const [addSub, setAddSub] = useState(false);
+  const [addItem, setAddItem] = useState(false);
+  const [newLabel, setNewLabel] = useState("");
+  const [newParent, setNewParent] = useState("");
+  const [delId, setDelId] = useState<string | null>(null);
+  const [expandedSubs, setExpandedSubs] = useState<Set<string>>(new Set());
+
+  const toggleExpandSub = (subId: string) =>
+    setExpandedSubs((prev) => {
+      const next = new Set(prev);
+      next.has(subId) ? next.delete(subId) : next.add(subId);
+      return next;
+    });
+
+  const sections = BUDGET_ROWS.filter((r) => r.type === "section");
+  const allSubs = [
+    ...BUDGET_ROWS.filter((r) => r.type === "sub"),
+    ...customRows
+      .filter((r) => r.type === "sub")
+      .map((r) => ({ id: r.id, label: r.label, type: "sub" as const, parentId: r.parent_id })),
+  ];
+
+  const addSubMut = useMutation({
+    mutationFn: async () => {
+      if (!newLabel.trim() || !newParent) throw new Error("Remplis le libellé et la section.");
+      const { error } = await db
+        .from("budget_structure_custom")
+        .insert({ label: newLabel.trim(), type: "sub", parent_id: newParent, sort_order: 100 });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Libellé ajouté");
+      setAddSub(false);
+      setNewLabel("");
+      setNewParent("");
+      qc.invalidateQueries({ queryKey: ["budget-structure-custom"] });
+      onRefresh();
+    },
+    onError: (e: Error) => toast.error("Erreur", { description: e.message }),
+  });
+
+  const addItemMut = useMutation({
+    mutationFn: async () => {
+      if (!newLabel.trim() || !newParent) throw new Error("Remplis la ligne et le libellé parent.");
+      const { error } = await db
+        .from("budget_structure_custom")
+        .insert({ label: newLabel.trim(), type: "item", parent_id: newParent, sort_order: 100 });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Ligne ajoutée");
+      setAddItem(false);
+      setNewLabel("");
+      setNewParent("");
+      qc.invalidateQueries({ queryKey: ["budget-structure-custom"] });
+      onRefresh();
+    },
+    onError: (e: Error) => toast.error("Erreur", { description: e.message }),
+  });
+
+  const delMut = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await db.from("budget_structure_custom").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Supprimé");
+      setDelId(null);
+      qc.invalidateQueries({ queryKey: ["budget-structure-custom"] });
+      onRefresh();
+    },
+    onError: (e: Error) => toast.error("Erreur", { description: e.message }),
+  });
+
+  const hideMut = useMutation({
+    mutationFn: async (rowId: string) => {
+      const { error } = await db.from("budget_hidden_rows").insert({ row_id: rowId });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Ligne masquée");
+      qc.invalidateQueries({ queryKey: ["budget-hidden-rows"] });
+      onRefresh();
+    },
+    onError: (e: Error) => toast.error("Erreur", { description: e.message }),
+  });
+
+  const unhideMut = useMutation({
+    mutationFn: async (rowId: string) => {
+      const { error } = await db.from("budget_hidden_rows").delete().eq("row_id", rowId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Ligne réaffichée");
+      qc.invalidateQueries({ queryKey: ["budget-hidden-rows"] });
+      onRefresh();
+    },
+    onError: (e: Error) => toast.error("Erreur", { description: e.message }),
+  });
+
+  return (
+    <div className="mt-4 rounded-xl border border-border bg-card">
+      <button
+        className="flex w-full items-center justify-between px-4 py-3 text-sm font-semibold text-foreground hover:bg-muted/30 transition-colors rounded-xl"
+        onClick={() => setExpanded((v) => !v)}
+      >
+        <span className="flex items-center gap-2">
+          <PenLine className="size-4 text-primary" /> Gérer la structure du budget
+        </span>
+        {expanded ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
+      </button>
+
+      {expanded && (
+        <div className="border-t border-border px-4 pb-4 pt-3 space-y-4">
+          <p className="text-xs text-muted-foreground">
+            Ajoutez ou supprimez des libellés et des lignes personnalisées. Masquez les lignes
+            intégrées que vous n'utilisez pas.
+          </p>
+
+          {/* Add sub */}
+          {addSub ? (
+            <div className="flex flex-wrap items-end gap-2 rounded-lg bg-muted/30 p-3">
+              <div className="flex-1 min-w-[160px] space-y-1">
+                <Label className="text-xs">Nom du libellé</Label>
+                <Input
+                  value={newLabel}
+                  onChange={(e) => setNewLabel(e.target.value)}
+                  placeholder="Ex : Vente de formations"
+                />
+              </div>
+              <div className="flex-1 min-w-[160px] space-y-1">
+                <Label className="text-xs">Section parent</Label>
+                <Select value={newParent} onValueChange={setNewParent}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choisir…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sections.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={() => addSubMut.mutate()} disabled={addSubMut.isPending}>
+                  {addSubMut.isPending && <Loader2 className="mr-1 size-3 animate-spin" />} Ajouter
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setAddSub(false);
+                    setNewLabel("");
+                    setNewParent("");
+                  }}
+                >
+                  Annuler
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setAddItem(false);
+                setAddSub(true);
+                setNewLabel("");
+                setNewParent("");
+              }}
+            >
+              <Plus className="mr-1.5 size-3.5" /> Ajouter un libellé (sous-catégorie)
+            </Button>
+          )}
+
+          {/* Add item */}
+          {addItem ? (
+            <div className="flex flex-wrap items-end gap-2 rounded-lg bg-muted/30 p-3">
+              <div className="flex-1 min-w-[160px] space-y-1">
+                <Label className="text-xs">Intitulé de la ligne</Label>
+                <Input
+                  value={newLabel}
+                  onChange={(e) => setNewLabel(e.target.value)}
+                  placeholder="Ex : Frais de déplacement terrain"
+                />
+              </div>
+              <div className="flex-1 min-w-[200px] space-y-1">
+                <Label className="text-xs">Libellé parent</Label>
+                <Select value={newParent} onValueChange={setNewParent}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choisir…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {allSubs.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={() => addItemMut.mutate()}
+                  disabled={addItemMut.isPending}
+                >
+                  {addItemMut.isPending && <Loader2 className="mr-1 size-3 animate-spin" />} Ajouter
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setAddItem(false);
+                    setNewLabel("");
+                    setNewParent("");
+                  }}
+                >
+                  Annuler
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setAddSub(false);
+                setAddItem(true);
+                setNewLabel("");
+                setNewParent("");
+              }}
+            >
+              <Plus className="mr-1.5 size-3.5" /> Ajouter une ligne budgétaire
+            </Button>
+          )}
+
+          {/* List custom rows */}
+          {customRows.length > 0 && (
+            <div className="space-y-1">
+              <p className="text-xs font-semibold text-muted-foreground">
+                Éléments personnalisés :
+              </p>
+              {customRows.map((r) => {
+                const parentLabel =
+                  allSubs.find((s) => s.id === r.parent_id)?.label ??
+                  BUDGET_ROWS.find((s) => s.id === r.parent_id)?.label ??
+                  r.parent_id;
+                return (
+                  <div
+                    key={r.id}
+                    className="flex items-center justify-between rounded-lg border border-border px-3 py-1.5 text-xs"
+                  >
+                    <span>
+                      <span className="font-medium">{r.label}</span>
+                      <span className="ml-2 text-muted-foreground">
+                        ({r.type === "sub" ? "Libellé" : "Ligne"} sous «{parentLabel}»)
+                      </span>
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 px-1.5 text-destructive hover:bg-destructive/10"
+                      onClick={() => setDelId(r.id)}
+                      title="Supprimer"
+                    >
+                      <Trash2 className="size-3" />
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {customRows.length === 0 && !addSub && !addItem && (
+            <p className="text-xs text-muted-foreground italic">Aucune ligne personnalisée.</p>
+          )}
+
+          {/* Built-in rows visibility */}
+          <div className="border-t border-border pt-3">
+            <p className="text-xs font-semibold text-muted-foreground mb-1">
+              Masquer des libellés / lignes intégrés :
+            </p>
+            <p className="text-xs text-muted-foreground italic mb-3">
+              Masquez les catégories ou lignes que vous n'utilisez pas. Leurs valeurs sont exclues
+              des totaux.
+            </p>
+            {sections.map((sec) => (
+              <div key={sec.id} className="mb-3">
+                <div className="text-xs font-bold uppercase text-primary mb-1">{sec.label}</div>
+                {BUDGET_ROWS.filter((r) => r.type === "sub" && r.parentId === sec.id).map((sub) => {
+                  const isHidden = hiddenIds.has(sub.id);
+                  const isExpanded = expandedSubs.has(sub.id);
+                  const subItems = BUDGET_ROWS.filter(
+                    (r) => r.type === "item" && r.parentId === sub.id,
+                  );
+                  return (
+                    <div key={sub.id} className="mb-1">
+                      <div
+                        className="flex items-center gap-1 rounded-lg border border-border px-3 py-1.5"
+                        style={{ opacity: isHidden ? 0.6 : 1 }}
+                      >
+                        <button
+                          className="p-0.5 hover:bg-muted/30 rounded"
+                          onClick={() => toggleExpandSub(sub.id)}
+                          title="Voir les lignes"
+                        >
+                          {isExpanded ? (
+                            <ChevronDown className="size-3.5" />
+                          ) : (
+                            <ChevronRight className="size-3.5" />
+                          )}
+                        </button>
+                        <span
+                          className={`flex-1 text-xs font-medium ${isHidden ? "line-through text-muted-foreground" : ""}`}
+                        >
+                          {sub.label}
+                        </span>
+                        {isHidden && (
+                          <span className="text-[10px] text-amber-600 mr-1">Masqué</span>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-6 px-1.5"
+                          title={isHidden ? "Réafficher" : "Masquer"}
+                          onClick={() =>
+                            isHidden ? unhideMut.mutate(sub.id) : hideMut.mutate(sub.id)
+                          }
+                          disabled={hideMut.isPending || unhideMut.isPending}
+                        >
+                          {isHidden ? (
+                            <Eye className="size-3 text-primary" />
+                          ) : (
+                            <EyeOff className="size-3 text-muted-foreground" />
+                          )}
+                        </Button>
+                      </div>
+                      {isExpanded && !isHidden && (
+                        <div className="ml-6 mt-0.5 space-y-0.5">
+                          {subItems.map((item) => {
+                            const itemHidden = hiddenIds.has(item.id);
+                            return (
+                              <div
+                                key={item.id}
+                                className="flex items-center gap-1 rounded border border-border/50 px-3 py-1"
+                                style={{ opacity: itemHidden ? 0.6 : 1 }}
+                              >
+                                <span
+                                  className={`flex-1 text-xs ${itemHidden ? "line-through text-muted-foreground" : ""}`}
+                                >
+                                  {item.label}
+                                </span>
+                                {itemHidden && (
+                                  <span className="text-[10px] text-amber-600 mr-1">Masqué</span>
+                                )}
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-5 px-1"
+                                  title={itemHidden ? "Réafficher" : "Masquer"}
+                                  onClick={() =>
+                                    itemHidden ? unhideMut.mutate(item.id) : hideMut.mutate(item.id)
+                                  }
+                                  disabled={hideMut.isPending || unhideMut.isPending}
+                                >
+                                  {itemHidden ? (
+                                    <Eye className="size-3 text-primary" />
+                                  ) : (
+                                    <EyeOff className="size-3 text-muted-foreground" />
+                                  )}
+                                </Button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <ConfirmDialog
+        open={delId !== null}
+        onOpenChange={(o) => {
+          if (!o) setDelId(null);
+        }}
+        title="Supprimer cet élément ?"
+        description="Les valeurs saisies pour cette ligne dans tous les budgets ne seront plus affichées."
+        onConfirm={() => {
+          if (delId) delMut.mutate(delId);
+        }}
+        loading={delMut.isPending}
+      />
+    </div>
+  );
+}
+
 /* ─── Editor ─────────────────────────────────────────────────── */
 function BudgetEditor({
   initialYear,
   initialVals,
   initialNotes,
+  allRows,
   onSave,
   onCancel,
   saving,
@@ -142,6 +666,7 @@ function BudgetEditor({
   initialYear: number;
   initialVals: Vals;
   initialNotes: string;
+  allRows: BudgetRow[];
   onSave: (year: number, vals: Vals, notes: string) => void;
   onCancel: () => void;
   saving: boolean;
@@ -149,15 +674,18 @@ function BudgetEditor({
   const [year, setYear] = useState(initialYear);
   const [vals, setVals] = useState<Vals>(initialVals);
   const [notes, setNotes] = useState(initialNotes);
-  const computed = useMemo(() => computeAll(vals), [vals]);
+  const computed = useMemo(() => computeAllForRows(vals, allRows), [vals, allRows]);
 
   const setVal = useCallback((id: string, mi: number, raw: string) => {
     const n = parseFloat(raw) || 0;
-    setVals((prev) => ({ ...prev, [id]: prev[id].map((v, i) => (i === mi ? n : v)) }));
+    setVals((prev) => {
+      const existing = prev[id] || Array(12).fill(0);
+      return { ...prev, [id]: existing.map((v: number, i: number) => (i === mi ? n : v)) };
+    });
   }, []);
 
   const doPrint = async () => {
-    let html = buildPrintHTML(year, computed);
+    let html = buildPrintHTML(year, computed, allRows);
     html = await injectCachetInHtml(html);
     const w = window.open("", "_blank");
     if (!w) {
@@ -224,7 +752,7 @@ function BudgetEditor({
             </tr>
           </thead>
           <tbody>
-            {BUDGET_ROWS.map((row) => {
+            {allRows.map((row) => {
               const cv = computed[row.id] || Array(12).fill(0);
               const total = rowTotal(computed, row.id);
               const isSection = row.type === "section";
@@ -371,6 +899,39 @@ function BudgetPrevisionnel() {
     },
   });
 
+  const { data: customRows = [] } = useQuery({
+    queryKey: ["budget-structure-custom"],
+    queryFn: async () => {
+      try {
+        const { data, error } = await db
+          .from("budget_structure_custom")
+          .select("*")
+          .order("sort_order");
+        if (error) return [];
+        return (data ?? []) as CustomRow[];
+      } catch {
+        return [];
+      }
+    },
+  });
+
+  const { data: hiddenRowsData = [] } = useQuery({
+    queryKey: ["budget-hidden-rows"],
+    queryFn: async () => {
+      try {
+        const { data, error } = await db.from("budget_hidden_rows").select("*");
+        if (error) return [];
+        return (data ?? []) as Array<{ id: string; row_id: string }>;
+      } catch {
+        return [];
+      }
+    },
+  });
+
+  const hiddenIds = useMemo(() => new Set(hiddenRowsData.map((r) => r.row_id)), [hiddenRowsData]);
+
+  const allRows = useMemo(() => buildAllRows(customRows, hiddenIds), [customRows, hiddenIds]);
+
   const editing = view !== "list" && view !== "new" ? budgets.find((b) => b.id === view) : null;
 
   const save = useMutation({
@@ -417,8 +978,8 @@ function BudgetPrevisionnel() {
   });
 
   async function doPrint(b: BudgetRecord) {
-    const computed = computeAll(b.vals || initVals());
-    let html = buildPrintHTML(b.year, computed);
+    const computed = computeAllForRows(b.vals || initValsForRows(allRows), allRows);
+    let html = buildPrintHTML(b.year, computed, allRows);
     html = await injectCachetInHtml(html);
     const w = window.open("", "_blank");
     if (!w) {
@@ -444,8 +1005,11 @@ function BudgetPrevisionnel() {
         />
         <BudgetEditor
           initialYear={editing ? editing.year : new Date().getFullYear()}
-          initialVals={editing ? editing.vals || initVals() : initVals()}
+          initialVals={
+            editing ? editing.vals || initValsForRows(allRows) : initValsForRows(allRows)
+          }
           initialNotes={editing ? editing.notes || "" : ""}
+          allRows={allRows}
           saving={save.isPending}
           onCancel={() => setView("list")}
           onSave={(year, vals, notes) => save.mutate({ year, vals, notes, id: editing?.id })}
@@ -480,7 +1044,7 @@ function BudgetPrevisionnel() {
         ) : (
           <ul className="space-y-2">
             {budgets.map((b) => {
-              const computed = computeAll(b.vals || initVals());
+              const computed = computeAllForRows(b.vals || initValsForRows(allRows), allRows);
               const prodTotal = rowTotal(computed, "produits");
               const charTotal = rowTotal(computed, "charges");
               return (
@@ -527,6 +1091,15 @@ function BudgetPrevisionnel() {
           </ul>
         )}
       </Panel>
+
+      <StructurePanel
+        customRows={customRows}
+        hiddenIds={hiddenIds}
+        onRefresh={() => {
+          qc.invalidateQueries({ queryKey: ["budget-structure-custom"] });
+          qc.invalidateQueries({ queryKey: ["budget-hidden-rows"] });
+        }}
+      />
 
       <ConfirmDialog
         open={pendingDeleteId !== null}
