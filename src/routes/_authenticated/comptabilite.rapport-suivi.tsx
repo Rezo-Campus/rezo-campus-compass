@@ -274,10 +274,14 @@ function buildPrintHTML(
 function StructurePanel({
   customRows,
   hiddenIds,
+  rapportId,
+  currentVals,
   onRefresh,
 }: {
   customRows: CustomRow[];
   hiddenIds: Set<string>;
+  rapportId?: string;
+  currentVals?: RapportVals;
   onRefresh: () => void;
 }) {
   const qc = useQueryClient();
@@ -298,12 +302,32 @@ function StructurePanel({
 
   const hideMut = useMutation({
     mutationFn: async (rowId: string) => {
-      const { error } = await db.from("rapport_hidden_rows").insert({ row_id: rowId });
+      if (!rapportId) return;
+      const builtinRow = BUDGET_ROWS.find((r) => r.id === rowId);
+      const idsToCheck: string[] = [];
+      if (builtinRow?.type === "item") {
+        idsToCheck.push(rowId);
+      } else if (builtinRow?.type === "sub") {
+        BUDGET_ROWS.filter((r) => r.type === "item" && r.parentId === rowId).forEach((r) =>
+          idsToCheck.push(r.id),
+        );
+      }
+      const hasData = idsToCheck.some((id) => {
+        const v = currentVals?.[id];
+        return v && (Number(v.budget) !== 0 || Number(v.realise) !== 0);
+      });
+      if (hasData)
+        throw new Error(
+          "Cette ligne contient des données saisies. Videz-la d'abord pour pouvoir la masquer.",
+        );
+      const { error } = await db
+        .from("rapport_hidden_rows")
+        .insert({ document_id: rapportId, row_id: rowId });
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Ligne masquée");
-      qc.invalidateQueries({ queryKey: ["rapport-hidden-rows"] });
+      qc.invalidateQueries({ queryKey: ["rapport-hidden-rows", rapportId] });
       onRefresh();
     },
     onError: (e: Error) => toast.error("Erreur", { description: e.message }),
@@ -311,12 +335,16 @@ function StructurePanel({
 
   const unhideMut = useMutation({
     mutationFn: async (rowId: string) => {
-      const { error } = await db.from("rapport_hidden_rows").delete().eq("row_id", rowId);
+      const { error } = await db
+        .from("rapport_hidden_rows")
+        .delete()
+        .eq("document_id", rapportId ?? "")
+        .eq("row_id", rowId);
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Ligne réaffichée");
-      qc.invalidateQueries({ queryKey: ["rapport-hidden-rows"] });
+      qc.invalidateQueries({ queryKey: ["rapport-hidden-rows", rapportId] });
       onRefresh();
     },
     onError: (e: Error) => toast.error("Erreur", { description: e.message }),
@@ -561,111 +589,119 @@ function StructurePanel({
             <p className="text-xs text-muted-foreground italic">Aucune ligne personnalisée.</p>
           )}
 
-          {/* Built-in rows visibility */}
-          <div className="border-t border-border pt-3">
-            <p className="text-xs font-semibold text-muted-foreground mb-1">
-              Masquer des libellés / lignes intégrés :
-            </p>
-            <p className="text-xs text-muted-foreground italic mb-3">
-              Masquez les catégories ou lignes que vous n'utilisez pas. Les valeurs des lignes
-              masquées sont exclues des totaux.
-            </p>
-            {BUDGET_ROWS.filter((r) => r.type === "section").map((sec) => (
-              <div key={sec.id} className="mb-3">
-                <div className="text-xs font-bold uppercase text-primary mb-1">{sec.label}</div>
-                {BUDGET_ROWS.filter((r) => r.type === "sub" && r.parentId === sec.id).map((sub) => {
-                  const isHidden = hiddenIds.has(sub.id);
-                  const isExpanded = expandedSubs.has(sub.id);
-                  const subItems = BUDGET_ROWS.filter(
-                    (r) => r.type === "item" && r.parentId === sub.id,
-                  );
-                  return (
-                    <div key={sub.id} className="mb-1">
-                      <div
-                        className="flex items-center gap-1 rounded-lg border border-border px-3 py-1.5"
-                        style={{ opacity: isHidden ? 0.6 : 1 }}
-                      >
-                        <button
-                          className="p-0.5 hover:bg-muted/30 rounded"
-                          onClick={() => toggleExpandSub(sub.id)}
-                          title="Voir les lignes"
-                        >
-                          {isExpanded ? (
-                            <ChevronDown className="size-3.5" />
-                          ) : (
-                            <ChevronRight className="size-3.5" />
+          {/* Built-in rows visibility — only when editing a specific document */}
+          {rapportId && (
+            <div className="border-t border-border pt-3">
+              <p className="text-xs font-semibold text-muted-foreground mb-1">
+                Masquer des libellés / lignes intégrés :
+              </p>
+              <p className="text-xs text-muted-foreground italic mb-3">
+                Masquez les catégories ou lignes vides de ce rapport. Les lignes masquées sont
+                exclues des totaux.
+              </p>
+              {BUDGET_ROWS.filter((r) => r.type === "section").map((sec) => (
+                <div key={sec.id} className="mb-3">
+                  <div className="text-xs font-bold uppercase text-primary mb-1">{sec.label}</div>
+                  {BUDGET_ROWS.filter((r) => r.type === "sub" && r.parentId === sec.id).map(
+                    (sub) => {
+                      const isHidden = hiddenIds.has(sub.id);
+                      const isExpanded = expandedSubs.has(sub.id);
+                      const subItems = BUDGET_ROWS.filter(
+                        (r) => r.type === "item" && r.parentId === sub.id,
+                      );
+                      return (
+                        <div key={sub.id} className="mb-1">
+                          <div
+                            className="flex items-center gap-1 rounded-lg border border-border px-3 py-1.5"
+                            style={{ opacity: isHidden ? 0.6 : 1 }}
+                          >
+                            <button
+                              className="p-0.5 hover:bg-muted/30 rounded"
+                              onClick={() => toggleExpandSub(sub.id)}
+                              title="Voir les lignes"
+                            >
+                              {isExpanded ? (
+                                <ChevronDown className="size-3.5" />
+                              ) : (
+                                <ChevronRight className="size-3.5" />
+                              )}
+                            </button>
+                            <span
+                              className={`flex-1 text-xs font-medium ${isHidden ? "line-through text-muted-foreground" : ""}`}
+                            >
+                              {sub.label}
+                            </span>
+                            {isHidden && (
+                              <span className="text-[10px] text-amber-600 mr-1">Masqué</span>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-6 px-1.5"
+                              title={isHidden ? "Réafficher" : "Masquer"}
+                              onClick={() =>
+                                isHidden ? unhideMut.mutate(sub.id) : hideMut.mutate(sub.id)
+                              }
+                              disabled={hideMut.isPending || unhideMut.isPending}
+                            >
+                              {isHidden ? (
+                                <Eye className="size-3 text-primary" />
+                              ) : (
+                                <EyeOff className="size-3 text-muted-foreground" />
+                              )}
+                            </Button>
+                          </div>
+                          {isExpanded && !isHidden && (
+                            <div className="ml-6 mt-0.5 space-y-0.5">
+                              {subItems.map((item) => {
+                                const itemHidden = hiddenIds.has(item.id);
+                                return (
+                                  <div
+                                    key={item.id}
+                                    className="flex items-center gap-1 rounded border border-border/50 px-3 py-1"
+                                    style={{ opacity: itemHidden ? 0.6 : 1 }}
+                                  >
+                                    <span
+                                      className={`flex-1 text-xs ${itemHidden ? "line-through text-muted-foreground" : ""}`}
+                                    >
+                                      {item.label}
+                                    </span>
+                                    {itemHidden && (
+                                      <span className="text-[10px] text-amber-600 mr-1">
+                                        Masqué
+                                      </span>
+                                    )}
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-5 px-1"
+                                      title={itemHidden ? "Réafficher" : "Masquer"}
+                                      onClick={() =>
+                                        itemHidden
+                                          ? unhideMut.mutate(item.id)
+                                          : hideMut.mutate(item.id)
+                                      }
+                                      disabled={hideMut.isPending || unhideMut.isPending}
+                                    >
+                                      {itemHidden ? (
+                                        <Eye className="size-3 text-primary" />
+                                      ) : (
+                                        <EyeOff className="size-3 text-muted-foreground" />
+                                      )}
+                                    </Button>
+                                  </div>
+                                );
+                              })}
+                            </div>
                           )}
-                        </button>
-                        <span
-                          className={`flex-1 text-xs font-medium ${isHidden ? "line-through text-muted-foreground" : ""}`}
-                        >
-                          {sub.label}
-                        </span>
-                        {isHidden && (
-                          <span className="text-[10px] text-amber-600 mr-1">Masqué</span>
-                        )}
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-6 px-1.5"
-                          title={isHidden ? "Réafficher" : "Masquer"}
-                          onClick={() =>
-                            isHidden ? unhideMut.mutate(sub.id) : hideMut.mutate(sub.id)
-                          }
-                          disabled={hideMut.isPending || unhideMut.isPending}
-                        >
-                          {isHidden ? (
-                            <Eye className="size-3 text-primary" />
-                          ) : (
-                            <EyeOff className="size-3 text-muted-foreground" />
-                          )}
-                        </Button>
-                      </div>
-                      {isExpanded && !isHidden && (
-                        <div className="ml-6 mt-0.5 space-y-0.5">
-                          {subItems.map((item) => {
-                            const itemHidden = hiddenIds.has(item.id);
-                            return (
-                              <div
-                                key={item.id}
-                                className="flex items-center gap-1 rounded border border-border/50 px-3 py-1"
-                                style={{ opacity: itemHidden ? 0.6 : 1 }}
-                              >
-                                <span
-                                  className={`flex-1 text-xs ${itemHidden ? "line-through text-muted-foreground" : ""}`}
-                                >
-                                  {item.label}
-                                </span>
-                                {itemHidden && (
-                                  <span className="text-[10px] text-amber-600 mr-1">Masqué</span>
-                                )}
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-5 px-1"
-                                  title={itemHidden ? "Réafficher" : "Masquer"}
-                                  onClick={() =>
-                                    itemHidden ? unhideMut.mutate(item.id) : hideMut.mutate(item.id)
-                                  }
-                                  disabled={hideMut.isPending || unhideMut.isPending}
-                                >
-                                  {itemHidden ? (
-                                    <Eye className="size-3 text-primary" />
-                                  ) : (
-                                    <EyeOff className="size-3 text-muted-foreground" />
-                                  )}
-                                </Button>
-                              </div>
-                            );
-                          })}
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
+                      );
+                    },
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -990,13 +1026,19 @@ function RapportSuivi() {
     },
   });
 
+  const currentDocId = view !== "list" && view !== "new" ? view : null;
+
   const { data: hiddenRowsData = [] } = useQuery({
-    queryKey: ["rapport-hidden-rows"],
+    queryKey: ["rapport-hidden-rows", currentDocId],
     queryFn: async () => {
+      if (!currentDocId) return [];
       try {
-        const { data, error } = await db.from("rapport_hidden_rows").select("*");
+        const { data, error } = await db
+          .from("rapport_hidden_rows")
+          .select("*")
+          .eq("document_id", currentDocId);
         if (error) return [];
-        return (data ?? []) as Array<{ id: string; row_id: string }>;
+        return (data ?? []) as Array<{ id: string; row_id: string; document_id: string }>;
       } catch {
         return [];
       }
@@ -1098,6 +1140,16 @@ function RapportSuivi() {
             save.mutate({ ps, pe, vals, comments, id: editing?.id })
           }
         />
+        <StructurePanel
+          customRows={customRows}
+          hiddenIds={hiddenIds}
+          rapportId={editing?.id}
+          currentVals={editing?.vals ?? undefined}
+          onRefresh={() => {
+            qc.invalidateQueries({ queryKey: ["rapport-structure-custom"] });
+            qc.invalidateQueries({ queryKey: ["rapport-hidden-rows", editing?.id] });
+          }}
+        />
       </>
     );
   }
@@ -1183,7 +1235,6 @@ function RapportSuivi() {
         hiddenIds={hiddenIds}
         onRefresh={() => {
           qc.invalidateQueries({ queryKey: ["rapport-structure-custom"] });
-          qc.invalidateQueries({ queryKey: ["rapport-hidden-rows"] });
         }}
       />
 
