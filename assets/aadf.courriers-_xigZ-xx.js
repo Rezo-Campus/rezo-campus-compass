@@ -1,1 +1,0 @@
-import{j as o}from"./index-B_J8bVID.js";import{T as t}from"./TransmissionsInternes-E5zK3iRP.js";import"./inbox-AQREQiI8.js";import"./stamp-C_Zoue0H.js";const e=()=>o.jsx(t,{department:"aadf",eyebrow:"AADF"});export{e as component};

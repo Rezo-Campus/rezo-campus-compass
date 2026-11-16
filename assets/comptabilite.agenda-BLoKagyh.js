@@ -1,0 +1,1 @@
+import{j as t}from"./index-2JIkdHAp.js";import{A as o}from"./AgendaView-p1eE1BKd.js";import"./bell-l4tsqSZn.js";const m=()=>t.jsx(o,{department:"comptabilite",canEdit:!0,title:"Agenda Finance & Comptabilité"});export{m as component};
